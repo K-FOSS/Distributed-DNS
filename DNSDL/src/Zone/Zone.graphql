@@ -1,0 +1,11 @@
+# import "../ResourceRecords/ResourceRecord.graphql"
+
+fragment Zone on Zone {
+  domainName
+  id
+  updatedDate
+  contact
+  resourceRecords {
+    ...ResourceRecord
+  }
+}

@@ -22,7 +22,7 @@ export default function AppBar(): React.ReactElement {
               <MenuIcon />
             </IconButton>
             <Typography variant='h6' className={classes.title}>
-              AppName
+              Distributed DNS
             </Typography>
             <SessionActions />
           </Toolbar>

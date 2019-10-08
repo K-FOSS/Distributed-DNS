@@ -1,0 +1,6 @@
+fragment ResourceRecord on ResourceRecord {
+  id
+  type
+  host
+  data
+}

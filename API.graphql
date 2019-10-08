@@ -12,8 +12,28 @@ type Configuration {
   id: ID!
 }
 
+input CreateMXResourceRecordInput {
+  zoneId: String!
+  host: String!
+  ttl: Int
+  preference: Int!
+  value: String!
+}
+
+input CreateSubscriberInput {
+  zoneIds: [String!]!
+}
+
 input CreateUtilityInput {
   name: String!
+}
+
+input CreateValueResourceRecordInput {
+  zoneId: String!
+  recordType: ValueRecordType!
+  ttl: Int
+  host: String!
+  value: String!
 }
 
 type CurrentUser {
@@ -22,6 +42,11 @@ type CurrentUser {
   email: String!
   roles: [UserRole!]!
 }
+
+"""
+The javascript `Date` as string. Type represents date and time as the ISO Date string.
+"""
+scalar DateTime
 
 input LoginInput {
   username: String!
@@ -33,16 +58,23 @@ type Mutation {
   register(input: UserInput!): RegisterResponse!
   resetPasswordReset(input: RequestPasswordResetInput!): Boolean!
   initialConfiguration(user: UserInput!): Configuration!
+  createValueResourceRecord(input: CreateValueResourceRecordInput!): Zone!
+  createSubscriber(input: CreateSubscriberInput!): Subscriber!
+  addZoneToSubscription(subscriberId: String!, zoneId: String!): Subscriber!
   createUtility(input: CreateUtilityInput!): Utility!
+  createZone(input: ZoneInput!): Zone!
 }
 
 type Query {
   currentUser: CurrentUser
   hasSetup: Boolean!
+  getSubscribedZones(subscriberToken: String!): [Zone!]!
   users: [User!]!
   user(userId: String!): User!
   utilities: [Utility!]!
   helloWorld: String!
+  zones: [Zone!]!
+  zone(zoneId: String!): Zone!
 }
 
 type RegisterResponse {
@@ -58,6 +90,40 @@ input RequestPasswordResetInput {
 input ResetPasswordInput {
   token: String!
   password: String!
+}
+
+type ResourceRecord {
+  id: ID!
+  type: ResourceRecordType!
+  host: String!
+
+  """JSON Stringified data"""
+  data: String!
+}
+
+input ResourceRecordFilter {
+  host: String
+  type: ResourceRecordType
+}
+
+enum ResourceRecordType {
+  A
+  NS
+  TXT
+  CNAME
+  DNAME
+  AAAA
+  MX
+}
+
+type Subscriber {
+  id: ID!
+  subscribedZones: [Zone!]!
+  subscriberToken: String!
+}
+
+type Subscription {
+  subscribeToZones(subscriberToken: String!): Zone!
 }
 
 type User {
@@ -80,4 +146,44 @@ enum UserRole {
 type Utility {
   id: ID!
   name: String!
+}
+
+enum ValueRecordType {
+  A
+  NS
+  CNAME
+  DNAME
+  AAAA
+  TXT
+}
+
+type Zone {
+  id: ID!
+  contact: String!
+  updatedDate: DateTime
+  domainName: String!
+  resourceRecords(filter: ResourceRecordFilter): [ResourceRecord!]!
+  accessPermissions: [ZonePermissions!]!
+  subscribers: [Subscriber!]!
+}
+
+enum ZoneAccessPermissions {
+  READ
+  WRITE
+  ADMIN
+}
+
+input ZoneInput {
+  domainName: String!
+
+  """The user requesting the zone"""
+  zoneOwnerUserId: String!
+  ns: String!
+  contact: String!
+}
+
+type ZonePermissions {
+  id: ID!
+  user: User!
+  accessPermissions: [ZoneAccessPermissions!]!
 }

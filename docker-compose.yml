@@ -24,8 +24,17 @@ services:
     image: 'applicationtemplate-gen'
     volumes:
       - './Web:/data'
+  dnsdl-gen:
+    build:
+      context: './Scripts/GraphQLCodegen'
+      dockerfile: 'Dockerfile'
+    image: 'applicationtemplate-gen'
+    volumes:
+      - './DNSDL:/data'
   database:
     image: postgres:11-alpine
+    ports:
+      - 4763:5432
     volumes:
       - databaseData:/var/lib/postgresql/data
     environment:

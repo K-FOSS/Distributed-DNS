@@ -1,0 +1,7 @@
+# import "../Zone/Zone.graphql"
+
+query GetSubscribedZones($subscriberToken: String!) {
+  getSubscribedZones(subscriberToken: $subscriberToken) {
+    ...Zone
+  }
+}

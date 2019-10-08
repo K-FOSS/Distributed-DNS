@@ -1,4 +1,4 @@
-# Application Template
+# Distributed DNS
 
 ## Usage
 
