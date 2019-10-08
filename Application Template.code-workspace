@@ -1,0 +1,16 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "prettier.singleQuote": true,
+    "prettier.jsxSingleQuote": true,
+    "editor.formatOnSave": true,
+    "eslint.workingDirectories": [
+      { "directory": "Web", "changeProcessCWD": true },
+      { "directory": "API", "changeProcessCWD": true }
+    ]
+  }
+}

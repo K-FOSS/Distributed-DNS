@@ -1,0 +1,5 @@
+mutation InitialConfiguration($userInput: UserInput!) {
+  initialConfiguration(user: $userInput) {
+    id
+  }
+}

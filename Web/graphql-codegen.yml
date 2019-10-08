@@ -1,0 +1,40 @@
+overwrite: true
+schema: 'http://api/graphql'
+generates:
+  UI/GraphQL/graphqlTypes.gen.ts:
+    documents: 'UI/**/*.graphql'
+    plugins:
+      - typescript
+      - typescript-operations
+  ./UI/.:
+    preset: near-operation-file
+    documents: 'UI/**/*.graphql'
+    presetConfig:
+      extension: .gen.ts
+      baseTypesPath: GraphQL/graphqlTypes.gen.ts
+    config:
+      noGraphQLTag: true
+      withHOC: false
+      withComponent: false
+      withHooks: true
+    plugins:
+      - typescript-react-apollo
+      - typescript-operations
+  ./Server/graphqlTypes.gen.ts:
+    documents: 'Server/**/*.graphql'
+    plugins:
+      - typescript
+      - typescript-operations
+  ./Server/.:
+    preset: near-operation-file
+    documents: 'Server/**/*.graphql'
+    presetConfig:
+      extension: .gen.ts
+      baseTypesPath: graphqlTypes.gen.ts
+    config:
+      withHOC: false
+      withComponent: false
+      withHooks: true
+    plugins:
+      - typescript-document-nodes
+      - typescript-operations

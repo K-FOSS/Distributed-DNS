@@ -1,0 +1,38 @@
+name: Web
+on:
+  push:
+jobs:
+  Prettier:
+    name: Prettier
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: KristianFJones/npm-run-action@alternative
+        with:
+          scriptName: 'prettier'
+          scriptPath: 'Web/'
+  Lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: KristianFJones/npm-run-action@alternative
+        with:
+          scriptName: 'lint'
+          scriptPath: 'Web/'
+  Build:
+    name: Build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    needs: [Prettier, Lint]
+    steps:
+      - uses: actions/checkout@master
+      - name: Publish to Registry
+        uses: KristianFJones/Publish-Docker-Github-Action@master
+        with:
+          dockerfile: Web/Dockerfile
+          name: docker.pkg.github.com/kristianfjones/application-template/application-template-ui
+          username: ${{ secrets.DOCKER_GITHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_GITHUB_PASSWORD }}
+          registry: docker.pkg.github.com
+          path: Web

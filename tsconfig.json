@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "strict": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "alwaysStrict": true,
+    "experimentalDecorators": true,
+    "incremental": true,
+    "allowSyntheticDefaultImports": true,
+    "pretty": true,
+    "noUnusedLocals": true,
+    "lib": ["esnext", "esnext.asynciterable"],
+    "esModuleInterop": true
+  }
+}

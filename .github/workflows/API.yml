@@ -1,0 +1,61 @@
+name: API
+on:
+  push:
+jobs:
+  Test:
+    name: Testing
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:11-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: pgpass
+          POSTGRES_HOST: localhost
+          POSTGRES_DB: application-test
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v1
+      - uses: KristianFJones/npm-run-action@alternative
+        env:
+          DB_HOST: postgres
+        with:
+          scriptName: 'test'
+          scriptPath: 'API/'
+  Prettier:
+    name: Prettier
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: KristianFJones/npm-run-action@alternative
+        with:
+          scriptName: 'prettier'
+          scriptPath: 'API/'
+  Lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: KristianFJones/npm-run-action@alternative
+        with:
+          scriptName: 'lint'
+          scriptPath: 'API/'
+  Build:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    needs: [Test, Prettier, Lint]
+    steps:
+      - uses: actions/checkout@master
+      - uses: textbook/git-checkout-submodule-action@master
+      - name: Publish to Registry
+        uses: KristianFJones/Publish-Docker-Github-Action@master
+        with:
+          dockerfile: API/Dockerfile
+          name: docker.pkg.github.com/kristianfjones/application-template/application-template-api
+          username: ${{ secrets.DOCKER_GITHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_GITHUB_PASSWORD }}
+          registry: docker.pkg.github.com
+          path: API

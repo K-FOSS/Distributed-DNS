@@ -1,0 +1,133 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon",
+    "build": "tsc",
+    "test": "jest",
+    "prettier": "prettier -c src/**/*.ts",
+    "lint": "eslint ./src/*.ts"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.(t|j)sx?$": "ts-jest"
+    },
+    "globalSetup": "<rootDir>/src/testSetup.ts",
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^API/(.*)$": "<rootDir>/src/$1"
+    },
+    "testRegex": ".*(test|spec)\\.ts",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@entity-factory/core": "^0.2.1",
+    "@entity-factory/typeorm": "^0.2.1",
+    "@jest/core": "^24.8.0",
+    "@types/bcryptjs": "^2.4.2",
+    "@types/jest": "^24.0.18",
+    "@types/jsonwebtoken": "^8.3.4",
+    "@types/koa__router": "^8.0.0",
+    "@types/module-alias": "^2.0.0",
+    "@types/node": "^12.7.7",
+    "@typescript-eslint/eslint-plugin": "^2.3.1",
+    "@typescript-eslint/parser": "^2.3.1",
+    "babel-jest": "^24.9.0",
+    "eslint": "^6.5.1",
+    "eslint-config-prettier": "^6.3.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jest": "^22.17.0",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "jest": "^24.9.0",
+    "jest-cli": "^24.8.0",
+    "nodemon": "^1.19.2",
+    "prettier": "^1.18.2",
+    "ts-jest": "^24.1.0",
+    "ts-node": "^8.4.1",
+    "typescript": "^3.6.3"
+  },
+  "dependencies": {
+    "@koa/router": "^8.0.1",
+    "@types/graphql": "^14.5.0",
+    "apollo-server-koa": "^2.9.4",
+    "bcryptjs": "^2.4.3",
+    "class-validator": "^0.10.1",
+    "jsonwebtoken": "^8.5.1",
+    "koa": "^2.8.1",
+    "module-alias": "^2.2.1",
+    "pg": "^7.12.1",
+    "reflect-metadata": "^0.1.13",
+    "type-graphql": "^0.17.5",
+    "typeorm": "^0.2.19"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "arrowParens": "always",
+    "semi": true
+  },
+  "eslintConfig": {
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "project": "./tsconfig.json",
+      "tsconfigRootDir": "."
+    },
+    "env": {
+      "jest/globals": true
+    },
+    "plugins": [
+      "@typescript-eslint",
+      "prettier",
+      "jest"
+    ],
+    "extends": [
+      "standard",
+      "plugin:@typescript-eslint/recommended",
+      "prettier",
+      "prettier/standard",
+      "prettier/@typescript-eslint"
+    ],
+    "rules": {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          "args": "none",
+          "varsIgnorePattern": "_.+"
+        }
+      ],
+      "@typescript-eslint/camelcase": "warn",
+      "@typescript-eslint/no-var-requires": "warn",
+      "@typescript-eslint/no-object-literal-type-assertion": "off",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/explicit-member-accessibility": "off",
+      "no-unused-vars": "off",
+      "comma-dangle": [
+        "error",
+        "always-multiline"
+      ],
+      "semi": "off",
+      "@typescript-eslint/semi": [
+        "error"
+      ],
+      "prettier/prettier": "error"
+    }
+  }
+}

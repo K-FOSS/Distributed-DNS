@@ -1,0 +1,35 @@
+version: '3.7'
+services:
+  Web:
+    image: abiosoft/caddy
+    ports:
+      - 80:80
+    volumes:
+      - './Caddyfile:/etc/Caddyfile'
+  api:
+    build:
+      context: './API'
+      dockerfile: 'Dockerfile.dev'
+    image: 'applicationtemplate'
+    environment:
+      DB_HOST: database
+      DB_PASSWORD: pgpass
+    volumes:
+      - './API:/development'
+      - './API.graphql:/API.graphql'
+  web-gen:
+    build:
+      context: './Scripts/GraphQLCodegen'
+      dockerfile: 'Dockerfile'
+    image: 'applicationtemplate-gen'
+    volumes:
+      - './Web:/data'
+  database:
+    image: postgres:11-alpine
+    volumes:
+      - databaseData:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: pgpass
+      POSTGRES_DB: application
+volumes:
+  databaseData:

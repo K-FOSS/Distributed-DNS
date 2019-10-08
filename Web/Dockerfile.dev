@@ -1,0 +1,3 @@
+FROM mhart/alpine-node:latest
+WORKDIR /development
+CMD npm run dev

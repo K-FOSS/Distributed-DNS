@@ -1,0 +1,10 @@
+# import "./User.graphql"
+
+mutation login($input: LoginInput!) {
+  login(input: $input) {
+    token
+    currentUser {
+      ...CurrentUser
+    }
+  }
+}

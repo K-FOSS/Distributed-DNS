@@ -1,0 +1,25 @@
+{
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "compilerOptions": {
+    "target": "esnext",
+    "strict": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "baseUrl": "./src",
+    "paths": {
+      "API/*": ["./*"]
+    },
+    "alwaysStrict": true,
+    "experimentalDecorators": true,
+    "incremental": true,
+    "strictPropertyInitialization": false,
+    "allowSyntheticDefaultImports": true,
+    "emitDecoratorMetadata": true,
+    "pretty": true,
+    "noUnusedLocals": true,
+    "outDir": "dist",
+    "lib": ["esnext", "esnext.asynciterable"],
+    "esModuleInterop": true
+  }
+}
