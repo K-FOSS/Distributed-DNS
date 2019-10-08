@@ -62,7 +62,7 @@ export async function uiServer(
 
   const cache = new InMemoryCache();
 
-  const AppComponent = (
+  const AppComponent = React.createElement(() => (
     <StaticRouter location={ctx.url} context={context}>
       <ImportProvider imports={imports}>
         <ConfigProvider {...config}>
@@ -76,11 +76,11 @@ export async function uiServer(
         </ConfigProvider>
       </ImportProvider>
     </StaticRouter>
-  );
+  ));
 
   const preRender = async () => {
     try {
-      prepass(AppComponent, async (a, b) => {});
+      prepass(AppComponent);
     } catch {
       console.log('Prerender Error');
     }

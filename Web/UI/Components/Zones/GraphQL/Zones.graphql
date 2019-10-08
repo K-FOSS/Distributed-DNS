@@ -1,0 +1,6 @@
+query Zones {
+  zones {
+    domainName
+    id
+  }
+}

@@ -13,9 +13,7 @@ export interface Route {
 export const Routes: Route[] = [
   { label: 'Home', to: '/' },
   { label: 'Setup', to: '/Setup', hideUI: true, hidden: true },
-  { label: 'Test', to: '/Test' },
-  { label: 'Example', to: '/Example' },
-  { label: 'Lab', to: '/Lab' },
+  { label: 'Zones', to: '/Zones', roles: [UserRole.User] },
   { label: 'Login', to: '/Login', roles: [UserRole.Guest] },
   { label: 'Register', to: '/Register', roles: [UserRole.Guest] },
   {

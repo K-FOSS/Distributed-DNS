@@ -21,28 +21,22 @@ export const AppRoutes: AppRoute[] = [
     },
   },
   {
-    path: 'Test',
-    label: 'Test',
+    path: 'Zones',
+    label: 'Zones',
     imported: {
-      imported: import('UI/Routes/Test'),
-      path: 'Routes/Test/index.tsx',
+      imported: import('UI/Routes/Zones/Zones'),
+      path: 'Routes/Zones/Zones.tsx',
     },
-  },
-  {
-    path: 'Example',
-    label: 'Example',
-    imported: {
-      imported: import('UI/Routes/Example'),
-      path: 'Routes/Example/index.tsx',
-    },
-  },
-  {
-    path: 'Lab',
-    label: 'Lab',
-    imported: {
-      imported: import('UI/Routes/Lab'),
-      path: 'Routes/Lab/index.tsx',
-    },
+    children: [
+      {
+        path: ':zoneId',
+        label: 'Zone',
+        imported: {
+          imported: import('UI/Routes/Zones/Zone'),
+          path: 'Routes/Zones/Zone.tsx',
+        },
+      },
+    ],
   },
   {
     path: 'Login',

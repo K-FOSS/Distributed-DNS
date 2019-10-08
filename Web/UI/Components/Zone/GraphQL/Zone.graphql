@@ -1,0 +1,12 @@
+query Zone($zoneId: String!) {
+  zone(zoneId: $zoneId) {
+    id
+    domainName
+    resourceRecords {
+      id
+      host
+      data
+      type
+    }
+  }
+}
