@@ -25,9 +25,9 @@ describe('Resource Records Resolver', () => {
         const { data, errors } = await execute(
           `mutation {
           createValueResourceRecord(
+            zoneId: "${zone.id}"
             input: {
-              zoneId: "${zone.id}"
-              recordType: NS
+              type: NS
               value: "ns1.kristianjones.dev."
               host: "@"
             }
