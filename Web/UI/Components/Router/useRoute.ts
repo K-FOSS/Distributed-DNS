@@ -1,5 +1,5 @@
 // Web/UI/Components/Router/useRoute.ts
-import { useLocation } from 'react-router';
+import { useLocation } from 'react-router-dom';
 import { Routes, Route } from './Routes';
 import { useCallback } from 'react';
 

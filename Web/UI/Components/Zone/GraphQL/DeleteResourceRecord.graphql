@@ -1,0 +1,12 @@
+mutation DeleteResourceRecord($resourceRecordId: ID!) {
+  deleteResourceRecord(resourceRecordId: $resourceRecordId) {
+    id
+    domainName
+    resourceRecords {
+      id
+      host
+      ttl
+      data
+    }
+  }
+}

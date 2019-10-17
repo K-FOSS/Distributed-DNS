@@ -47,7 +47,7 @@ export class SubscriberPubSub {
       subscription = await Subscriber.getSubscriberFromToken(subscriberToken);
       const zoneIds: string[] = [];
 
-      for (const { id } of subscription.subscribedZones) zoneIds.push(id);
+      for (const { id } of await subscription.subscribedZones) zoneIds.push(id);
 
       yield* pEvent.iterator(eventEmitter, zoneIds, {
         resolutionEvents: [`${subscription.id}-newZone`],

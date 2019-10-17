@@ -1,0 +1,10 @@
+query Subscriber($subscriberId: ID!) {
+  subscriber(subscriberId: $subscriberId) {
+    id
+    name
+    subscribedZones {
+      domainName
+      id
+    }
+  }
+}

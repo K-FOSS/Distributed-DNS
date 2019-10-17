@@ -14,12 +14,9 @@ enum ValueRecordTypes {
 registerEnumType(ValueRecordTypes, { name: 'ValueRecordType' });
 
 @InputType()
-export class CreateValueResourceRecordInput implements Partial<ResourceRecord> {
-  @Field()
-  zoneId: string;
-
+export class CreateValueResourceRecordInput {
   @Field(() => ValueRecordTypes)
-  recordType: ValueRecordTypes;
+  type: ValueRecordTypes;
 
   @Field(() => Int, { nullable: true })
   ttl?: number;
@@ -33,9 +30,6 @@ export class CreateValueResourceRecordInput implements Partial<ResourceRecord> {
 
 @InputType()
 export class CreateMXResourceRecordInput implements Partial<ResourceRecord> {
-  @Field()
-  zoneId: string;
-
   @Field()
   host: string;
 

@@ -4,6 +4,7 @@ query Zone($zoneId: String!) {
     domainName
     resourceRecords {
       id
+      ttl
       host
       data
       type

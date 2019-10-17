@@ -18,7 +18,7 @@ export function getConnectionArgs(test = false): PostgresConnectionOptions {
       resolve(`${__dirname}/../Modules/**/*Model.js`),
     ],
     synchronize: true || config.env === 'development',
-    logging: !test,
+    logging: false,
   };
 }
 

@@ -10,10 +10,53 @@ export type Scalars = {
   DateTime: any,
 };
 
+export type Acme = {
+   __typename?: 'ACME',
+  id: Scalars['ID'],
+  name: Scalars['String'],
+  domains: Array<AcmeDomain>,
+  ACMEToken: Scalars['String'],
+};
+
+export type AcmeAccount = {
+   __typename?: 'ACMEAccount',
+  id: Scalars['ID'],
+};
+
+export type AcmeDomain = {
+   __typename?: 'ACMEDomain',
+  id: Scalars['ID'],
+  domains: Array<Scalars['String']>,
+};
+
+export type AcmeDomainInput = {
+  zoneId: Scalars['String'],
+  domains: Array<Scalars['String']>,
+};
+
+export type AcmeInput = {
+  name: Scalars['String'],
+  email: Scalars['String'],
+};
+
+export type AcmeUpdateInput = {
+  name?: Maybe<Scalars['String']>,
+  email?: Maybe<Scalars['String']>,
+  addDomains?: Maybe<Array<AcmeDomainInput>>,
+  removeDomains?: Maybe<Array<Scalars['ID']>>,
+};
+
 export type AuthResponse = {
    __typename?: 'AuthResponse',
   token: Scalars['String'],
   currentUser: CurrentUser,
+};
+
+export type Certificate = {
+   __typename?: 'Certificate',
+  id: Scalars['ID'],
+  certificate: Scalars['String'],
+  privateKey: Scalars['String'],
 };
 
 export type Configuration = {
@@ -22,15 +65,10 @@ export type Configuration = {
 };
 
 export type CreateMxResourceRecordInput = {
-  zoneId: Scalars['String'],
   host: Scalars['String'],
   ttl?: Maybe<Scalars['Int']>,
   preference: Scalars['Int'],
   value: Scalars['String'],
-};
-
-export type CreateSubscriberInput = {
-  zoneIds: Array<Scalars['String']>,
 };
 
 export type CreateUtilityInput = {
@@ -38,8 +76,7 @@ export type CreateUtilityInput = {
 };
 
 export type CreateValueResourceRecordInput = {
-  zoneId: Scalars['String'],
-  recordType: ValueRecordType,
+  type: ValueRecordType,
   ttl?: Maybe<Scalars['Int']>,
   host: Scalars['String'],
   value: Scalars['String'],
@@ -51,6 +88,9 @@ export type CurrentUser = {
   username: Scalars['String'],
   email: Scalars['String'],
   roles: Array<UserRole>,
+  subscribers: Array<Subscriber>,
+  zones: Array<Zone>,
+  ACMEs: Array<Acme>,
 };
 
 
@@ -61,15 +101,50 @@ export type LoginInput = {
 
 export type Mutation = {
    __typename?: 'Mutation',
+  createACME: CurrentUser,
+  deleteACME: CurrentUser,
+  updateACME: Acme,
+  addACMEDomain: Acme,
+  generateCertificate: Acme,
   login: AuthResponse,
   register: RegisterResponse,
   resetPasswordReset: Scalars['Boolean'],
   initialConfiguration: Configuration,
   createValueResourceRecord: Zone,
-  createSubscriber: Subscriber,
-  addZoneToSubscription: Subscriber,
+  createMXResourceRecord: Zone,
+  deleteResourceRecord: Zone,
+  updateValueResourceRecord: Zone,
+  createSubscriber: CurrentUser,
+  updateSubscriber: Subscriber,
   createUtility: Utility,
   createZone: Zone,
+};
+
+
+export type MutationCreateAcmeArgs = {
+  input: AcmeInput
+};
+
+
+export type MutationDeleteAcmeArgs = {
+  acmeId: Scalars['String']
+};
+
+
+export type MutationUpdateAcmeArgs = {
+  input: AcmeUpdateInput,
+  acmeId: Scalars['String']
+};
+
+
+export type MutationAddAcmeDomainArgs = {
+  input: Array<AcmeDomainInput>,
+  acmeId: Scalars['String']
+};
+
+
+export type MutationGenerateCertificateArgs = {
+  acmeId: Scalars['String']
 };
 
 
@@ -94,18 +169,36 @@ export type MutationInitialConfigurationArgs = {
 
 
 export type MutationCreateValueResourceRecordArgs = {
-  input: CreateValueResourceRecordInput
+  input: CreateValueResourceRecordInput,
+  zoneId: Scalars['ID']
+};
+
+
+export type MutationCreateMxResourceRecordArgs = {
+  input: CreateMxResourceRecordInput,
+  zoneId: Scalars['ID']
+};
+
+
+export type MutationDeleteResourceRecordArgs = {
+  resourceRecordId: Scalars['ID']
+};
+
+
+export type MutationUpdateValueResourceRecordArgs = {
+  input: ValueResourceRecordInput,
+  resourceRecordId: Scalars['ID']
 };
 
 
 export type MutationCreateSubscriberArgs = {
-  input: CreateSubscriberInput
+  input: SubscriberInput
 };
 
 
-export type MutationAddZoneToSubscriptionArgs = {
-  subscriberId: Scalars['String'],
-  zoneId: Scalars['String']
+export type MutationUpdateSubscriberArgs = {
+  input: UpdateSubscriberInput,
+  subscriberId: Scalars['ID']
 };
 
 
@@ -118,10 +211,17 @@ export type MutationCreateZoneArgs = {
   input: ZoneInput
 };
 
+export enum Permission {
+  Read = 'READ',
+  Write = 'WRITE',
+  Admin = 'ADMIN'
+}
+
 export type Query = {
    __typename?: 'Query',
   currentUser?: Maybe<CurrentUser>,
   hasSetup: Scalars['Boolean'],
+  subscriber: Subscriber,
   getSubscribedZones: Array<Zone>,
   users: Array<User>,
   user: User,
@@ -129,6 +229,11 @@ export type Query = {
   helloWorld: Scalars['String'],
   zones: Array<Zone>,
   zone: Zone,
+};
+
+
+export type QuerySubscriberArgs = {
+  subscriberId: Scalars['ID']
 };
 
 
@@ -165,6 +270,7 @@ export type ResetPasswordInput = {
 export type ResourceRecord = {
    __typename?: 'ResourceRecord',
   id: Scalars['ID'],
+  ttl?: Maybe<Scalars['Int']>,
   type: ResourceRecordType,
   host: Scalars['String'],
   /** JSON Stringified data */
@@ -189,18 +295,39 @@ export enum ResourceRecordType {
 export type Subscriber = {
    __typename?: 'Subscriber',
   id: Scalars['ID'],
+  name: Scalars['String'],
   subscribedZones: Array<Zone>,
+  accessPermissions: Array<SubscriberAccess>,
   subscriberToken: Scalars['String'],
+};
+
+export type SubscriberAccess = {
+   __typename?: 'SubscriberAccess',
+  id: Scalars['ID'],
+};
+
+export type SubscriberInput = {
+  name: Scalars['String'],
 };
 
 export type Subscription = {
    __typename?: 'Subscription',
+  certificateEvents: Certificate,
   subscribeToZones: Zone,
+};
+
+
+export type SubscriptionCertificateEventsArgs = {
+  ACMEToken: Scalars['String']
 };
 
 
 export type SubscriptionSubscribeToZonesArgs = {
   subscriberToken: Scalars['String']
+};
+
+export type UpdateSubscriberInput = {
+  updateZoneIds: Array<Scalars['ID']>,
 };
 
 export type User = {
@@ -236,6 +363,12 @@ export enum ValueRecordType {
   Txt = 'TXT'
 }
 
+export type ValueResourceRecordInput = {
+  host?: Maybe<Scalars['String']>,
+  ttl?: Maybe<Scalars['Float']>,
+  value?: Maybe<Scalars['String']>,
+};
+
 export type Zone = {
    __typename?: 'Zone',
   id: Scalars['ID'],
@@ -245,18 +378,13 @@ export type Zone = {
   resourceRecords: Array<ResourceRecord>,
   accessPermissions: Array<ZonePermissions>,
   subscribers: Array<Subscriber>,
+  zoneSettings: ZoneSettings,
 };
 
 
 export type ZoneResourceRecordsArgs = {
   filter?: Maybe<ResourceRecordFilter>
 };
-
-export enum ZoneAccessPermissions {
-  Read = 'READ',
-  Write = 'WRITE',
-  Admin = 'ADMIN'
-}
 
 export type ZoneInput = {
   domainName: Scalars['String'],
@@ -270,7 +398,12 @@ export type ZonePermissions = {
    __typename?: 'ZonePermissions',
   id: Scalars['ID'],
   user: User,
-  accessPermissions: Array<ZoneAccessPermissions>,
+  accessPermissions: Array<Permission>,
+};
+
+export type ZoneSettings = {
+   __typename?: 'ZoneSettings',
+  id: Scalars['ID'],
 };
 export type HasSetupQueryVariables = {};
 

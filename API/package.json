@@ -36,6 +36,7 @@
     "@entity-factory/core": "^0.2.1",
     "@entity-factory/typeorm": "^0.2.1",
     "@jest/core": "24.8.0",
+    "@types/acme-client": "^3.0.0",
     "@types/bcryptjs": "^2.4.2",
     "@types/jest": "^24.0.18",
     "@types/jsonwebtoken": "^8.3.4",
@@ -65,6 +66,7 @@
   "dependencies": {
     "@koa/router": "^8.0.1",
     "@types/graphql": "^14.5.0",
+    "acme-client": "^3.2.0",
     "apollo-server-koa": "^2.9.4",
     "bcryptjs": "^2.4.3",
     "class-validator": "^0.10.1",

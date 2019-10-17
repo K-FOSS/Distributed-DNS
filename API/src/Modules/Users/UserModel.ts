@@ -12,6 +12,10 @@ import {
   UniqueUsernameConstraint,
   UniqueEmailConstraint,
 } from '../Auth/AuthValidator';
+import { Subscriber } from '../Subscribers/SubscriberModel';
+import { Zone } from '../Zones/ZoneModel';
+import { Permission } from '../Permission/Permission';
+import { ACME } from '../ACMEs/ACMEModel';
 
 @ObjectType()
 @Entity()
@@ -57,5 +61,17 @@ export class User extends BaseEntity {
 
   async setPassword(plainText: string): Promise<void> {
     this.hashedPassword = await hashPassword(plainText);
+  }
+
+  get subscribers(): Promise<Subscriber[]> {
+    return Subscriber.getSubscribers(this);
+  }
+
+  get zones(): Promise<Zone[]> {
+    return Zone.getUserZones(this, Permission.READ);
+  }
+
+  get ACMEs(): Promise<ACME[]> {
+    return ACME.getUserACMEs(this);
   }
 }

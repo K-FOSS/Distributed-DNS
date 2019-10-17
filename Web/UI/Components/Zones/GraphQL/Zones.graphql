@@ -1,6 +1,10 @@
 query Zones {
-  zones {
-    domainName
+  currentUser {
     id
+
+    zones {
+      domainName
+      id
+    }
   }
 }

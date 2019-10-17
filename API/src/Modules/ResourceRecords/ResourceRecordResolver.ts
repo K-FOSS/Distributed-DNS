@@ -1,40 +1,106 @@
 // API/src/Modules/ResourceRecords/ResourceRecordResolver.ts
-import { Resolver, Mutation, Arg, Ctx, Authorized } from 'type-graphql';
-import { CreateValueResourceRecordInput } from './CreateResourceRecordInput';
+import { Resolver, Mutation, Arg, Ctx, Authorized, ID } from 'type-graphql';
+import {
+  CreateValueResourceRecordInput,
+  CreateMXResourceRecordInput,
+} from './CreateResourceRecordInput';
 import { ResourceRecord } from './ResourceRecordModel';
 import { Zone } from '../Zones/ZoneModel';
 import { AuthContext } from 'API/Context';
-import { ZoneAccessPermission } from '../Zones/ZonePermissionModel';
 import { ResourceRecordType } from './ResourceRecordTypes';
+import { ValueResourceRecordInput } from './ResourceRecordInput';
+import { Permission } from '../Permission/Permission';
 
 @Resolver(() => ResourceRecord)
 export class ResourceRecordResolver {
   @Authorized()
   @Mutation(() => Zone)
   async createValueResourceRecord(
+    @Arg('zoneId', () => ID) zoneId: string,
     @Arg('input')
-    {
-      zoneId,
-      value,
-      recordType,
-      ttl,
-      ...input
-    }: CreateValueResourceRecordInput,
+    { value, type, ...input }: CreateValueResourceRecordInput,
     @Ctx() { currentUser }: AuthContext,
   ): Promise<Zone> {
-    const zone = await Zone.getUserZone(
-      currentUser,
-      zoneId,
-      ZoneAccessPermission.WRITE,
-      { relations: ['resourceRecords'] },
-    );
+    const zone = await Zone.getUserZone(currentUser, zoneId, Permission.WRITE, {
+      relations: ['resourceRecords'],
+    });
+
     await ResourceRecord.create({
       zoneId: zone.id,
-      data: JSON.stringify({ value, ttl }),
-      type: ResourceRecordType[recordType],
+      data: JSON.stringify({ value }),
+      type: ResourceRecordType[type],
       ...input,
     }).save();
 
     return zone;
+  }
+
+  @Authorized()
+  @Mutation(() => Zone)
+  async createMXResourceRecord(
+    @Arg('zoneId', () => ID) zoneId: string,
+    @Arg('input') { host, preference, value }: CreateMXResourceRecordInput,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Zone> {
+    const zone = await Zone.getUserZone(currentUser, zoneId, Permission.WRITE, {
+      relations: ['resourceRecords'],
+    });
+
+    await ResourceRecord.create({
+      zoneId: zone.id,
+      host: host,
+      data: JSON.stringify({ value, preference }),
+      type: ResourceRecordType[ResourceRecordType.MX],
+    }).save();
+
+    return zone;
+  }
+
+  @Authorized()
+  @Mutation(() => Zone)
+  async deleteResourceRecord(
+    @Arg('resourceRecordId', () => ID) resourceRecordId: string,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Zone> {
+    const resourceRecord = await ResourceRecord.findOneOrFail(
+      resourceRecordId,
+      { relations: ['zone'] },
+    );
+
+    await resourceRecord.zone.checkUserAuthorization(
+      currentUser,
+      Permission.WRITE,
+    );
+
+    await resourceRecord.remove();
+
+    return resourceRecord.zone;
+  }
+
+  @Authorized()
+  @Mutation(() => Zone)
+  async updateValueResourceRecord(
+    @Arg('resourceRecordId', () => ID) resourceRecordId: string,
+    @Arg('input')
+    { host, value, ttl }: ValueResourceRecordInput,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Zone> {
+    const resourceRecord = await ResourceRecord.findOneOrFail(
+      resourceRecordId,
+      { relations: ['zone'] },
+    );
+
+    await resourceRecord.zone.checkUserAuthorization(
+      currentUser,
+      Permission.WRITE,
+    );
+
+    if (host) resourceRecord.host = host;
+    if (value) resourceRecord.data = JSON.stringify({ value });
+    if (ttl) resourceRecord.ttl = ttl;
+    else resourceRecord.ttl = null;
+    await resourceRecord.save();
+
+    return resourceRecord.zone;
   }
 }

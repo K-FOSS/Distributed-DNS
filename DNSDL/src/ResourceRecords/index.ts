@@ -6,14 +6,15 @@ type ResourceRecordLowerTypes = 'a' | 'ns';
 
 export async function handleResourceRecords(
   resourceRecords: ResourceRecordFragment[],
-  zone: ZONE
+  zone: ZONE,
 ): Promise<any> {
-  for (const { host, data, type } of resourceRecords) {
+  for (const { host, data, type, ttl } of resourceRecords) {
     if (!zone[type.toLowerCase() as ResourceRecordLowerTypes])
       zone[type.toLowerCase() as ResourceRecordLowerTypes] = [];
     zone[type.toLowerCase() as ResourceRecordLowerTypes].push({
       host,
-      ...JSON.parse(data)
+      ttl,
+      ...JSON.parse(data),
     });
   }
 }

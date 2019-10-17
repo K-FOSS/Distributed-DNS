@@ -1,6 +1,6 @@
 // Web/UI/Routes/Zones/Zone.tsx
 import React from 'react';
-import { useParams, Redirect } from 'react-router';
+import { useParams, Redirect } from 'react-router-dom';
 import { ZoneTable } from 'UI/Components/Zone/Table';
 import { Header } from 'UI/Components/Styles/Header';
 

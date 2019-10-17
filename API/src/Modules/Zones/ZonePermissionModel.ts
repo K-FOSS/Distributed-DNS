@@ -1,22 +1,16 @@
 // API/src/Modules/Zones/ZonePermissionModel.ts
-import { Field, ID, ObjectType, registerEnumType } from 'type-graphql';
+import { Field, ID, ObjectType } from 'type-graphql';
 import {
   BaseEntity,
   Column,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  JoinColumn,
 } from 'typeorm';
 import { User } from '../Users/UserModel';
 import { Zone } from './ZoneModel';
-
-export enum ZoneAccessPermission {
-  READ = 'READ',
-  WRITE = 'WRITE',
-  ADMIN = 'ADMIN',
-}
-
-registerEnumType(ZoneAccessPermission, { name: 'ZoneAccessPermissions' });
+import { Permission } from '../Permission/Permission';
 
 @ObjectType()
 @Entity()
@@ -25,7 +19,8 @@ export class ZonePermissions extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   readonly id: string;
 
-  @ManyToOne(() => Zone)
+  @ManyToOne(() => Zone, (zone) => zone.accessPermissions)
+  @JoinColumn()
   zone: Zone;
   @Column()
   zoneId: string;
@@ -36,7 +31,7 @@ export class ZonePermissions extends BaseEntity {
   @Column()
   userId: string;
 
-  @Field(() => [ZoneAccessPermission])
-  @Column({ enum: ZoneAccessPermission, type: 'enum', array: true })
-  accessPermissions: ZoneAccessPermission[];
+  @Field(() => [Permission])
+  @Column({ enum: Permission, type: 'enum', array: true })
+  accessPermissions: Permission[];
 }

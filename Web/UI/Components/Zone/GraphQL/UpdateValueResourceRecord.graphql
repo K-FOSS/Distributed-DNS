@@ -1,0 +1,17 @@
+mutation UpdateResourceRecord(
+  $resourceRecordId: ID!
+  $input: ValueResourceRecordInput!
+) {
+  updateValueResourceRecord(
+    resourceRecordId: $resourceRecordId
+    input: $input
+  ) {
+    id
+    resourceRecords {
+      host
+      id
+      ttl
+      data
+    }
+  }
+}
