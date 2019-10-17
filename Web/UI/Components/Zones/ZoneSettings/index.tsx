@@ -5,9 +5,9 @@ export interface ZoneSettingsPageProps {
   zoneId: string;
 }
 
-export function ZoneSettingsPage({
-  ,
-}: ZoneSettingsPageProps): React.ReactElement {
+export function ZoneSettingsPage(
+  props: ZoneSettingsPageProps,
+): React.ReactElement {
   return (
     <>
       <div>Hello World</div>
