@@ -1,0 +1,10 @@
+query ZoneSettings($zoneId: String!) {
+  zone(zoneId: $zoneId) {
+    id
+    domainName
+
+    zoneSettings {
+      id
+    }
+  }
+}

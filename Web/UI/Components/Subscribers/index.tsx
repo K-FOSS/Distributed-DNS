@@ -7,6 +7,8 @@ import { BaseButton } from '../Styles/Button/BaseButton';
 import { PageSectionRoot } from '../Styles/Section/PageSectionRoot';
 import { useStyles } from '../Styles';
 import { PaperSection } from '../Styles/Section/PaperSection';
+import { useUpdateSubscriberMutation } from './GraphQL/UpdateSubscriber.gen';
+import { useSnackbar } from 'notistack';
 
 interface SubscriberPageProps {
   subscriberId: string;
@@ -18,6 +20,8 @@ export function SubscriberPage({
   const classes = useStyles();
   const { data } = useSubscriberQuery({ variables: { subscriberId } });
   const [selectedZones, setSelectedZones] = useState<ZoneData[]>([]);
+  const [updateSubscriber] = useUpdateSubscriberMutation();
+  const { enqueueSnackbar } = useSnackbar();
   const hasSet = useRef(false);
 
   useEffect(() => {
@@ -30,12 +34,27 @@ export function SubscriberPage({
   const handleSaveSubscriber = useCallback(async () => {
     if (!data) return;
 
-    const newZones = selectedZones.filter(
+    const removedZones = data.subscriber.subscribedZones.filter(
+      (zone) => !selectedZones.includes(zone),
+    );
+    const addedZones = selectedZones.filter(
       (zone) => !data.subscriber.subscribedZones.includes(zone),
     );
 
-    console.log(newZones);
-  }, [selectedZones, data]);
+    const response = await updateSubscriber({
+      variables: {
+        subscriberId,
+        input: {
+          addZoneIds: addedZones.map(({ id }) => id),
+          removeZoneIds: removedZones.map(({ id }) => id),
+        },
+      },
+    });
+    if (response.data)
+      enqueueSnackbar('Subscriber successfully updated', {
+        variant: 'success',
+      });
+  }, [selectedZones, data, updateSubscriber, enqueueSnackbar, subscriberId]);
 
   return (
     <>

@@ -6,8 +6,8 @@ export class ZoneInput {
   @Field()
   domainName: string;
 
-  @Field({ description: 'The user requesting the zone' })
-  zoneOwnerUserId: string;
+  @Field(() => [String], { description: 'The user requesting the zone' })
+  zoneUserIds: string[];
 
   @Field()
   ns: string;

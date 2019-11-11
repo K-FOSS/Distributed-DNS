@@ -5,6 +5,7 @@ import { useSubscribersQuery } from '../GraphQL/Subscribers.gen';
 import { Subscriber } from 'UI/GraphQL/graphqlTypes.gen';
 import { useHistory } from 'react-router-dom';
 import { useCreateSubscriberMutation } from '../GraphQL/CreateSubscriber.gen';
+// import { useUpdateSubscriberMutation } from '../GraphQL/UpdateSubscriber.gen';
 
 type SubscriberData = Pick<Subscriber, 'id' | 'name'>;
 
@@ -16,8 +17,11 @@ type RowClick<T> = (
 
 export function SubscribersTable(): React.ReactElement {
   const history = useHistory();
+
   const { data } = useSubscribersQuery();
+
   const [createSubscriber] = useCreateSubscriberMutation();
+  // const [updateSubscriber] = useUpdateSubscriberMutation();
 
   const handleAddSubscriber = useCallback(
     async (input: SubscriberData) => {

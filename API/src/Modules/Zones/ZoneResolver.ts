@@ -62,18 +62,24 @@ export class ZoneResolver {
   @Mutation(() => Zone)
   async createZone(@Arg('input')
   {
-    zoneOwnerUserId,
+    zoneUserIds,
     ns,
     ...zoneInput
   }: ZoneInput): Promise<Zone> {
     const zone = Zone.create(zoneInput);
     const zoneSettings = ZoneSettings.create();
-    const zonePermissions = ZonePermissions.create({
-      userId: zoneOwnerUserId,
-      accessPermissions: [Permission.READ, Permission.WRITE, Permission.ADMIN],
-    });
+    const zonePermissions = zoneUserIds.map((userId) =>
+      ZonePermissions.create({
+        userId: userId,
+        accessPermissions: [
+          Permission.READ,
+          Permission.WRITE,
+          Permission.ADMIN,
+        ],
+      }),
+    );
     zone.zoneSettings = zoneSettings;
-    zone.accessPermissions = [zonePermissions];
+    zone.accessPermissions = zonePermissions;
 
     const nsRecord = ResourceRecord.create({
       type: ResourceRecordType.NS,
@@ -98,5 +104,38 @@ export class ZoneResolver {
   @FieldResolver(() => ZoneSettings)
   zoneSettings(@Root() { zoneSettingsId }: Zone): Promise<ZoneSettings> {
     return ZoneSettings.findOneOrFail(zoneSettingsId);
+  }
+
+  @Authorized()
+  @FieldResolver(() => Permission)
+  async userPermission(
+    @Root() { id }: Zone,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Permission> {
+    const userPermission = await ZonePermissions.findOneOrFail({
+      where: { zoneId: id, userId: currentUser.id },
+    });
+
+    if (userPermission.accessPermissions.includes(Permission.ADMIN))
+      return Permission.ADMIN;
+    else if (userPermission.accessPermissions.includes(Permission.WRITE))
+      return Permission.WRITE;
+    else if (userPermission.accessPermissions.includes(Permission.READ))
+      return Permission.READ;
+
+    throw new Error();
+  }
+
+  @Authorized()
+  @FieldResolver(() => [Permission])
+  async userPermissions(
+    @Root() { id }: Zone,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Permission[]> {
+    const userPermission = await ZonePermissions.findOneOrFail({
+      where: { zoneId: id, userId: currentUser.id },
+    });
+
+    return userPermission.accessPermissions;
   }
 }

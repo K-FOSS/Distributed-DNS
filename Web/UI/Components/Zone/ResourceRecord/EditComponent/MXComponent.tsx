@@ -45,6 +45,7 @@ export function MXEditComponent({
         label='Priority'
         variant='outlined'
         className={classes.doubleTextLeft}
+        value={valueObj.preference}
         onChange={handleChange('preference')}
       />
       <TextField

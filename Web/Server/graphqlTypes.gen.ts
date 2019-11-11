@@ -26,6 +26,7 @@ export type AcmeAccount = {
 export type AcmeDomain = {
    __typename?: 'ACMEDomain',
   id: Scalars['ID'],
+  zone: Zone,
   domains: Array<Scalars['String']>,
 };
 
@@ -114,6 +115,7 @@ export type Mutation = {
   createMXResourceRecord: Zone,
   deleteResourceRecord: Zone,
   updateValueResourceRecord: Zone,
+  updateMXResourceRecord: Zone,
   createSubscriber: CurrentUser,
   updateSubscriber: Subscriber,
   createUtility: Utility,
@@ -191,6 +193,12 @@ export type MutationUpdateValueResourceRecordArgs = {
 };
 
 
+export type MutationUpdateMxResourceRecordArgs = {
+  input: MxResourceRecordInput,
+  resourceRecordId: Scalars['ID']
+};
+
+
 export type MutationCreateSubscriberArgs = {
   input: SubscriberInput
 };
@@ -211,6 +219,13 @@ export type MutationCreateZoneArgs = {
   input: ZoneInput
 };
 
+export type MxResourceRecordInput = {
+  host?: Maybe<Scalars['String']>,
+  ttl?: Maybe<Scalars['Int']>,
+  preference?: Maybe<Scalars['Int']>,
+  value?: Maybe<Scalars['String']>,
+};
+
 export enum Permission {
   Read = 'READ',
   Write = 'WRITE',
@@ -219,6 +234,7 @@ export enum Permission {
 
 export type Query = {
    __typename?: 'Query',
+  ACME: Acme,
   currentUser?: Maybe<CurrentUser>,
   hasSetup: Scalars['Boolean'],
   subscriber: Subscriber,
@@ -229,6 +245,11 @@ export type Query = {
   helloWorld: Scalars['String'],
   zones: Array<Zone>,
   zone: Zone,
+};
+
+
+export type QueryAcmeArgs = {
+  acmeId: Scalars['String']
 };
 
 
@@ -327,7 +348,9 @@ export type SubscriptionSubscribeToZonesArgs = {
 };
 
 export type UpdateSubscriberInput = {
-  updateZoneIds: Array<Scalars['ID']>,
+  name?: Maybe<Scalars['String']>,
+  addZoneIds: Array<Scalars['ID']>,
+  removeZoneIds: Array<Scalars['ID']>,
 };
 
 export type User = {
@@ -379,6 +402,8 @@ export type Zone = {
   accessPermissions: Array<ZonePermissions>,
   subscribers: Array<Subscriber>,
   zoneSettings: ZoneSettings,
+  userPermission: Permission,
+  userPermissions: Array<Permission>,
 };
 
 
@@ -389,7 +414,7 @@ export type ZoneResourceRecordsArgs = {
 export type ZoneInput = {
   domainName: Scalars['String'],
   /** The user requesting the zone */
-  zoneOwnerUserId: Scalars['String'],
+  zoneUserIds: Array<Scalars['String']>,
   ns: Scalars['String'],
   contact: Scalars['String'],
 };

@@ -1,0 +1,6 @@
+mutation CreateZone($input: ZoneInput!) {
+  createZone(input: $input) {
+    domainName
+    id
+  }
+}

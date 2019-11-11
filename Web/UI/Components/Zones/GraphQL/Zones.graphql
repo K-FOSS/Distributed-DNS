@@ -1,10 +1,10 @@
 query Zones {
   currentUser {
     id
-
     zones {
       domainName
       id
+      userPermissions
     }
   }
 }

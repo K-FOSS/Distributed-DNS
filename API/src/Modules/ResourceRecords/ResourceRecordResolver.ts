@@ -8,7 +8,10 @@ import { ResourceRecord } from './ResourceRecordModel';
 import { Zone } from '../Zones/ZoneModel';
 import { AuthContext } from 'API/Context';
 import { ResourceRecordType } from './ResourceRecordTypes';
-import { ValueResourceRecordInput } from './ResourceRecordInput';
+import {
+  ValueResourceRecordInput,
+  MXResourceRecordInput,
+} from './ResourceRecordInput';
 import { Permission } from '../Permission/Permission';
 
 @Resolver(() => ResourceRecord)
@@ -39,7 +42,7 @@ export class ResourceRecordResolver {
   @Mutation(() => Zone)
   async createMXResourceRecord(
     @Arg('zoneId', () => ID) zoneId: string,
-    @Arg('input') { host, preference, value }: CreateMXResourceRecordInput,
+    @Arg('input') { host, preference, value, ttl }: CreateMXResourceRecordInput,
     @Ctx() { currentUser }: AuthContext,
   ): Promise<Zone> {
     const zone = await Zone.getUserZone(currentUser, zoneId, Permission.WRITE, {
@@ -51,6 +54,7 @@ export class ResourceRecordResolver {
       host: host,
       data: JSON.stringify({ value, preference }),
       type: ResourceRecordType[ResourceRecordType.MX],
+      ttl,
     }).save();
 
     return zone;
@@ -97,6 +101,41 @@ export class ResourceRecordResolver {
 
     if (host) resourceRecord.host = host;
     if (value) resourceRecord.data = JSON.stringify({ value });
+    if (ttl) resourceRecord.ttl = ttl;
+    else resourceRecord.ttl = null;
+    await resourceRecord.save();
+
+    return resourceRecord.zone;
+  }
+
+  @Authorized()
+  @Mutation(() => Zone)
+  async updateMXResourceRecord(
+    @Arg('resourceRecordId', () => ID) resourceRecordId: string,
+    @Arg('input')
+    { host, value, ttl, preference }: MXResourceRecordInput,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Zone> {
+    const resourceRecord = await ResourceRecord.findOneOrFail(
+      resourceRecordId,
+      { relations: ['zone'] },
+    );
+
+    await resourceRecord.zone.checkUserAuthorization(
+      currentUser,
+      Permission.WRITE,
+    );
+
+    if (host) resourceRecord.host = host;
+    if (value || preference) {
+      let data: { preference: number; value: string } = JSON.parse(
+        resourceRecord.data,
+      );
+      if (value) data = { ...data, value };
+      if (preference) data = { ...data, preference };
+      console.log(data);
+      resourceRecord.data = JSON.stringify(data);
+    }
     if (ttl) resourceRecord.ttl = ttl;
     else resourceRecord.ttl = null;
     await resourceRecord.save();

@@ -3,6 +3,12 @@ import { InputType, Field, ID } from 'type-graphql';
 
 @InputType()
 export class UpdateSubscriberInput {
+  @Field({ nullable: true })
+  name?: string;
+
   @Field(() => [ID])
-  updateZoneIds: string[];
+  addZoneIds: string[];
+
+  @Field(() => [ID])
+  removeZoneIds: string[];
 }

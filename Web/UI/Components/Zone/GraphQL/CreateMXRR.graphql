@@ -1,0 +1,13 @@
+mutation CreateMXRR($zoneId: ID!, $input: CreateMXResourceRecordInput!) {
+  createMXResourceRecord(zoneId: $zoneId, input: $input) {
+    id
+    domainName
+    resourceRecords {
+      id
+      host
+      data
+      ttl
+      type
+    }
+  }
+}

@@ -26,6 +26,7 @@ export type AcmeAccount = {
 export type AcmeDomain = {
    __typename?: 'ACMEDomain',
   id: Scalars['ID'],
+  zone: Zone,
   domains: Array<Scalars['String']>,
 };
 
@@ -114,6 +115,7 @@ export type Mutation = {
   createMXResourceRecord: Zone,
   deleteResourceRecord: Zone,
   updateValueResourceRecord: Zone,
+  updateMXResourceRecord: Zone,
   createSubscriber: CurrentUser,
   updateSubscriber: Subscriber,
   createUtility: Utility,
@@ -191,6 +193,12 @@ export type MutationUpdateValueResourceRecordArgs = {
 };
 
 
+export type MutationUpdateMxResourceRecordArgs = {
+  input: MxResourceRecordInput,
+  resourceRecordId: Scalars['ID']
+};
+
+
 export type MutationCreateSubscriberArgs = {
   input: SubscriberInput
 };
@@ -211,6 +219,13 @@ export type MutationCreateZoneArgs = {
   input: ZoneInput
 };
 
+export type MxResourceRecordInput = {
+  host?: Maybe<Scalars['String']>,
+  ttl?: Maybe<Scalars['Int']>,
+  preference?: Maybe<Scalars['Int']>,
+  value?: Maybe<Scalars['String']>,
+};
+
 export enum Permission {
   Read = 'READ',
   Write = 'WRITE',
@@ -219,6 +234,7 @@ export enum Permission {
 
 export type Query = {
    __typename?: 'Query',
+  ACME: Acme,
   currentUser?: Maybe<CurrentUser>,
   hasSetup: Scalars['Boolean'],
   subscriber: Subscriber,
@@ -229,6 +245,11 @@ export type Query = {
   helloWorld: Scalars['String'],
   zones: Array<Zone>,
   zone: Zone,
+};
+
+
+export type QueryAcmeArgs = {
+  acmeId: Scalars['String']
 };
 
 
@@ -327,7 +348,9 @@ export type SubscriptionSubscribeToZonesArgs = {
 };
 
 export type UpdateSubscriberInput = {
-  updateZoneIds: Array<Scalars['ID']>,
+  name?: Maybe<Scalars['String']>,
+  addZoneIds: Array<Scalars['ID']>,
+  removeZoneIds: Array<Scalars['ID']>,
 };
 
 export type User = {
@@ -379,6 +402,8 @@ export type Zone = {
   accessPermissions: Array<ZonePermissions>,
   subscribers: Array<Subscriber>,
   zoneSettings: ZoneSettings,
+  userPermission: Permission,
+  userPermissions: Array<Permission>,
 };
 
 
@@ -389,7 +414,7 @@ export type ZoneResourceRecordsArgs = {
 export type ZoneInput = {
   domainName: Scalars['String'],
   /** The user requesting the zone */
-  zoneOwnerUserId: Scalars['String'],
+  zoneUserIds: Array<Scalars['String']>,
   ns: Scalars['String'],
   contact: Scalars['String'],
 };
@@ -516,6 +541,53 @@ export type SubscribersQuery = (
   )> }
 );
 
+export type UpdateSubscriberMutationVariables = {
+  subscriberId: Scalars['ID'],
+  input: UpdateSubscriberInput
+};
+
+
+export type UpdateSubscriberMutation = (
+  { __typename?: 'Mutation' }
+  & { updateSubscriber: (
+    { __typename?: 'Subscriber' }
+    & Pick<Subscriber, 'id' | 'name'>
+    & { subscribedZones: Array<(
+      { __typename?: 'Zone' }
+      & Pick<Zone, 'domainName' | 'id'>
+    )> }
+  ) }
+);
+
+export type UsersQueryVariables = {};
+
+
+export type UsersQuery = (
+  { __typename?: 'Query' }
+  & { users: Array<(
+    { __typename?: 'User' }
+    & Pick<User, 'id' | 'username'>
+  )> }
+);
+
+export type CreateMxrrMutationVariables = {
+  zoneId: Scalars['ID'],
+  input: CreateMxResourceRecordInput
+};
+
+
+export type CreateMxrrMutation = (
+  { __typename?: 'Mutation' }
+  & { createMXResourceRecord: (
+    { __typename?: 'Zone' }
+    & Pick<Zone, 'id' | 'domainName'>
+    & { resourceRecords: Array<(
+      { __typename?: 'ResourceRecord' }
+      & Pick<ResourceRecord, 'id' | 'host' | 'data' | 'ttl' | 'type'>
+    )> }
+  ) }
+);
+
 export type CreateValueRrMutationVariables = {
   zoneId: Scalars['ID'],
   input: CreateValueResourceRecordInput
@@ -551,6 +623,24 @@ export type DeleteResourceRecordMutation = (
   ) }
 );
 
+export type UpdateMxResourceRecordMutationVariables = {
+  resourceRecordId: Scalars['ID'],
+  input: MxResourceRecordInput
+};
+
+
+export type UpdateMxResourceRecordMutation = (
+  { __typename?: 'Mutation' }
+  & { updateMXResourceRecord: (
+    { __typename?: 'Zone' }
+    & Pick<Zone, 'id'>
+    & { resourceRecords: Array<(
+      { __typename?: 'ResourceRecord' }
+      & Pick<ResourceRecord, 'host' | 'id' | 'ttl' | 'data'>
+    )> }
+  ) }
+);
+
 export type UpdateResourceRecordMutationVariables = {
   resourceRecordId: Scalars['ID'],
   input: ValueResourceRecordInput
@@ -578,11 +668,24 @@ export type ZoneQuery = (
   { __typename?: 'Query' }
   & { zone: (
     { __typename?: 'Zone' }
-    & Pick<Zone, 'id' | 'domainName'>
+    & Pick<Zone, 'id' | 'domainName' | 'userPermissions'>
     & { resourceRecords: Array<(
       { __typename?: 'ResourceRecord' }
       & Pick<ResourceRecord, 'id' | 'ttl' | 'host' | 'data' | 'type'>
     )> }
+  ) }
+);
+
+export type CreateZoneMutationVariables = {
+  input: ZoneInput
+};
+
+
+export type CreateZoneMutation = (
+  { __typename?: 'Mutation' }
+  & { createZone: (
+    { __typename?: 'Zone' }
+    & Pick<Zone, 'domainName' | 'id'>
   ) }
 );
 
@@ -596,19 +699,8 @@ export type ZonesQuery = (
     & Pick<CurrentUser, 'id'>
     & { zones: Array<(
       { __typename?: 'Zone' }
-      & Pick<Zone, 'domainName' | 'id'>
+      & Pick<Zone, 'domainName' | 'id' | 'userPermissions'>
     )> }
-  )> }
-);
-
-export type UsersQueryVariables = {};
-
-
-export type UsersQuery = (
-  { __typename?: 'Query' }
-  & { users: Array<(
-    { __typename?: 'User' }
-    & Pick<User, 'username' | 'id'>
   )> }
 );
 
@@ -625,10 +717,19 @@ export type InitialConfigurationMutation = (
   ) }
 );
 
-export type HelloWorldQueryVariables = {};
+export type ZoneSettingsQueryVariables = {
+  zoneId: Scalars['String']
+};
 
 
-export type HelloWorldQuery = (
+export type ZoneSettingsQuery = (
   { __typename?: 'Query' }
-  & Pick<Query, 'helloWorld'>
+  & { zone: (
+    { __typename?: 'Zone' }
+    & Pick<Zone, 'id' | 'domainName'>
+    & { zoneSettings: (
+      { __typename?: 'ZoneSettings' }
+      & Pick<ZoneSettings, 'id'>
+    ) }
+  ) }
 );

@@ -22,12 +22,5 @@ export const Routes: Route[] = [
     label: 'Admin',
     to: '/Admin',
     roles: [UserRole.Admin],
-    children: [
-      {
-        label: 'Test',
-        to: '/Admin/Test',
-        roles: [UserRole.Admin],
-      },
-    ],
   },
 ];

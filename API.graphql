@@ -104,10 +104,18 @@ type Mutation {
   createMXResourceRecord(input: CreateMXResourceRecordInput!, zoneId: ID!): Zone!
   deleteResourceRecord(resourceRecordId: ID!): Zone!
   updateValueResourceRecord(input: ValueResourceRecordInput!, resourceRecordId: ID!): Zone!
+  updateMXResourceRecord(input: MXResourceRecordInput!, resourceRecordId: ID!): Zone!
   createSubscriber(input: SubscriberInput!): CurrentUser!
   updateSubscriber(input: UpdateSubscriberInput!, subscriberId: ID!): Subscriber!
   createUtility(input: CreateUtilityInput!): Utility!
   createZone(input: ZoneInput!): Zone!
+}
+
+input MXResourceRecordInput {
+  host: String
+  ttl: Int
+  preference: Int
+  value: String
 }
 
 enum Permission {
@@ -192,7 +200,9 @@ type Subscription {
 }
 
 input UpdateSubscriberInput {
-  updateZoneIds: [ID!]!
+  name: String
+  addZoneIds: [ID!]!
+  removeZoneIds: [ID!]!
 }
 
 type User {
@@ -241,13 +251,15 @@ type Zone {
   accessPermissions: [ZonePermissions!]!
   subscribers: [Subscriber!]!
   zoneSettings: ZoneSettings!
+  userPermission: Permission!
+  userPermissions: [Permission!]!
 }
 
 input ZoneInput {
   domainName: String!
 
   """The user requesting the zone"""
-  zoneOwnerUserId: String!
+  zoneUserIds: [String!]!
   ns: String!
   contact: String!
 }

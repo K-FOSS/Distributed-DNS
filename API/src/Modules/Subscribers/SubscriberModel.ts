@@ -10,6 +10,7 @@ import {
   Column,
   BeforeUpdate,
   OneToMany,
+  AfterUpdate,
 } from 'typeorm';
 import { Zone } from '../Zones/ZoneModel';
 import { config } from 'API/Config';
@@ -100,6 +101,7 @@ export class Subscriber extends BaseEntity {
   }
 
   @BeforeUpdate()
+  @AfterUpdate()
   async beforeUpdate(item: Subscriber, b: string): Promise<void> {
     console.log(item, b);
   }

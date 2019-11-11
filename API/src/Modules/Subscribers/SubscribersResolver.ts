@@ -69,22 +69,25 @@ export class SubscribersResolver {
     );
     const zonePromises: Promise<Zone>[] = [];
 
-    for (const zoneId of input.updateZoneIds)
+    for (const zoneId of input.addZoneIds)
       zonePromises.push(
         Zone.getUserZone(currentUser, zoneId, Permission.ADMIN),
       );
 
+    const existingZones = (await subscriber.subscribedZones).filter(
+      ({ id }) => !input.removeZoneIds.includes(id),
+    );
+
     const zones = await Promise.all(zonePromises);
 
-    subscriber.subscribedZones = [
-      ...(await subscriber.subscribedZones),
-      ...zones,
-    ];
+    subscriber.subscribedZones = [...existingZones, ...zones];
+
+    if (input.name) subscriber.name = input.name;
 
     await subscriber.save();
 
     await Promise.all(
-      input.updateZoneIds.map((zoneId) =>
+      input.addZoneIds.map((zoneId) =>
         subscriberPubSub.addZoneToSubscriber(subscriber.id, zoneId),
       ),
     );

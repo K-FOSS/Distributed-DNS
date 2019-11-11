@@ -4,7 +4,6 @@ services:
     image: abiosoft/caddy
     ports:
       - 80:80
-      - 443:443
     volumes:
       - './Caddyfile:/etc/Caddyfile'
       - './ACMEDL/data:/SSL'
@@ -64,7 +63,7 @@ services:
     build: './DNSDL'
     image: 'dnsdl'
     environment:
-      SUBSCRIBER_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWJzY3JpYmVySWQiOiJiZTQzY2JiNi0xNTgxLTQ2YWYtYWExNC01NmY5MTUzYWQ2ZjgiLCJpYXQiOjE1NzEyNDk5ODB9.HTI3j2S_cuniYlvxMIyi6TA7MR2x7LBTXJhYiA8CBvI
+      SUBSCRIBER_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWJzY3JpYmVySWQiOiIwMjdhMTliOS1kZjgwLTQ0NzItOTRlZi01NWM0ZDkzY2U1YjYiLCJpYXQiOjE1NzI0NTIyMTB9.r4MmRGSbdc0-PKIszyBHqDX8k4JJMXMMy2jjKPVXlRU
       API_URL: 'http://api/graphql'
     volumes:
       - 'zoneFiles:/data/Zones'

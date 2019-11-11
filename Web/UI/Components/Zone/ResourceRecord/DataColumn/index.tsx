@@ -3,13 +3,14 @@ import React from 'react';
 import { RRData } from '..';
 import { ResourceRecordType } from 'UI/GraphQL/graphqlTypes.gen';
 import { ValueResourceRecord } from './ValueRecord';
+import { MXResourceRecord } from './MXRecord';
 
 const RRDataColumnComponent = {
   [ResourceRecordType.A]: ValueResourceRecord,
   [ResourceRecordType.Aaaa]: ValueResourceRecord,
   [ResourceRecordType.Cname]: ValueResourceRecord,
   [ResourceRecordType.Dname]: ValueResourceRecord,
-  [ResourceRecordType.Mx]: ValueResourceRecord,
+  [ResourceRecordType.Mx]: MXResourceRecord,
   [ResourceRecordType.Ns]: ValueResourceRecord,
   [ResourceRecordType.Txt]: ValueResourceRecord,
 };

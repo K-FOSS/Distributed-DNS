@@ -16,8 +16,5 @@ export const useStyles = makeStyles((theme: Theme) =>
     inputRoot: {
       flexWrap: 'wrap',
     },
-    input: {
-      marginTop: '1em',
-    },
   }),
 );

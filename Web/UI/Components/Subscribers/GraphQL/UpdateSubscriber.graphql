@@ -1,0 +1,10 @@
+mutation UpdateSubscriber($subscriberId: ID!, $input: UpdateSubscriberInput!) {
+  updateSubscriber(subscriberId: $subscriberId, input: $input) {
+    id
+    name
+    subscribedZones {
+      domainName
+      id
+    }
+  }
+}

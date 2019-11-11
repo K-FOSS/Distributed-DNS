@@ -9,7 +9,7 @@ export const DATA_VOLUME =
 
 const acmeToken =
   process.env.ACME_TOKEN ||
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY21lSWQiOiIwNmExOGFjNS03NTNhLTRjMzAtOTVmNS1iYjdjMWJjZGVkNzgiLCJpYXQiOjE1NzEzMzEwMTV9.o_WK5WJexbTpZMrtbX2J_wo9z2M9Jb1l5szwaMnSKig';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY21lSWQiOiIwNmExOGFjNS03NTNhLTRjMzAtOTVmNS1iYjdjMWJjZGVkNzgiLCJpYXQiOjE1NzEzNDU1NzZ9.4CrlsvL2ta-3jKmOxFbUCj4SkSbVKJvt6n6OnzxQ-0o';
 
 const API_URL = process.env.API_URL || 'http://localhost/graphql';
 

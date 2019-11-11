@@ -68,6 +68,8 @@
         "always-multiline"
       ],
       "react/no-children-prop": "off",
+      "react/display-name": "off",
+      "react/prop-types": "off",
       "@typescript-eslint/no-unused-vars": [
         "error",
         {

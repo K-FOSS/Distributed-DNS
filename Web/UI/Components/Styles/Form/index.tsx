@@ -19,6 +19,7 @@ export function Form<T>({
   onSubmit,
   title,
   errors,
+  children,
 }: PropsWithChildren<FormProps<T>>): React.ReactElement {
   const { register, handleSubmit } = useForm<T>();
 
@@ -35,6 +36,7 @@ export function Form<T>({
       >
         {title}
         {Fields}
+        {children}
         <BaseButtonCore
           submit
           label='Submit'

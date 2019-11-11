@@ -137,13 +137,6 @@ export class ACMEResolver {
 
     await acme.generateCertificate();
 
-    const certificate = await Certificate.getRepository().findOneOrFail(
-      undefined,
-      { order: { updatedAt: 'DESC' } },
-    );
-
-    acmePubSub.publish(acmeId, certificate);
-
     return acme;
   }
 

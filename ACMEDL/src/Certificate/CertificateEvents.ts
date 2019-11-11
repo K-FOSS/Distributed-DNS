@@ -28,7 +28,12 @@ export async function subscribeToCertificateEvents(
         if (!data) return;
 
         const cert = analyzeCertificate(data.certificateEvents.certificate);
-        console.log(cert);
+        console.log(
+          `Issuer: `,
+          cert.issuer.attributes,
+          `\nSubject: `,
+          cert.subject.attributes,
+        );
 
         console.log('Received new Certificate');
         outputCertificate(data.certificateEvents);

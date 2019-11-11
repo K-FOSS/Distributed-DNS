@@ -2,6 +2,7 @@ query Zone($zoneId: String!) {
   zone(zoneId: $zoneId) {
     id
     domainName
+    userPermissions
     resourceRecords {
       id
       ttl

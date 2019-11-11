@@ -1,4 +1,4 @@
-// Web/UI/Components/Zones/AutoSuggest/AutoSuggest.tsx
+// Web/UI/Components/Users/AutoSuggest/AutoSuggest.tsx
 import React, {
   useMemo,
   useState,
@@ -9,23 +9,23 @@ import React, {
   useRef,
 } from 'react';
 import Paper from '@material-ui/core/Paper';
-import { useZonesQuery } from '../GraphQL/Zones.gen';
+import { useUsersQuery } from './Users.gen';
 import { useImport } from 'UI/Components/Providers/ImportProvider';
 import { Loader } from 'UI/Components/Styles/Loader';
 import { useStyles } from './Styles';
 import Chip from '@material-ui/core/Chip';
 import MenuItem from '@material-ui/core/MenuItem';
-import { Zone } from 'UI/GraphQL/graphqlTypes.gen';
+import { User } from 'UI/GraphQL/graphqlTypes.gen';
 
-export type ZoneData = Pick<Zone, 'domainName' | 'id'>;
+export type UserData = Pick<User, 'username' | 'id'>;
 
 interface AutoSuggestProps {
-  selectedZones: ZoneData[];
-  setSelectedZones: Dispatch<SetStateAction<ZoneData[]>>;
+  selectedUsers: UserData[];
+  setSelectedUsers: Dispatch<SetStateAction<UserData[]>>;
 }
 
 interface State {
-  domainFilter: string;
+  usernameFilter: string;
   hideSuggest: boolean;
 }
 
@@ -34,16 +34,16 @@ type HandleStateChange = <T extends keyof State>(
   value: State[T],
 ) => void;
 
-export function ZonesAutoSuggest({
-  selectedZones,
-  setSelectedZones,
+export function UsersAutoSuggest({
+  selectedUsers,
+  setSelectedUsers,
 }: AutoSuggestProps): React.ReactElement {
   const classes = useStyles({});
-  const { data } = useZonesQuery();
+  const { data } = useUsersQuery();
   const inputRef = useRef<HTMLInputElement>();
 
   const [state, setState] = useState<State>({
-    domainFilter: '',
+    usernameFilter: '',
     hideSuggest: true,
   });
 
@@ -66,48 +66,48 @@ export function ZonesAutoSuggest({
     [handleStateChange],
   );
 
-  const handleZoneFilterChange = useCallback(
+  const handleUsernameFilterChange = useCallback(
     ({ target }: ChangeEvent<HTMLInputElement>) =>
-      handleStateChange('domainFilter', target.value),
+      handleStateChange('usernameFilter', target.value),
     [handleStateChange],
   );
 
-  const handleAddZone = useCallback(
-    (zone: ZoneData) => {
-      setSelectedZones((selectedZonesState) => [...selectedZonesState, zone]);
-      setState({ hideSuggest: true, domainFilter: '' });
+  const handleAddUser = useCallback(
+    (user: UserData) => {
+      setSelectedUsers((selectedUsersState) => [...selectedUsersState, user]);
+      setState({ hideSuggest: true, usernameFilter: '' });
     },
-    [setSelectedZones, setState],
+    [setSelectedUsers, setState],
   );
 
-  const handleDeleteZone = useCallback(
-    (zone: ZoneData) =>
-      setSelectedZones((selectedZoneState) =>
-        selectedZoneState
-          ? selectedZoneState.filter((selectedZone) => selectedZone !== zone)
+  const handleDeleteUser = useCallback(
+    (user: UserData) =>
+      setSelectedUsers((selectedUsersState) =>
+        selectedUsersState
+          ? selectedUsersState.filter((selectedUser) => selectedUser !== user)
           : [],
       ),
-    [setSelectedZones],
+    [setSelectedUsers],
   );
 
-  const filteredZones = useMemo(
+  const filteredUsers = useMemo(
     () =>
-      data && data.currentUser ? (
-        data.currentUser.zones
+      data && data.users ? (
+        data.users
           .filter(
-            (zone) =>
-              zone.domainName.includes(state.domainFilter) &&
-              !selectedZones.find(({ id }) => zone.id === id),
+            (user) =>
+              user.username.includes(state.usernameFilter) &&
+              !selectedUsers.find(({ id }) => user.id === id),
           )
-          .map((zone) => (
-            <MenuItem key={zone.id} onClick={() => handleAddZone(zone)}>
-              {zone.domainName}
+          .map((user) => (
+            <MenuItem key={user.id} onClick={() => handleAddUser(user)}>
+              {user.username}
             </MenuItem>
           ))
       ) : (
         <></>
       ),
-    [data, state, selectedZones, handleAddZone],
+    [data, state, selectedUsers, handleAddUser],
   );
 
   const suggestMemo = useMemo(
@@ -121,33 +121,33 @@ export function ZonesAutoSuggest({
             width: inputRef.current ? `${inputRef.current.clientWidth}px` : '',
           }}
         >
-          {filteredZones}
+          {filteredUsers}
         </Paper>
       ),
-    [classes.suggestPaper, state.hideSuggest, filteredZones, inputRef],
+    [classes.suggestPaper, state.hideSuggest, filteredUsers, inputRef],
   );
 
   return (
     <div>
       <TextField
         onFocus={() => handleToggleHideSuggest(false)}
-        label='Zones'
+        label='User'
         variant='outlined'
-        value={state.domainFilter}
-        onChange={handleZoneFilterChange}
+        value={state.usernameFilter}
+        onChange={handleUsernameFilterChange}
         innerRef={inputRef}
-        className={classes.input}
         fullWidth
         multiline
+        style={{ marginTop: '1em' }}
         onBlur={() => setTimeout(() => handleToggleHideSuggest(true), 200)}
         InputProps={{
-          startAdornment: selectedZones.map((item) => (
+          startAdornment: selectedUsers.map((item) => (
             <Chip
               key={item.id}
               tabIndex={-1}
-              label={item.domainName}
+              label={item.username}
               className={classes.chip}
-              onDelete={() => handleDeleteZone(item)}
+              onDelete={() => handleDeleteUser(item)}
             />
           )),
           className: classes.inputRoot,

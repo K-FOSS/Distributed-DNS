@@ -3,13 +3,13 @@ import { ACMEDomain } from '../ACMEDomainModel';
 import { ACMEAccount } from '../ACMEAccountModel';
 import { Client, forge } from 'acme-client';
 import { directoryUrl } from '../ACMEModel';
-import { performAuthorizations } from './PerformAuthorizatoins';
+import { performAuthorizations } from './PerformAuthorizations';
 import { Certificate } from 'API/Modules/Certificates/CertificateModel';
 
 export async function createOrder(
   acmeId: string,
   acmeAccountId: string,
-): Promise<void> {
+): Promise<Certificate> {
   const [domains, acmeAccount] = await Promise.all([
     ACMEDomain.find({
       where: { acmeId },
@@ -18,12 +18,12 @@ export async function createOrder(
     ACMEAccount.findOneOrFail(acmeAccountId),
   ]);
 
-  const domainNames: string[] = [];
-  for (const domain of domains)
-    for (const domainName of domain.domains) domainNames.push(domainName);
+  const domainNames = domains.flatMap((domain) =>
+    domain.domains.map((domain) => domain),
+  );
 
   const client = new Client({
-    accountKey: acmeAccount.accountKey as Buffer,
+    accountKey: acmeAccount.accountKey,
     directoryUrl,
     accountUrl: acmeAccount.accountUrl,
   });
@@ -52,5 +52,5 @@ export async function createOrder(
     acmeId,
   });
 
-  await certificate.save();
+  return certificate.save();
 }
