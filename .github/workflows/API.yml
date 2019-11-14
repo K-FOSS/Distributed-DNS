@@ -45,7 +45,6 @@ jobs:
           scriptPath: 'API/'
   Build:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
     needs: [Test, Prettier, Lint]
     steps:
       - uses: actions/checkout@master
