@@ -94,7 +94,6 @@ export class Subscriber extends BaseEntity {
         userId: typeof user === 'string' ? user : user.id,
       })
       .getOne();
-
     if (!subscriber) throw new ForbiddenError();
 
     return subscriber;

@@ -31,7 +31,7 @@ jobs:
         uses: KristianFJones/Publish-Docker-Github-Action@master
         with:
           dockerfile: Web/Dockerfile
-          name: docker.pkg.github.com/kristianfjones/application-template/application-template-ui
+          name: docker.pkg.github.com/kristianfjones/distributed-dns/distributed-dns-web:latest
           username: ${{ secrets.DOCKER_GITHUB_USERNAME }}
           password: ${{ secrets.DOCKER_GITHUB_PASSWORD }}
           registry: docker.pkg.github.com
