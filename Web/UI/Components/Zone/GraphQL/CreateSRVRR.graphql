@@ -1,0 +1,14 @@
+mutation CreateSRVRR($zoneId: ID!, $input: CreateSRVResourceRecordInput!) {
+  createSRVResourceRecord(zoneId: $zoneId, input: $input) {
+    id
+    domainName
+
+    resourceRecords {
+      id
+      host
+      data
+      type
+      ttl
+    }
+  }
+}

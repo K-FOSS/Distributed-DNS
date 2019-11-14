@@ -64,10 +64,11 @@ export class ZoneResolver {
   {
     zoneUserIds,
     ns,
+    contact,
     ...zoneInput
   }: ZoneInput): Promise<Zone> {
     const zone = Zone.create(zoneInput);
-    const zoneSettings = ZoneSettings.create();
+    const zoneSettings = ZoneSettings.create({ contact });
     const zonePermissions = zoneUserIds.map((userId) =>
       ZonePermissions.create({
         userId: userId,

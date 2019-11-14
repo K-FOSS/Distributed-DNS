@@ -5,6 +5,7 @@ query ZoneSettings($zoneId: String!) {
 
     zoneSettings {
       id
+      contact
     }
   }
 }

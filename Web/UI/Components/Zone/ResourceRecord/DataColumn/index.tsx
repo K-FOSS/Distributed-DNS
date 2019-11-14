@@ -4,6 +4,7 @@ import { RRData } from '..';
 import { ResourceRecordType } from 'UI/GraphQL/graphqlTypes.gen';
 import { ValueResourceRecord } from './ValueRecord';
 import { MXResourceRecord } from './MXRecord';
+import { SRVResourceRecordDataColumn } from './SRVRecord';
 
 const RRDataColumnComponent = {
   [ResourceRecordType.A]: ValueResourceRecord,
@@ -13,6 +14,7 @@ const RRDataColumnComponent = {
   [ResourceRecordType.Mx]: MXResourceRecord,
   [ResourceRecordType.Ns]: ValueResourceRecord,
   [ResourceRecordType.Txt]: ValueResourceRecord,
+  [ResourceRecordType.Srv]: SRVResourceRecordDataColumn
 };
 
 export function RRDataColumn(

@@ -11,7 +11,7 @@ export function MXResourceRecord({
   const { value, preference } = JSON.parse(JSONData);
   return (
     <>
-      {preference} {value}
+      {preference}    {value}
     </>
   );
 }

@@ -1,7 +1,7 @@
 // Web/UI/Routes/Zones/ZoneSettings/index.tsx
 import React from 'react';
-import { Header } from 'UI/Components/Styles/Header';
 import { useParams } from 'react-router';
+import { Header } from 'UI/Components/Styles/Header';
 import { useZoneSettingsQuery } from './ZoneSettings.gen';
 
 interface ZoneSettingsPageParams {

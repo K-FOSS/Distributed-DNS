@@ -9,5 +9,11 @@ export const useStyles = makeStyles((theme: Theme) =>
     doubleTextLeft: {
       marginRight: '1em',
     },
+    srvTargetField: {
+      width: '-webkit-fill-available'
+    },
+    srvProtoSelect: {
+      width: '170px'
+    }
   }),
 );

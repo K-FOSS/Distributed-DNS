@@ -40,10 +40,6 @@ export class Zone extends BaseEntity {
   @Column()
   zoneSettingsId: string;
 
-  @Field()
-  @Column('varchar')
-  contact: string;
-
   @Field(() => Date, { nullable: true })
   async updatedDate(): Promise<Date | undefined> {
     const resourceRecord = await ResourceRecord.getRepository().findOne(
@@ -59,16 +55,24 @@ export class Zone extends BaseEntity {
   domainName: string;
 
   @Field(() => [ResourceRecord])
-  @OneToMany(() => ResourceRecord, (resourceRecord) => resourceRecord.zone, {
-    cascade: ['insert', 'update'],
-  })
+  @OneToMany(
+    () => ResourceRecord,
+    (resourceRecord) => resourceRecord.zone,
+    {
+      cascade: ['insert', 'update'],
+    },
+  )
   @JoinColumn()
   resourceRecords: ResourceRecord[];
 
   @Field(() => [ZonePermissions])
-  @OneToMany(() => ZonePermissions, (zonePermission) => zonePermission.zone, {
-    cascade: ['insert', 'update'],
-  })
+  @OneToMany(
+    () => ZonePermissions,
+    (zonePermission) => zonePermission.zone,
+    {
+      cascade: ['insert', 'update'],
+    },
+  )
   accessPermissions: ZonePermissions[];
 
   @Field(() => Subscriber)

@@ -10,5 +10,10 @@ query Zone($zoneId: String!) {
       data
       type
     }
+
+    zoneSettings {
+      id
+      contact
+    }
   }
 }

@@ -7,6 +7,7 @@ type ACME {
   id: ID!
   name: String!
   domains: [ACMEDomain!]!
+  contactEmail: String!
   ACMEToken: String!
 }
 
@@ -59,6 +60,17 @@ input CreateMXResourceRecordInput {
   value: String!
 }
 
+input CreateSRVResourceRecordInput {
+  host: String!
+  ttl: Int
+  service: String!
+  protocol: SRVProtocol!
+  priority: Int!
+  weight: Int!
+  port: Int!
+  target: String!
+}
+
 input CreateUtilityInput {
   name: String!
 }
@@ -102,9 +114,11 @@ type Mutation {
   initialConfiguration(user: UserInput!): Configuration!
   createValueResourceRecord(input: CreateValueResourceRecordInput!, zoneId: ID!): Zone!
   createMXResourceRecord(input: CreateMXResourceRecordInput!, zoneId: ID!): Zone!
+  createSRVResourceRecord(input: CreateSRVResourceRecordInput!, zoneId: ID!): Zone!
   deleteResourceRecord(resourceRecordId: ID!): Zone!
   updateValueResourceRecord(input: ValueResourceRecordInput!, resourceRecordId: ID!): Zone!
   updateMXResourceRecord(input: MXResourceRecordInput!, resourceRecordId: ID!): Zone!
+  updateSRVResourceRecord(input: SRVResourceRecordInput!, resourceRecordId: ID!): Zone!
   createSubscriber(input: SubscriberInput!): CurrentUser!
   updateSubscriber(input: UpdateSubscriberInput!, subscriberId: ID!): Subscriber!
   createUtility(input: CreateUtilityInput!): Utility!
@@ -176,6 +190,27 @@ enum ResourceRecordType {
   DNAME
   AAAA
   MX
+  SRV
+}
+
+enum SRVProtocol {
+  TCP
+  UDP
+  TLS
+  LDAP
+  HTTP
+  OCSP
+}
+
+input SRVResourceRecordInput {
+  host: String
+  ttl: Int
+  service: String
+  protocol: SRVProtocol
+  priority: Int
+  weight: Int
+  port: Int
+  target: String
 }
 
 type Subscriber {
@@ -244,7 +279,6 @@ input ValueResourceRecordInput {
 
 type Zone {
   id: ID!
-  contact: String!
   updatedDate: DateTime
   domainName: String!
   resourceRecords(filter: ResourceRecordFilter): [ResourceRecord!]!
@@ -272,4 +306,5 @@ type ZonePermissions {
 
 type ZoneSettings {
   id: ID!
+  contact: String!
 }

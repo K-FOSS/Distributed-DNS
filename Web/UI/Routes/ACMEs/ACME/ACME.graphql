@@ -1,0 +1,22 @@
+query ACME($acmeId: String!) {
+  ACME(acmeId: $acmeId) {
+    id
+    
+    name
+    
+    domains {
+      id
+      
+      domains
+      
+      zone {
+        id
+        domainName
+      }
+      
+      domains
+    }
+    
+    contactEmail
+  }
+}

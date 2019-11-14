@@ -1,0 +1,13 @@
+mutation CreateACME($input: ACMEInput!) {
+  createACME(input: $input) {
+    id
+    
+    ACMEs {
+      id
+      
+      name
+      
+      contactEmail
+    }
+  }
+}

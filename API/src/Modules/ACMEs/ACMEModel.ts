@@ -85,6 +85,13 @@ export class ACME extends BaseEntity {
   @JoinColumn()
   domains: ACMEDomain[];
 
+  @Field(() => String)
+  async contactEmail(): Promise<string> {
+    const acmeAccount = await ACMEAccount.findOneOrFail(this.acmeAccountId)
+
+    return acmeAccount.email
+  }
+
   async addDomain(zoneId: string, domainNames: string[]): Promise<void> {
     const domains = await ACMEDomain.find({
       where: { acmeId: this.id },

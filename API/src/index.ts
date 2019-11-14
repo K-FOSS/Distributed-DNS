@@ -27,7 +27,6 @@ async function startAPI(): Promise<void> {
   apiServer.installSubscriptionHandlers(httpServer);
 
   await dbConnection;
-  console.log(httpServer.connections);
 }
 
 startAPI();

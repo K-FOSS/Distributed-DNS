@@ -15,6 +15,7 @@ export type Acme = {
   id: Scalars['ID'],
   name: Scalars['String'],
   domains: Array<AcmeDomain>,
+  contactEmail: Scalars['String'],
   ACMEToken: Scalars['String'],
 };
 
@@ -72,6 +73,17 @@ export type CreateMxResourceRecordInput = {
   value: Scalars['String'],
 };
 
+export type CreateSrvResourceRecordInput = {
+  host: Scalars['String'],
+  ttl?: Maybe<Scalars['Int']>,
+  service: Scalars['String'],
+  protocol: SrvProtocol,
+  priority: Scalars['Int'],
+  weight: Scalars['Int'],
+  port: Scalars['Int'],
+  target: Scalars['String'],
+};
+
 export type CreateUtilityInput = {
   name: Scalars['String'],
 };
@@ -113,9 +125,11 @@ export type Mutation = {
   initialConfiguration: Configuration,
   createValueResourceRecord: Zone,
   createMXResourceRecord: Zone,
+  createSRVResourceRecord: Zone,
   deleteResourceRecord: Zone,
   updateValueResourceRecord: Zone,
   updateMXResourceRecord: Zone,
+  updateSRVResourceRecord: Zone,
   createSubscriber: CurrentUser,
   updateSubscriber: Subscriber,
   createUtility: Utility,
@@ -182,6 +196,12 @@ export type MutationCreateMxResourceRecordArgs = {
 };
 
 
+export type MutationCreateSrvResourceRecordArgs = {
+  input: CreateSrvResourceRecordInput,
+  zoneId: Scalars['ID']
+};
+
+
 export type MutationDeleteResourceRecordArgs = {
   resourceRecordId: Scalars['ID']
 };
@@ -195,6 +215,12 @@ export type MutationUpdateValueResourceRecordArgs = {
 
 export type MutationUpdateMxResourceRecordArgs = {
   input: MxResourceRecordInput,
+  resourceRecordId: Scalars['ID']
+};
+
+
+export type MutationUpdateSrvResourceRecordArgs = {
+  input: SrvResourceRecordInput,
   resourceRecordId: Scalars['ID']
 };
 
@@ -310,8 +336,29 @@ export enum ResourceRecordType {
   Cname = 'CNAME',
   Dname = 'DNAME',
   Aaaa = 'AAAA',
-  Mx = 'MX'
+  Mx = 'MX',
+  Srv = 'SRV'
 }
+
+export enum SrvProtocol {
+  Tcp = 'TCP',
+  Udp = 'UDP',
+  Tls = 'TLS',
+  Ldap = 'LDAP',
+  Http = 'HTTP',
+  Ocsp = 'OCSP'
+}
+
+export type SrvResourceRecordInput = {
+  host?: Maybe<Scalars['String']>,
+  ttl?: Maybe<Scalars['Int']>,
+  service?: Maybe<Scalars['String']>,
+  protocol?: Maybe<SrvProtocol>,
+  priority?: Maybe<Scalars['Int']>,
+  weight?: Maybe<Scalars['Int']>,
+  port?: Maybe<Scalars['Int']>,
+  target?: Maybe<Scalars['String']>,
+};
 
 export type Subscriber = {
    __typename?: 'Subscriber',
@@ -395,7 +442,6 @@ export type ValueResourceRecordInput = {
 export type Zone = {
    __typename?: 'Zone',
   id: Scalars['ID'],
-  contact: Scalars['String'],
   updatedDate?: Maybe<Scalars['DateTime']>,
   domainName: Scalars['String'],
   resourceRecords: Array<ResourceRecord>,
@@ -429,7 +475,9 @@ export type ZonePermissions = {
 export type ZoneSettings = {
    __typename?: 'ZoneSettings',
   id: Scalars['ID'],
+  contact: Scalars['String'],
 };
+
 export type HasSetupQueryVariables = {};
 
 

@@ -3,6 +3,8 @@ import { Resolver, Mutation, Arg, Ctx, Authorized, ID } from 'type-graphql';
 import {
   CreateValueResourceRecordInput,
   CreateMXResourceRecordInput,
+  CreateSRVResourceRecordInput,
+  SRVProtocol,
 } from './CreateResourceRecordInput';
 import { ResourceRecord } from './ResourceRecordModel';
 import { Zone } from '../Zones/ZoneModel';
@@ -11,6 +13,7 @@ import { ResourceRecordType } from './ResourceRecordTypes';
 import {
   ValueResourceRecordInput,
   MXResourceRecordInput,
+  SRVResourceRecordInput,
 } from './ResourceRecordInput';
 import { Permission } from '../Permission/Permission';
 
@@ -54,6 +57,27 @@ export class ResourceRecordResolver {
       host: host,
       data: JSON.stringify({ value, preference }),
       type: ResourceRecordType[ResourceRecordType.MX],
+      ttl,
+    }).save();
+
+    return zone;
+  }
+
+  @Mutation(() => Zone)
+  async createSRVResourceRecord(
+    @Arg('zoneId', () => ID) zoneId: string,
+    @Arg('input') { host, ttl, ...RR }: CreateSRVResourceRecordInput,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Zone> {
+    const zone = await Zone.getUserZone(currentUser, zoneId, Permission.WRITE, {
+      relations: ['resourceRecords'],
+    });
+
+    await ResourceRecord.create({
+      zoneId: zone.id,
+      host: host,
+      data: JSON.stringify(RR),
+      type: ResourceRecordType[ResourceRecordType.SRV],
       ttl,
     }).save();
 
@@ -131,9 +155,51 @@ export class ResourceRecordResolver {
       let data: { preference: number; value: string } = JSON.parse(
         resourceRecord.data,
       );
+
       if (value) data = { ...data, value };
+
       if (preference) data = { ...data, preference };
-      console.log(data);
+
+      resourceRecord.data = JSON.stringify(data);
+    }
+    if (ttl) resourceRecord.ttl = ttl;
+    else resourceRecord.ttl = null;
+    await resourceRecord.save();
+
+    return resourceRecord.zone;
+  }
+
+  @Authorized()
+  @Mutation(() => Zone)
+  async updateSRVResourceRecord(
+    @Arg('resourceRecordId', () => ID) resourceRecordId: string,
+    @Arg('input')
+    { host, ttl, ...RRData }: SRVResourceRecordInput,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Zone> {
+    const resourceRecord = await ResourceRecord.findOneOrFail(
+      resourceRecordId,
+      { relations: ['zone'] },
+    );
+
+    await resourceRecord.zone.checkUserAuthorization(
+      currentUser,
+      Permission.WRITE,
+    );
+
+    if (host) resourceRecord.host = host;
+    if (RRData) {
+      let data: {
+        service: string;
+        protocol: SRVProtocol;
+        priority: number;
+        weight: number;
+        port: number;
+        target: string;
+      } = JSON.parse(resourceRecord.data);
+
+      data = { ...data, ...RRData };
+
       resourceRecord.data = JSON.stringify(data);
     }
     if (ttl) resourceRecord.ttl = ttl;

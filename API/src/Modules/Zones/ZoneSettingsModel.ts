@@ -6,6 +6,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Column,
 } from 'typeorm';
 
 @ObjectType()
@@ -20,4 +21,8 @@ export class ZoneSettings extends BaseEntity {
 
   @UpdateDateColumn()
   readonly updatedAt: Date;
+
+  @Field()
+  @Column('varchar')
+  contact: string;
 }

@@ -15,6 +15,7 @@ export type Acme = {
   id: Scalars['ID'],
   name: Scalars['String'],
   domains: Array<AcmeDomain>,
+  contactEmail: Scalars['String'],
   ACMEToken: Scalars['String'],
 };
 
@@ -72,6 +73,17 @@ export type CreateMxResourceRecordInput = {
   value: Scalars['String'],
 };
 
+export type CreateSrvResourceRecordInput = {
+  host: Scalars['String'],
+  ttl?: Maybe<Scalars['Int']>,
+  service: Scalars['String'],
+  protocol: SrvProtocol,
+  priority: Scalars['Int'],
+  weight: Scalars['Int'],
+  port: Scalars['Int'],
+  target: Scalars['String'],
+};
+
 export type CreateUtilityInput = {
   name: Scalars['String'],
 };
@@ -113,9 +125,11 @@ export type Mutation = {
   initialConfiguration: Configuration,
   createValueResourceRecord: Zone,
   createMXResourceRecord: Zone,
+  createSRVResourceRecord: Zone,
   deleteResourceRecord: Zone,
   updateValueResourceRecord: Zone,
   updateMXResourceRecord: Zone,
+  updateSRVResourceRecord: Zone,
   createSubscriber: CurrentUser,
   updateSubscriber: Subscriber,
   createUtility: Utility,
@@ -182,6 +196,12 @@ export type MutationCreateMxResourceRecordArgs = {
 };
 
 
+export type MutationCreateSrvResourceRecordArgs = {
+  input: CreateSrvResourceRecordInput,
+  zoneId: Scalars['ID']
+};
+
+
 export type MutationDeleteResourceRecordArgs = {
   resourceRecordId: Scalars['ID']
 };
@@ -195,6 +215,12 @@ export type MutationUpdateValueResourceRecordArgs = {
 
 export type MutationUpdateMxResourceRecordArgs = {
   input: MxResourceRecordInput,
+  resourceRecordId: Scalars['ID']
+};
+
+
+export type MutationUpdateSrvResourceRecordArgs = {
+  input: SrvResourceRecordInput,
   resourceRecordId: Scalars['ID']
 };
 
@@ -310,8 +336,29 @@ export enum ResourceRecordType {
   Cname = 'CNAME',
   Dname = 'DNAME',
   Aaaa = 'AAAA',
-  Mx = 'MX'
+  Mx = 'MX',
+  Srv = 'SRV'
 }
+
+export enum SrvProtocol {
+  Tcp = 'TCP',
+  Udp = 'UDP',
+  Tls = 'TLS',
+  Ldap = 'LDAP',
+  Http = 'HTTP',
+  Ocsp = 'OCSP'
+}
+
+export type SrvResourceRecordInput = {
+  host?: Maybe<Scalars['String']>,
+  ttl?: Maybe<Scalars['Int']>,
+  service?: Maybe<Scalars['String']>,
+  protocol?: Maybe<SrvProtocol>,
+  priority?: Maybe<Scalars['Int']>,
+  weight?: Maybe<Scalars['Int']>,
+  port?: Maybe<Scalars['Int']>,
+  target?: Maybe<Scalars['String']>,
+};
 
 export type Subscriber = {
    __typename?: 'Subscriber',
@@ -395,7 +442,6 @@ export type ValueResourceRecordInput = {
 export type Zone = {
    __typename?: 'Zone',
   id: Scalars['ID'],
-  contact: Scalars['String'],
   updatedDate?: Maybe<Scalars['DateTime']>,
   domainName: Scalars['String'],
   resourceRecords: Array<ResourceRecord>,
@@ -429,21 +475,8 @@ export type ZonePermissions = {
 export type ZoneSettings = {
    __typename?: 'ZoneSettings',
   id: Scalars['ID'],
+  contact: Scalars['String'],
 };
-export type AcmEsQueryVariables = {};
-
-
-export type AcmEsQuery = (
-  { __typename?: 'Query' }
-  & { currentUser: Maybe<(
-    { __typename?: 'CurrentUser' }
-    & Pick<CurrentUser, 'id'>
-    & { ACMEs: Array<(
-      { __typename?: 'ACME' }
-      & Pick<Acme, 'id' | 'name'>
-    )> }
-  )> }
-);
 
 export type CurrentUserFragment = (
   { __typename?: 'CurrentUser' }
@@ -455,9 +488,10 @@ export type CurrentUserQueryVariables = {};
 
 export type CurrentUserQuery = (
   { __typename?: 'Query' }
-  & { currentUser: Maybe<{ __typename?: 'CurrentUser' }
+  & { currentUser: Maybe<(
+    { __typename?: 'CurrentUser' }
     & CurrentUserFragment
-  > }
+  )> }
 );
 
 export type LoginMutationVariables = {
@@ -470,9 +504,10 @@ export type LoginMutation = (
   & { login: (
     { __typename?: 'AuthResponse' }
     & Pick<AuthResponse, 'token'>
-    & { currentUser: { __typename?: 'CurrentUser' }
+    & { currentUser: (
+      { __typename?: 'CurrentUser' }
       & CurrentUserFragment
-     }
+    ) }
   ) }
 );
 
@@ -486,9 +521,10 @@ export type RegisterMutation = (
   & { register: (
     { __typename?: 'RegisterResponse' }
     & Pick<RegisterResponse, 'token'>
-    & { currentUser: { __typename?: 'CurrentUser' }
+    & { currentUser: (
+      { __typename?: 'CurrentUser' }
       & CurrentUserFragment
-     }
+    ) }
   ) }
 );
 
@@ -588,6 +624,24 @@ export type CreateMxrrMutation = (
   ) }
 );
 
+export type CreateSrvrrMutationVariables = {
+  zoneId: Scalars['ID'],
+  input: CreateSrvResourceRecordInput
+};
+
+
+export type CreateSrvrrMutation = (
+  { __typename?: 'Mutation' }
+  & { createSRVResourceRecord: (
+    { __typename?: 'Zone' }
+    & Pick<Zone, 'id' | 'domainName'>
+    & { resourceRecords: Array<(
+      { __typename?: 'ResourceRecord' }
+      & Pick<ResourceRecord, 'id' | 'host' | 'data' | 'type' | 'ttl'>
+    )> }
+  ) }
+);
+
 export type CreateValueRrMutationVariables = {
   zoneId: Scalars['ID'],
   input: CreateValueResourceRecordInput
@@ -641,6 +695,24 @@ export type UpdateMxResourceRecordMutation = (
   ) }
 );
 
+export type UpdateSrvResourceRecordMutationVariables = {
+  resourceRecordId: Scalars['ID'],
+  input: SrvResourceRecordInput
+};
+
+
+export type UpdateSrvResourceRecordMutation = (
+  { __typename?: 'Mutation' }
+  & { updateSRVResourceRecord: (
+    { __typename?: 'Zone' }
+    & Pick<Zone, 'id'>
+    & { resourceRecords: Array<(
+      { __typename?: 'ResourceRecord' }
+      & Pick<ResourceRecord, 'id' | 'ttl' | 'type' | 'host' | 'data'>
+    )> }
+  ) }
+);
+
 export type UpdateResourceRecordMutationVariables = {
   resourceRecordId: Scalars['ID'],
   input: ValueResourceRecordInput
@@ -655,23 +727,6 @@ export type UpdateResourceRecordMutation = (
     & { resourceRecords: Array<(
       { __typename?: 'ResourceRecord' }
       & Pick<ResourceRecord, 'host' | 'id' | 'ttl' | 'data'>
-    )> }
-  ) }
-);
-
-export type ZoneQueryVariables = {
-  zoneId: Scalars['String']
-};
-
-
-export type ZoneQuery = (
-  { __typename?: 'Query' }
-  & { zone: (
-    { __typename?: 'Zone' }
-    & Pick<Zone, 'id' | 'domainName' | 'userPermissions'>
-    & { resourceRecords: Array<(
-      { __typename?: 'ResourceRecord' }
-      & Pick<ResourceRecord, 'id' | 'ttl' | 'host' | 'data' | 'type'>
     )> }
   ) }
 );
@@ -704,6 +759,63 @@ export type ZonesQuery = (
   )> }
 );
 
+export type AcmeQueryVariables = {
+  acmeId: Scalars['String']
+};
+
+
+export type AcmeQuery = (
+  { __typename?: 'Query' }
+  & { ACME: (
+    { __typename?: 'ACME' }
+    & Pick<Acme, 'id' | 'name' | 'contactEmail'>
+    & { domains: Array<(
+      { __typename?: 'ACMEDomain' }
+      & Pick<AcmeDomain, 'id' | 'domains'>
+      & { zone: (
+        { __typename?: 'Zone' }
+        & Pick<Zone, 'id' | 'domainName'>
+      ) }
+    )> }
+  ) }
+);
+
+export type AcmEsQueryVariables = {};
+
+
+export type AcmEsQuery = (
+  { __typename?: 'Query' }
+  & { currentUser: Maybe<(
+    { __typename?: 'CurrentUser' }
+    & Pick<CurrentUser, 'id'>
+    & { ACMEs: Array<(
+      { __typename?: 'ACME' }
+      & Pick<Acme, 'id' | 'name' | 'contactEmail'>
+      & { domains: Array<(
+        { __typename?: 'ACMEDomain' }
+        & Pick<AcmeDomain, 'domains'>
+      )> }
+    )> }
+  )> }
+);
+
+export type CreateAcmeMutationVariables = {
+  input: AcmeInput
+};
+
+
+export type CreateAcmeMutation = (
+  { __typename?: 'Mutation' }
+  & { createACME: (
+    { __typename?: 'CurrentUser' }
+    & Pick<CurrentUser, 'id'>
+    & { ACMEs: Array<(
+      { __typename?: 'ACME' }
+      & Pick<Acme, 'id' | 'name' | 'contactEmail'>
+    )> }
+  ) }
+);
+
 export type InitialConfigurationMutationVariables = {
   userInput: UserInput
 };
@@ -714,6 +826,26 @@ export type InitialConfigurationMutation = (
   & { initialConfiguration: (
     { __typename?: 'Configuration' }
     & Pick<Configuration, 'id'>
+  ) }
+);
+
+export type ZoneQueryVariables = {
+  zoneId: Scalars['String']
+};
+
+
+export type ZoneQuery = (
+  { __typename?: 'Query' }
+  & { zone: (
+    { __typename?: 'Zone' }
+    & Pick<Zone, 'id' | 'domainName' | 'userPermissions'>
+    & { resourceRecords: Array<(
+      { __typename?: 'ResourceRecord' }
+      & Pick<ResourceRecord, 'id' | 'ttl' | 'host' | 'data' | 'type'>
+    )>, zoneSettings: (
+      { __typename?: 'ZoneSettings' }
+      & Pick<ZoneSettings, 'id' | 'contact'>
+    ) }
   ) }
 );
 
@@ -729,7 +861,7 @@ export type ZoneSettingsQuery = (
     & Pick<Zone, 'id' | 'domainName'>
     & { zoneSettings: (
       { __typename?: 'ZoneSettings' }
-      & Pick<ZoneSettings, 'id'>
+      & Pick<ZoneSettings, 'id' | 'contact'>
     ) }
   ) }
 );

@@ -63,7 +63,7 @@ services:
     build: './DNSDL'
     image: 'dnsdl'
     environment:
-      SUBSCRIBER_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWJzY3JpYmVySWQiOiIwMjdhMTliOS1kZjgwLTQ0NzItOTRlZi01NWM0ZDkzY2U1YjYiLCJpYXQiOjE1NzI0NTIyMTB9.r4MmRGSbdc0-PKIszyBHqDX8k4JJMXMMy2jjKPVXlRU
+      SUBSCRIBER_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWJzY3JpYmVySWQiOiJiMzk2MDNmZi1hYmY3LTQ1ZmYtODNjYS00OGQxZmFkYmE0YTkiLCJpYXQiOjE1NzM3NTA4NTB9.IDWvf9xcp2Bf3X0ry9NRNnEualtVjfhdQ-mlTYkf444
       API_URL: 'http://api/graphql'
     volumes:
       - 'zoneFiles:/data/Zones'

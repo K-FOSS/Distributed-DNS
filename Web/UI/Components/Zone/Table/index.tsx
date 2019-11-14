@@ -2,11 +2,17 @@
 import MaterialTable from 'material-table';
 import { useSnackbar } from 'notistack';
 import React, { useCallback, useMemo } from 'react';
-import { ResourceRecordType, Permission } from 'UI/GraphQL/graphqlTypes.gen';
+import {
+  ResourceRecordType,
+  Permission,
+  ZoneQuery,
+  Zone,
+  ResourceRecord,
+  ValueRecordType,
+} from 'UI/GraphQL/graphqlTypes.gen';
 import { useCreateValueRrMutation } from '../GraphQL/CreateValueRR.gen';
 import { useDeleteResourceRecordMutation } from '../GraphQL/DeleteResourceRecord.gen';
 import { useUpdateResourceRecordMutation } from '../GraphQL/UpdateValueResourceRecord.gen';
-import { useZoneQuery } from '../GraphQL/Zone.gen';
 import { RREditComponent } from '../ResourceRecord/EditComponent';
 import { ResourceRecordSelect } from '../ResourceRecord/Select';
 import { RRData } from '../ResourceRecord';
@@ -15,28 +21,42 @@ import { Loader } from 'UI/Components/Styles/Loader';
 import { useImport } from 'UI/Components/Providers/ImportProvider';
 import { useCreateMxrrMutation } from '../GraphQL/CreateMXRR.gen';
 import { useUpdateMxResourceRecordMutation } from '../GraphQL/UpdateMXResourceRecord.gen';
+import { useCreateSrvrrMutation } from '../GraphQL/CreateSRVRR.gen';
+import { useUpdateSrvResourceRecordMutation } from '../GraphQL/UpdateSRVResourceRecord.gen';
+
+type ResourceRecordData = { __typename?: 'ResourceRecord' } & Pick<
+  ResourceRecord,
+  'id' | 'ttl' | 'host' | 'data' | 'type'
+>;
+
+type ZoneData =
+  | (Pick<Zone, 'id' | 'domainName' | 'userPermissions'> & {
+      resourceRecords: Array<ResourceRecordData>;
+    })
+  | undefined;
 
 interface ZoneTableProps {
-  zoneId: string;
+  zoneData: ZoneData;
 }
 
-export function ZoneTable({ zoneId }: ZoneTableProps): React.ReactElement {
-  const { data } = useZoneQuery({ variables: { zoneId } });
+export function ZoneTable({ zoneData }: ZoneTableProps): React.ReactElement {
   const [createValueRR] = useCreateValueRrMutation();
   const [createMXRR] = useCreateMxrrMutation();
+  const [createSRV] = useCreateSrvrrMutation();
   const [deleteResourceRecord] = useDeleteResourceRecordMutation();
   const [updateValueResourceRecord] = useUpdateResourceRecordMutation();
   const [updateMXResourceRecord] = useUpdateMxResourceRecordMutation();
+  const [updateSRVResourceRecord] = useUpdateSrvResourceRecordMutation();
   const { enqueueSnackbar } = useSnackbar();
 
   const userZonePermissions = useMemo(
-    () => (data ? data.zone.userPermissions : [Permission.Read]),
-    [data],
+    () => zoneData?.userPermissions || [Permission.Read],
+    [zoneData],
   );
 
   const TextField = useImport({
     imported: import(
-      'UI/Components/Styles/Inputs/TextField/BaseTextField/index',
+      'UI/Components/Styles/Inputs/TextField/BaseTextField/index'
     ),
     path: 'Components/Styles/Inputs/TextField/BaseTextField/index.tsx',
     // TODO: TextField Skeleton Loader
@@ -44,17 +64,22 @@ export function ZoneTable({ zoneId }: ZoneTableProps): React.ReactElement {
   });
 
   const handleAddResourceRecord = useCallback(
-    async ({ data, ttl, ...input }) => {
-      if (input.type === ResourceRecordType.Mx) {
-        console.log('MX Record');
+    async ({ data, ttl, ...input }: ResourceRecordData) => {
+      if (!zoneData?.id) {
+        enqueueSnackbar('Error occurred. INVALID ZONE ID', {
+          variant: 'error',
+        });
+        return;
+      }
 
+      if (input.type === ResourceRecordType.Mx) {
         const { preference, value } = JSON.parse(data);
         const response = await createMXRR({
           variables: {
-            zoneId,
+            zoneId: zoneData.id,
             input: {
               host: input.host,
-              ttl: ttl ? parseInt(ttl) : undefined,
+              ttl: ttl ? parseInt((ttl as unknown) as string) : undefined,
               preference: parseInt(preference),
               value,
             },
@@ -62,29 +87,62 @@ export function ZoneTable({ zoneId }: ZoneTableProps): React.ReactElement {
         });
 
         console.log(response, preference, value);
-      } else {
-        const response = await createValueRR({
+      } else if (input.type === ResourceRecordType.Srv) {
+        const { priority, weight, port, ...inputData } = JSON.parse(data);
+
+        const response = await createSRV({
           variables: {
-            zoneId,
+            zoneId: zoneData.id,
             input: {
-              ...input,
-              ttl: ttl ? parseInt(ttl) : undefined,
-              value: JSON.parse(data).value,
+              ...inputData,
+              host: input.host,
+              ttl: ttl ? parseInt((ttl as unknown) as string) : undefined,
+              priority: parseInt(priority),
+              weight: parseInt(weight),
+              port: parseInt(port),
             },
           },
         });
-        console.log(response);
+
+        if (response.data?.createSRVResourceRecord)
+          enqueueSnackbar('Successfully added SRV Record', {
+            variant: 'success',
+          });
+      } else {
+        const valueType =
+          ValueRecordType[
+            (input.type as unknown) as keyof typeof ValueRecordType
+          ];
+        if (valueType) {
+          console.log(ttl);
+          const response = await createValueRR({
+            variables: {
+              zoneId: zoneData.id,
+              input: {
+                ...input,
+                type: valueType,
+                ttl: ttl ? parseInt((ttl as unknown) as string) : undefined,
+                value: JSON.parse(data).value,
+              },
+            },
+          });
+          console.log(response);
+        }
       }
     },
-    [zoneId, createValueRR, createMXRR],
+    [zoneData, createValueRR, createMXRR],
   );
 
   const handleResourceRecordChanges = useCallback(
-    async ({ id, type, data, host, ttl }: RRData) => {
+    async ({ id, type, data, ...inputData }: RRData) => {
+      const input = Object.fromEntries(
+        Object.entries(inputData).filter(
+          ([key, value]) => key !== '__typename',
+        ),
+      );
+
       if (type === ResourceRecordType.Mx) {
         const { preference, value } = JSON.parse(data);
-
-        console.log(data);
 
         const response = await updateMXResourceRecord({
           variables: {
@@ -92,8 +150,7 @@ export function ZoneTable({ zoneId }: ZoneTableProps): React.ReactElement {
             input: {
               value,
               preference: parseInt(preference),
-              host,
-              ttl: ttl,
+              ...input,
             },
           },
         });
@@ -102,15 +159,32 @@ export function ZoneTable({ zoneId }: ZoneTableProps): React.ReactElement {
           enqueueSnackbar('Successfully updated resource record', {
             variant: 'success',
           });
+      } else if (type === ResourceRecordType.Srv) {
+        const { priority, weight, port, ...inputData } = JSON.parse(data);
+
+        const response = await updateSRVResourceRecord({
+          variables: {
+            resourceRecordId: id,
+            input: {
+              ...input,
+              host: input.host,
+              priority: parseInt(priority),
+              weight: parseInt(weight),
+              port: parseInt(port),
+            }
+          }
+        })
+
+        console.log('Change SRV', response);
       } else {
         const { value } = JSON.parse(data);
+
         const response = await updateValueResourceRecord({
           variables: {
             resourceRecordId: id,
             input: {
               value,
-              host,
-              ttl: ttl,
+              ...input,
             },
           },
         });
@@ -139,7 +213,7 @@ export function ZoneTable({ zoneId }: ZoneTableProps): React.ReactElement {
   return (
     <>
       <MaterialTable
-        title={data && data.zone ? data.zone.domainName : 'Zone RRs'}
+        title={zoneData?.domainName || 'Zone RRs'}
         style={{ margin: '1em' }}
         columns={[
           {
@@ -175,15 +249,13 @@ export function ZoneTable({ zoneId }: ZoneTableProps): React.ReactElement {
               <TextField
                 label='TTL'
                 variant='outlined'
-                onChange={({ target }) => onChange(parseInt(target.value))}
+                onChange={({ target }) => onChange(parseInt(target.value) || 0)}
                 {...props}
               />
             ),
           },
         ]}
-        data={
-          data && data.zone.resourceRecords ? data.zone.resourceRecords : []
-        }
+        data={zoneData?.resourceRecords || []}
         editable={{
           onRowAdd: userZonePermissions.includes(Permission.Write)
             ? handleAddResourceRecord

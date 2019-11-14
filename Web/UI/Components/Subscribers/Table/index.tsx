@@ -5,6 +5,7 @@ import { useSubscribersQuery } from '../GraphQL/Subscribers.gen';
 import { Subscriber } from 'UI/GraphQL/graphqlTypes.gen';
 import { useHistory } from 'react-router-dom';
 import { useCreateSubscriberMutation } from '../GraphQL/CreateSubscriber.gen';
+import { useSnackbar } from 'notistack';
 // import { useUpdateSubscriberMutation } from '../GraphQL/UpdateSubscriber.gen';
 
 type SubscriberData = Pick<Subscriber, 'id' | 'name'>;
@@ -17,6 +18,7 @@ type RowClick<T> = (
 
 export function SubscribersTable(): React.ReactElement {
   const history = useHistory();
+  const { enqueueSnackbar } = useSnackbar();
 
   const { data } = useSubscribersQuery();
 
@@ -26,8 +28,11 @@ export function SubscribersTable(): React.ReactElement {
   const handleAddSubscriber = useCallback(
     async (input: SubscriberData) => {
       const response = await createSubscriber({ variables: { input } });
-      console.log(response);
-      console.log(input);
+
+      if (response.data?.createSubscriber)
+        enqueueSnackbar('Successfully added subscriber', {
+          variant: 'success',
+        });
     },
     [createSubscriber],
   );

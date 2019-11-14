@@ -25,7 +25,7 @@ export const AppRoutes: AppRoute[] = [
     label: 'ACMEs',
     imported: {
       imported: import('UI/Routes/ACMEs/ACMEs'),
-      path: 'Routes/ACMEs/ACMEs.tsx',
+      path: 'Routes/ACMEs/ACMEs/index.tsx',
     },
     children: [
       {
@@ -33,7 +33,7 @@ export const AppRoutes: AppRoute[] = [
         label: 'ACME',
         imported: {
           imported: import('UI/Routes/ACMEs/ACME'),
-          path: 'Routes/ACMEs/ACME.tsx',
+          path: 'Routes/ACMEs/ACME/index.tsx',
         },
       },
     ],
@@ -51,7 +51,7 @@ export const AppRoutes: AppRoute[] = [
         label: 'Zone',
         imported: {
           imported: import('UI/Routes/Zones/Zone'),
-          path: 'Routes/Zones/Zone.tsx',
+          path: 'Routes/Zones/Zone/index.tsx',
         },
         children: [
           {
