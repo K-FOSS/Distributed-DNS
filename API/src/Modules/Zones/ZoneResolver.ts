@@ -8,6 +8,7 @@ import {
   Ctx,
   FieldResolver,
   Root,
+  ID,
 } from 'type-graphql';
 import { Zone } from './ZoneModel';
 import { ZoneInput } from './ZoneInput';
@@ -19,6 +20,8 @@ import { ResourceRecordType } from '../ResourceRecords/ResourceRecordTypes';
 import { ResourceRecordFilter } from './ResourceRecordFilter';
 import { ZoneSettings } from './ZoneSettingsModel';
 import { Permission } from '../Permission/Permission';
+import { ZoneUserInput } from './ZoneSettingsInput';
+import { ApolloError } from 'apollo-server-koa';
 
 @Resolver(() => Zone)
 export class ZoneResolver {
@@ -57,6 +60,32 @@ export class ZoneResolver {
     return zone;
   }
  */
+
+  @Authorized()
+  @Mutation(() => Zone)
+  async addZoneUser(@Arg('zoneId', () => ID) zoneId: string, @Arg('input') { userId, accessPermission }: ZoneUserInput, @Ctx() { currentUser }: AuthContext): Promise<Zone> {
+    const zone = await Zone.getUserZone(currentUser, zoneId, Permission.ADMIN, { relations: ['accessPermissions'] })
+    
+    const existingPermissions = zone.accessPermissions.find(({ userId: oldUserId }) => oldUserId === userId)
+    if (existingPermissions) throw new ApolloError('USER ALREADY IN ZONE')
+
+    let newUserAccessPermission: Permission[]
+    
+    if (accessPermission === Permission.ADMIN) newUserAccessPermission = [Permission.READ, Permission.WRITE, Permission.ADMIN]
+    else if (accessPermission === Permission.WRITE) newUserAccessPermission = [Permission.READ, Permission.WRITE]
+    else if (accessPermission === Permission.READ) newUserAccessPermission = [Permission.READ]
+
+    const userZonePermissions = ZonePermissions.create({
+      userId: userId,
+      accessPermissions: newUserAccessPermission!,
+    })
+
+    zone.accessPermissions.push(userZonePermissions)
+
+    await zone.save()
+    
+    return zone;
+  }
 
   @Authorized([UserRole.ADMIN])
   @Mutation(() => Zone)
@@ -138,5 +167,21 @@ export class ZoneResolver {
     });
 
     return userPermission.accessPermissions;
+  }
+
+  @Authorized()
+  @FieldResolver(() => [ZonePermissions])
+  async accessPermissions(
+    @Root() zone: Zone,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<ZonePermissions[]> {
+    await zone.checkUserAuthorization(
+      currentUser,
+      Permission.ADMIN,
+    );
+
+    return ZonePermissions.find({
+      where: { zoneId: zone.id },
+    });
   }
 }

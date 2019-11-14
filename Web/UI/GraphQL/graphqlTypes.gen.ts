@@ -133,6 +133,7 @@ export type Mutation = {
   createSubscriber: CurrentUser,
   updateSubscriber: Subscriber,
   createUtility: Utility,
+  addZoneUser: Zone,
   createZone: Zone,
 };
 
@@ -238,6 +239,12 @@ export type MutationUpdateSubscriberArgs = {
 
 export type MutationCreateUtilityArgs = {
   input: CreateUtilityInput
+};
+
+
+export type MutationAddZoneUserArgs = {
+  input: ZoneUserInput,
+  zoneId: Scalars['ID']
 };
 
 
@@ -476,6 +483,15 @@ export type ZoneSettings = {
    __typename?: 'ZoneSettings',
   id: Scalars['ID'],
   contact: Scalars['String'],
+};
+
+export type ZoneSettingsInput = {
+  stuff: Scalars['String'],
+};
+
+export type ZoneUserInput = {
+  userId: Scalars['ID'],
+  accessPermission: Permission,
 };
 
 export type CurrentUserFragment = (
@@ -849,6 +865,28 @@ export type ZoneQuery = (
   ) }
 );
 
+export type AddZoneUserMutationVariables = {
+  zoneId: Scalars['ID'],
+  input: ZoneUserInput
+};
+
+
+export type AddZoneUserMutation = (
+  { __typename?: 'Mutation' }
+  & { addZoneUser: (
+    { __typename?: 'Zone' }
+    & Pick<Zone, 'id'>
+    & { accessPermissions: Array<(
+      { __typename?: 'ZonePermissions' }
+      & Pick<ZonePermissions, 'id' | 'accessPermissions'>
+      & { user: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'username'>
+      ) }
+    )> }
+  ) }
+);
+
 export type ZoneSettingsQueryVariables = {
   zoneId: Scalars['String']
 };
@@ -859,7 +897,14 @@ export type ZoneSettingsQuery = (
   & { zone: (
     { __typename?: 'Zone' }
     & Pick<Zone, 'id' | 'domainName'>
-    & { zoneSettings: (
+    & { accessPermissions: Array<(
+      { __typename?: 'ZonePermissions' }
+      & Pick<ZonePermissions, 'id' | 'accessPermissions'>
+      & { user: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'username'>
+      ) }
+    )>, zoneSettings: (
       { __typename?: 'ZoneSettings' }
       & Pick<ZoneSettings, 'id' | 'contact'>
     ) }

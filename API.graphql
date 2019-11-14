@@ -122,6 +122,7 @@ type Mutation {
   createSubscriber(input: SubscriberInput!): CurrentUser!
   updateSubscriber(input: UpdateSubscriberInput!, subscriberId: ID!): Subscriber!
   createUtility(input: CreateUtilityInput!): Utility!
+  addZoneUser(input: ZoneUserInput!, zoneId: ID!): Zone!
   createZone(input: ZoneInput!): Zone!
 }
 
@@ -307,4 +308,13 @@ type ZonePermissions {
 type ZoneSettings {
   id: ID!
   contact: String!
+}
+
+input ZoneSettingsInput {
+  stuff: String!
+}
+
+input ZoneUserInput {
+  userId: ID!
+  accessPermission: Permission!
 }

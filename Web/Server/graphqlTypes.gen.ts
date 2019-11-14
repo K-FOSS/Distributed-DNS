@@ -133,6 +133,7 @@ export type Mutation = {
   createSubscriber: CurrentUser,
   updateSubscriber: Subscriber,
   createUtility: Utility,
+  addZoneUser: Zone,
   createZone: Zone,
 };
 
@@ -238,6 +239,12 @@ export type MutationUpdateSubscriberArgs = {
 
 export type MutationCreateUtilityArgs = {
   input: CreateUtilityInput
+};
+
+
+export type MutationAddZoneUserArgs = {
+  input: ZoneUserInput,
+  zoneId: Scalars['ID']
 };
 
 
@@ -476,6 +483,15 @@ export type ZoneSettings = {
    __typename?: 'ZoneSettings',
   id: Scalars['ID'],
   contact: Scalars['String'],
+};
+
+export type ZoneSettingsInput = {
+  stuff: Scalars['String'],
+};
+
+export type ZoneUserInput = {
+  userId: Scalars['ID'],
+  accessPermission: Permission,
 };
 
 export type HasSetupQueryVariables = {};

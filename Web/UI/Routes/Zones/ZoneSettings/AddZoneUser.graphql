@@ -1,24 +1,18 @@
-query ZoneSettings($zoneId: String!) {
-  zone(zoneId: $zoneId) {
+mutation AddZoneUser($zoneId: ID!, $input: ZoneUserInput!) {
+  addZoneUser(zoneId: $zoneId, input: $input) {
     id
-    domainName
-
+    
     accessPermissions {
       id
       
       user {
-      	id
+        id
         
         username
         
       }
       
       accessPermissions
-    }
-
-    zoneSettings {
-      id
-      contact
     }
   }
 }
