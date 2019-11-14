@@ -80,7 +80,9 @@ export async function uiServer(
 
   const preRender = async () => {
     try {
-      await prepass(AppComponent);
+      prepass(AppComponent).catch(() => {
+        
+      });
     } catch {
       console.log('Prerender Error');
     }

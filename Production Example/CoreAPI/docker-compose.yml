@@ -11,8 +11,8 @@ services:
       - Frontend
     ports:
       - 80:80
-      - 443:443
-      - 443:443/udp
+      - 443:442
+      - 443:442/udp
     volumes:
       - Caddy_Config:/etc/Caddy
 
