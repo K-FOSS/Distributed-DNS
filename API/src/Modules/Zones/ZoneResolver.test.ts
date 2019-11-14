@@ -135,7 +135,7 @@ describe('Zone Model', () => {
       `mutation {
         createZone(
           input: {
-            zoneOwnerUserId: "${user.id}"
+            zoneUserIds: ["${user.id}"],
             domainName: "example.com",
             contact: "me.example.com.",
             ns: "ns1.kristianjones.dev."
@@ -148,7 +148,6 @@ describe('Zone Model', () => {
     `,
       await getTestContext(user.id),
     );
-
     expect(createZoneResponse.data.createZone.domainName).toBe('example.com');
     expect(createZoneResponse.errors).toBeUndefined();
     expect(

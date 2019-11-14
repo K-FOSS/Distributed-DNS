@@ -36,7 +36,7 @@ export function ZoneTable({ zoneId }: ZoneTableProps): React.ReactElement {
 
   const TextField = useImport({
     imported: import(
-      'UI/Components/Styles/Inputs/TextField/BaseTextField/index'
+      'UI/Components/Styles/Inputs/TextField/BaseTextField/index',
     ),
     path: 'Components/Styles/Inputs/TextField/BaseTextField/index.tsx',
     // TODO: TextField Skeleton Loader
@@ -61,7 +61,7 @@ export function ZoneTable({ zoneId }: ZoneTableProps): React.ReactElement {
           },
         });
 
-        console.log(preference, value);
+        console.log(response, preference, value);
       } else {
         const response = await createValueRR({
           variables: {
