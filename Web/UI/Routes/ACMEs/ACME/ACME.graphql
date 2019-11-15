@@ -8,6 +8,8 @@ query ACME($acmeId: String!) {
       id
 
       createdAt
+
+      certificate
     }
     
     domains {

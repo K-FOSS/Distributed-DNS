@@ -1,5 +1,4 @@
 version: '3.7'
-
 services:
   NS1:
     image: resystit/bind9:latest
@@ -11,13 +10,12 @@ services:
     volumes:
       - zoneFiles:/Zones
       - bindConfig:/etc/bind/
-
+  
   DNSDL:
-    build: '../../DNSDL'
-    image: 'dnsdl'
+    image: docker.pkg.github.com/kristianfjones/distributed-dns/distributed-dns-dnsdl:dnsdl
     environment:
-      SUBSCRIBER_TOKEN: ABCDEFG
-      API_URL: 'https://distributed-dns.kristianjones.dev/graphql'
+      SUBSCRIBER_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWJzY3JpYmVySWQiOiJiMzk2MDNmZi1hYmY3LTQ1ZmYtODNjYS00OGQxZmFkYmE0YTkiLCJpYXQiOjE1NzM4Mzk1MDR9.RrAJINHIvwYMcw4hWx1KNWI3SiwfpVU7veo3JIFhdLY
+      API_URL: http://192.168.254.179/graphql
     volumes:
       - zoneFiles:/data/Zones
       - bindConfig:/data/BIND

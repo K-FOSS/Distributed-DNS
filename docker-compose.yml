@@ -15,7 +15,7 @@ services:
     environment:
       DB_HOST: database
       DB_PASSWORD: pgpass
-      NODE_ENV: production
+      NODE_ENV: development
     volumes:
       - './API:/development'
       - './API.graphql:/API.graphql'

@@ -48,7 +48,6 @@ export class Subscriber extends BaseEntity {
   )
   accessPermissions: SubscriberAccess[];
 
-  @Field(() => String)
   subscriberToken(): string {
     const payload: SubscriberTokenPayload = { subscriberId: this.id };
     return sign(payload, config.secretKey);

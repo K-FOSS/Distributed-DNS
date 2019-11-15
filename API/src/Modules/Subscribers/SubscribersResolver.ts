@@ -95,6 +95,20 @@ export class SubscribersResolver {
     return subscriber;
   }
 
+  @Authorized()
+  @Mutation(() => String)
+  async createSubscriberToken(
+    @Arg('subscriberId', () => ID) subscriberId: string,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<string> {
+    const subscriber = await Subscriber.getSubscriber(
+      subscriberId,
+      currentUser,
+    );
+
+    return subscriber.subscriberToken();
+  }
+
   @Subscription({
     // @ts-ignore
     subscribe: async (stuff, args) =>

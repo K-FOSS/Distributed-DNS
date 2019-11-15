@@ -9,6 +9,8 @@ export async function performAuthorizations(
   authorizations: Authorization[],
   domains: ACMEDomain[],
 ): Promise<void> {
+  const tempRecords: ResourceRecord[] = [];
+
   for (const Auth of authorizations) {
     const resourceRecord = ResourceRecord.create({
       type: ResourceRecordType.TXT,
@@ -44,6 +46,7 @@ export async function performAuthorizations(
       resourceRecord.data = JSON.stringify({ value: keyAuthorization });
       resourceRecord.host = host;
       domain.zone.resourceRecords.push(resourceRecord);
+      tempRecords.push(resourceRecord);
       await domain.zone.save();
 
       /* Notify ACME provider that challenge is satisfied */
@@ -54,13 +57,13 @@ export async function performAuthorizations(
     } catch (error) {
       console.error(`Error occurred in ACME DNS Challenge`);
       console.error(error);
-    } finally {
-      try {
-        await resourceRecord.reload();
-        await resourceRecord.remove();
-      } catch {
-        console.error('Error during removal of ACME Challenge RR');
-      }
     }
+  }
+
+  try {
+    console.log('Removing temp RRs');
+    await ResourceRecord.remove(tempRecords);
+  } catch {
+    console.error('Error during removal of ACME Challenge RRs');
   }
 }

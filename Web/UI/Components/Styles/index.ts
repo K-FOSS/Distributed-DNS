@@ -42,8 +42,9 @@ export const useStyles = makeStyles((theme: Theme) =>
       marginRight: '1rem',
     },
     pageSectionRoot: {
-      margin: '1em 1em 0 1em',
+      background: '#eee',
       display: 'flex',
+      minHeight: '100%',
       flexDirection: 'column',
       alignItems: 'center',
     },
@@ -51,7 +52,6 @@ export const useStyles = makeStyles((theme: Theme) =>
       maxWidth: '600px',
     },
     pageRoot: {
-      background: '#eee',
       width: '100%',
       height: '100%',
     },

@@ -19,7 +19,7 @@ import { UserRole } from '../Users/UserRole';
 import { ResourceRecordType } from '../ResourceRecords/ResourceRecordTypes';
 import { ResourceRecordFilter } from './ResourceRecordFilter';
 import { ZoneSettings } from './ZoneSettingsModel';
-import { Permission } from '../Permission/Permission';
+import { Permission, getPermission } from '../Permission/Permission';
 import { ZoneUserInput } from './ZoneSettingsInput';
 import { ApolloError } from 'apollo-server-koa';
 
@@ -63,54 +63,75 @@ export class ZoneResolver {
 
   @Authorized()
   @Mutation(() => Zone)
-  async addZoneUser(@Arg('zoneId', () => ID) zoneId: string, @Arg('input') { userId, accessPermission }: ZoneUserInput, @Ctx() { currentUser }: AuthContext): Promise<Zone> {
-    const zone = await Zone.getUserZone(currentUser, zoneId, Permission.ADMIN, { relations: ['accessPermissions'] })
-    
-    const existingPermissions = zone.accessPermissions.find(({ userId: oldUserId }) => oldUserId === userId)
-    if (existingPermissions) throw new ApolloError('USER ALREADY IN ZONE')
+  async addZoneUser(
+    @Arg('zoneId', () => ID) zoneId: string,
+    @Arg('input') { userId, accessPermission }: ZoneUserInput,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Zone> {
+    const zone = await Zone.getUserZone(currentUser, zoneId, Permission.ADMIN, {
+      relations: ['accessPermissions'],
+    });
 
-    let newUserAccessPermission: Permission[]
-    
-    if (accessPermission === Permission.ADMIN) newUserAccessPermission = [Permission.READ, Permission.WRITE, Permission.ADMIN]
-    else if (accessPermission === Permission.WRITE) newUserAccessPermission = [Permission.READ, Permission.WRITE]
-    else if (accessPermission === Permission.READ) newUserAccessPermission = [Permission.READ]
+    const existingPermissions = zone.accessPermissions.find(
+      ({ userId: oldUserId }) => oldUserId === userId,
+    );
+    if (existingPermissions) throw new ApolloError('USER ALREADY IN ZONE');
+
+    let newUserAccessPermission: Permission[];
+
+    if (accessPermission === Permission.ADMIN)
+      newUserAccessPermission = [
+        Permission.READ,
+        Permission.WRITE,
+        Permission.ADMIN,
+      ];
+    else if (accessPermission === Permission.WRITE)
+      newUserAccessPermission = [Permission.READ, Permission.WRITE];
+    else if (accessPermission === Permission.READ)
+      newUserAccessPermission = [Permission.READ];
 
     const userZonePermissions = ZonePermissions.create({
       userId: userId,
       accessPermissions: newUserAccessPermission!,
-    })
+    });
 
-    zone.accessPermissions.push(userZonePermissions)
+    zone.accessPermissions.push(userZonePermissions);
 
-    await zone.save()
-    
+    await zone.save();
+
     return zone;
   }
 
   @Authorized()
   @Mutation(() => Zone)
-  async removeZoneUser(@Arg('zoneId', () => ID) zoneId: string, @Arg('zoneUserId', () => ID) zoneUserId: string, @Ctx() { currentUser }: AuthContext): Promise<Zone> {
-    if (currentUser.id === zoneUserId) throw new ApolloError(`You can't remove yourself silly`, 'SILLY_HUMAN')
-    
-    const zone = await Zone.getUserZone(currentUser, zoneId, Permission.ADMIN, { relations: ['accessPermissions'] })
-    
-    const existingPermissions = zone.accessPermissions.find(({ userId: oldUserId }) => oldUserId === zoneUserId)
-    if (!existingPermissions) throw new ApolloError('USER IS NOT IN ZONE')
+  async removeZoneUser(
+    @Arg('zoneId', () => ID) zoneId: string,
+    @Arg('zoneUserId', () => ID) zoneUserId: string,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Zone> {
+    if (currentUser.id === zoneUserId)
+      throw new ApolloError(`You can't remove yourself silly`, 'SILLY_HUMAN');
 
-    await existingPermissions.remove()
+    const zone = await Zone.getUserZone(currentUser, zoneId, Permission.ADMIN, {
+      relations: ['accessPermissions'],
+    });
 
-    return zone
+    const existingPermissions = zone.accessPermissions.find(
+      ({ userId: oldUserId }) => oldUserId === zoneUserId,
+    );
+    if (!existingPermissions) throw new ApolloError('USER IS NOT IN ZONE');
+
+    await existingPermissions.remove();
+
+    return zone;
   }
 
   @Authorized([UserRole.ADMIN])
   @Mutation(() => Zone)
-  async createZone(@Arg('input')
-  {
-    zoneUserIds,
-    ns,
-    contact,
-    ...zoneInput
-  }: ZoneInput): Promise<Zone> {
+  async createZone(
+    @Arg('input')
+    { zoneUserIds, ns, contact, ...zoneInput }: ZoneInput,
+  ): Promise<Zone> {
     const zone = Zone.create(zoneInput);
     const zoneSettings = ZoneSettings.create({ contact });
     const zonePermissions = zoneUserIds.map((userId) =>
@@ -161,14 +182,11 @@ export class ZoneResolver {
       where: { zoneId: id, userId: currentUser.id },
     });
 
-    if (userPermission.accessPermissions.includes(Permission.ADMIN))
-      return Permission.ADMIN;
-    else if (userPermission.accessPermissions.includes(Permission.WRITE))
-      return Permission.WRITE;
-    else if (userPermission.accessPermissions.includes(Permission.READ))
-      return Permission.READ;
-
-    throw new Error();
+    try {
+      return getPermission(userPermission.accessPermissions);
+    } catch {
+      throw new ApolloError('PERMISSIONS ERROR');
+    }
   }
 
   @Authorized()
@@ -190,10 +208,7 @@ export class ZoneResolver {
     @Root() zone: Zone,
     @Ctx() { currentUser }: AuthContext,
   ): Promise<ZonePermissions[]> {
-    await zone.checkUserAuthorization(
-      currentUser,
-      Permission.ADMIN,
-    );
+    await zone.checkUserAuthorization(currentUser, Permission.ADMIN);
 
     return ZonePermissions.find({
       where: { zoneId: zone.id },

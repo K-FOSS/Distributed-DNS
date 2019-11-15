@@ -10,6 +10,7 @@ type ACME {
   domains: [ACMEDomain!]!
   contactEmail: String!
   ACMEToken: String!
+  acmeUserPermission: Permission!
 }
 
 type ACMEAccount {
@@ -111,6 +112,7 @@ type Mutation {
   updateACME(input: ACMEUpdateInput!, acmeId: String!): ACME!
   addACMEDomain(input: [ACMEDomainInput!]!, acmeId: String!): ACME!
   generateCertificate(acmeId: String!): ACME!
+  revokeCertificate(certificateId: ID!): ACME!
   login(input: LoginInput!): AuthResponse!
   register(input: UserInput!): RegisterResponse!
   resetPasswordReset(input: RequestPasswordResetInput!): Boolean!
@@ -124,6 +126,7 @@ type Mutation {
   updateSRVResourceRecord(input: SRVResourceRecordInput!, resourceRecordId: ID!): Zone!
   createSubscriber(input: SubscriberInput!): CurrentUser!
   updateSubscriber(input: UpdateSubscriberInput!, subscriberId: ID!): Subscriber!
+  createSubscriberToken(subscriberId: ID!): String!
   createUtility(input: CreateUtilityInput!): Utility!
   addZoneUser(input: ZoneUserInput!, zoneId: ID!): Zone!
   removeZoneUser(zoneUserId: ID!, zoneId: ID!): Zone!
@@ -223,7 +226,6 @@ type Subscriber {
   name: String!
   subscribedZones: [Zone!]!
   accessPermissions: [SubscriberAccess!]!
-  subscriberToken: String!
 }
 
 type SubscriberAccess {

@@ -9,12 +9,14 @@ import {
   Root,
   Subscription,
   Query,
+  ID,
+  ForbiddenError,
 } from 'type-graphql';
 import { ACME } from './ACMEModel';
 import { CurrentUser } from '../Auth/CurrentUser';
 import { AuthContext } from 'API/Context';
 import { ACMEAccess } from './ACMEAccessModel';
-import { Permission } from '../Permission/Permission';
+import { Permission, getPermission } from '../Permission/Permission';
 import { ACMEAccount } from './ACMEAccountModel';
 import { ACMEDomainInput } from './ACMEDomainInput';
 import { ACMEDomain } from './ACMEDomainModel';
@@ -140,6 +142,27 @@ export class ACMEResolver {
     return acme;
   }
 
+  @Authorized()
+  @Mutation(() => ACME)
+  async revokeCertificate(
+    @Arg('certificateId', () => ID) certificateId: string,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<ACME> {
+    const certificate = await Certificate.findOneOrFail({
+      where: {
+        id: certificateId,
+      },
+      relations: ['acme'],
+    });
+
+    await certificate.acme.checkUserAuthorization(
+      currentUser,
+      Permission.ADMIN,
+    );
+
+    return certificate.acme;
+  }
+
   @Subscription({
     // @ts-ignore
     subscribe: async (stuff, args) => acmePubSub.subscribe(args.ACMEToken),
@@ -158,6 +181,26 @@ export class ACMEResolver {
 
   @FieldResolver(() => [Certificate])
   async certificates(@Root() acme: ACME): Promise<Certificate[]> {
-    return Certificate.find({ where: { acmeId: acme.id } });
+    return Certificate.find({
+      where: { acmeId: acme.id },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  @Authorized()
+  @FieldResolver(() => Permission)
+  async acmeUserPermission(
+    @Root() { id }: ACME,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Permission> {
+    const acmeUserAccess = await ACMEAccess.findOne({
+      where: {
+        userId: currentUser.id,
+        acmeId: id,
+      },
+    });
+    if (!acmeUserAccess) throw new ForbiddenError();
+
+    return getPermission(acmeUserAccess.permission);
   }
 }

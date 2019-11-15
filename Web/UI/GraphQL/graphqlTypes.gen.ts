@@ -18,6 +18,7 @@ export type Acme = {
   domains: Array<AcmeDomain>,
   contactEmail: Scalars['String'],
   ACMEToken: Scalars['String'],
+  acmeUserPermission: Permission,
 };
 
 export type AcmeAccount = {
@@ -122,6 +123,7 @@ export type Mutation = {
   updateACME: Acme,
   addACMEDomain: Acme,
   generateCertificate: Acme,
+  revokeCertificate: Acme,
   login: AuthResponse,
   register: RegisterResponse,
   resetPasswordReset: Scalars['Boolean'],
@@ -135,6 +137,7 @@ export type Mutation = {
   updateSRVResourceRecord: Zone,
   createSubscriber: CurrentUser,
   updateSubscriber: Subscriber,
+  createSubscriberToken: Scalars['String'],
   createUtility: Utility,
   addZoneUser: Zone,
   removeZoneUser: Zone,
@@ -166,6 +169,11 @@ export type MutationAddAcmeDomainArgs = {
 
 export type MutationGenerateCertificateArgs = {
   acmeId: Scalars['String']
+};
+
+
+export type MutationRevokeCertificateArgs = {
+  certificateId: Scalars['ID']
 };
 
 
@@ -237,6 +245,11 @@ export type MutationCreateSubscriberArgs = {
 
 export type MutationUpdateSubscriberArgs = {
   input: UpdateSubscriberInput,
+  subscriberId: Scalars['ID']
+};
+
+
+export type MutationCreateSubscriberTokenArgs = {
   subscriberId: Scalars['ID']
 };
 
@@ -383,7 +396,6 @@ export type Subscriber = {
   name: Scalars['String'],
   subscribedZones: Array<Zone>,
   accessPermissions: Array<SubscriberAccess>,
-  subscriberToken: Scalars['String'],
 };
 
 export type SubscriberAccess = {
@@ -569,6 +581,16 @@ export type CreateSubscriberMutation = (
       & Pick<Subscriber, 'id' | 'name'>
     )> }
   ) }
+);
+
+export type CreateSubscriberTokenMutationVariables = {
+  subscriberId: Scalars['ID']
+};
+
+
+export type CreateSubscriberTokenMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'createSubscriberToken'>
 );
 
 export type SubscriberQueryVariables = {
@@ -797,7 +819,7 @@ export type AcmeQuery = (
     & Pick<Acme, 'id' | 'name' | 'contactEmail'>
     & { certificates: Array<(
       { __typename?: 'Certificate' }
-      & Pick<Certificate, 'id' | 'createdAt'>
+      & Pick<Certificate, 'id' | 'createdAt' | 'certificate'>
     )>, domains: Array<(
       { __typename?: 'ACMEDomain' }
       & Pick<AcmeDomain, 'id' | 'domains'>
@@ -840,10 +862,10 @@ export type GenerateCertificateMutation = (
   { __typename?: 'Mutation' }
   & { generateCertificate: (
     { __typename?: 'ACME' }
-    & Pick<Acme, 'id'>
+    & Pick<Acme, 'id' | 'name' | 'contactEmail'>
     & { certificates: Array<(
       { __typename?: 'Certificate' }
-      & Pick<Certificate, 'id' | 'createdAt'>
+      & Pick<Certificate, 'id' | 'createdAt' | 'certificate'>
     )>, domains: Array<(
       { __typename?: 'ACMEDomain' }
       & Pick<AcmeDomain, 'id' | 'domains'>

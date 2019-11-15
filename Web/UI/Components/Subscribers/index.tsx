@@ -9,6 +9,12 @@ import { useStyles } from '../Styles';
 import { PaperSection } from '../Styles/Section/PaperSection';
 import { useUpdateSubscriberMutation } from './GraphQL/UpdateSubscriber.gen';
 import { useSnackbar } from 'notistack';
+import Typography from '@material-ui/core/Typography';
+import TextField from '@material-ui/core/TextField';
+import { useCreateSubscriberTokenMutation } from './GraphQL/CreateSubscriberToken.gen';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { github } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { useConfig } from '../Providers/ConfigProvider';
 
 interface SubscriberPageProps {
   subscriberId: string;
@@ -17,12 +23,16 @@ interface SubscriberPageProps {
 export function SubscriberPage({
   subscriberId,
 }: SubscriberPageProps): React.ReactElement {
+  const { baseUrl } = useConfig()
   const classes = useStyles();
   const { data } = useSubscriberQuery({ variables: { subscriberId } });
   const [selectedZones, setSelectedZones] = useState<ZoneData[]>([]);
   const [updateSubscriber] = useUpdateSubscriberMutation();
+  const [createSubscriberToken] = useCreateSubscriberTokenMutation();
   const { enqueueSnackbar } = useSnackbar();
+  const [subscriberToken, setSubscriberToken] = useState<string>();
   const hasSet = useRef(false);
+  const tokenInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (hasSet.current === false && data) {
@@ -56,6 +66,72 @@ export function SubscriberPage({
       });
   }, [selectedZones, data, updateSubscriber, enqueueSnackbar, subscriberId]);
 
+  const handleGenerateConfiguration = useCallback(async () => {
+    const response = await createSubscriberToken({
+      variables: {
+        subscriberId,
+      },
+    });
+
+    if (response.data?.createSubscriberToken) {
+      enqueueSnackbar('Successfully created configuration', {
+        variant: 'success',
+      });
+      setSubscriberToken(response.data.createSubscriberToken as string);
+    }
+  }, [
+    subscriberId,
+    createSubscriberToken,
+    enqueueSnackbar,
+    setSubscriberToken,
+  ]);
+
+  const handleCopyTokenClick = useCallback(
+    async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      if (!tokenInputRef.current) {
+        enqueueSnackbar('Error occured during copy', { variant: 'error' });
+        return;
+      }
+
+      tokenInputRef.current.select();
+      document.execCommand('copy');
+      e.currentTarget.focus();
+
+      enqueueSnackbar('Successfully copied token', { variant: 'success' });
+    },
+    [tokenInputRef, enqueueSnackbar],
+  );
+
+  const composeFile = `version: '3.7'
+services:
+  NS1:
+    image: resystit/bind9:latest
+    restart: unless-stopped
+    container_name: 'NS'
+    ports:
+      - 53:53/tcp
+      - 53:53/udp
+    volumes:
+      - zoneFiles:/Zones
+      - bindConfig:/etc/bind/
+  
+  DNSDL:
+    image: docker.pkg.github.com/kristianfjones/distributed-dns/distributed-dns-dnsdl:dnsdl
+    environment:
+      SUBSCRIBER_TOKEN: ${subscriberToken}
+      API_URL: ${baseUrl}/graphql
+    volumes:
+      - zoneFiles:/data/Zones
+      - bindConfig:/data/BIND
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  zoneFiles:
+    driver: local
+
+  bindConfig:
+    driver: local`;
+
   return (
     <>
       <Header
@@ -77,6 +153,40 @@ export function SubscriberPage({
               color='primary'
               variant='contained'
             />
+          </PaperSection>
+
+          <PaperSection>
+            {subscriberToken ? (
+              <>
+                <Typography variant='h4'>Subscriber Configuration</Typography>
+                <Typography variant='body1'>
+                  Docker-compose service example
+                </Typography>
+                <SyntaxHighlighter language='yaml' style={github}>
+                  {composeFile}
+                </SyntaxHighlighter>
+                <TextField
+                  label='Subscriber Token'
+                  inputRef={tokenInputRef}
+                  value={subscriberToken}
+                  style={{ marginTop: '1em' }}
+                />
+                <BaseButton
+                  label='Copy Token'
+                  onClick={handleCopyTokenClick}
+                  style={{ marginTop: '1em' }}
+                  color='primary'
+                  variant='contained'
+                />
+              </>
+            ) : (
+              <BaseButton
+                label='Generate Config'
+                onClick={handleGenerateConfiguration}
+                color='primary'
+                variant='contained'
+              />
+            )}
           </PaperSection>
         </PageSectionRoot>
       </div>
