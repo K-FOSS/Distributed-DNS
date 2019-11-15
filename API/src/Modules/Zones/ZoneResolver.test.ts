@@ -4,10 +4,11 @@ import { User } from '../Users/UserModel';
 import { UserRole } from '../Users/UserRole';
 import { execute } from 'API/Library/execute';
 import { getTestContext } from 'API/Context';
-import { ZonePermissions, ZoneAccessPermission } from './ZonePermissionModel';
+import { ZonePermissions } from './ZonePermissionModel';
 import { Zone } from './ZoneModel';
 import { ResourceRecord } from '../ResourceRecords/ResourceRecordModel';
 import { ResourceRecordType } from '../ResourceRecords/ResourceRecordTypes';
+import { Permission } from '../Permission/Permission';
 
 describe('Zone Model', () => {
   test('Zones Query', async () => {
@@ -18,7 +19,7 @@ describe('Zone Model', () => {
     await factory.for(ZonePermissions).create(1, {
       zoneId: zone.id,
       userId: user.id,
-      accessPermissions: [ZoneAccessPermission.READ],
+      accessPermissions: [Permission.READ],
     });
 
     await factory
@@ -55,7 +56,7 @@ describe('Zone Model', () => {
       await factory.for(ZonePermissions).create(1, {
         zoneId: zone.id,
         userId: user.id,
-        accessPermissions: [ZoneAccessPermission.READ],
+        accessPermissions: [Permission.READ],
       });
 
       const resourceRecord = await factory
@@ -94,7 +95,7 @@ describe('Zone Model', () => {
       await factory.for(ZonePermissions).create(1, {
         zoneId: zone.id,
         userId: authorizedUser.id,
-        accessPermissions: [ZoneAccessPermission.READ],
+        accessPermissions: [Permission.READ],
       });
 
       await factory
@@ -134,7 +135,7 @@ describe('Zone Model', () => {
       `mutation {
         createZone(
           input: {
-            zoneOwnerUserId: "${user.id}"
+            zoneUserIds: ["${user.id}"],
             domainName: "example.com",
             contact: "me.example.com.",
             ns: "ns1.kristianjones.dev."
@@ -147,14 +148,13 @@ describe('Zone Model', () => {
     `,
       await getTestContext(user.id),
     );
-
     expect(createZoneResponse.data.createZone.domainName).toBe('example.com');
     expect(createZoneResponse.errors).toBeUndefined();
     expect(
       Zone.getUserZone(
         user,
         createZoneResponse.data.createZone.id,
-        ZoneAccessPermission.ADMIN,
+        Permission.ADMIN,
       ),
     ).resolves.not.toThrow();
   });

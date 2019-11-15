@@ -1,5 +1,13 @@
 *:80 {
   tls off
-  proxy /graphql http://api
+  proxy /graphql http://api {
+    websocket
+  }
   proxy / http://localhost:81
+}
+
+https://test1.lab.nslab.kristianjones.dev, https://nslab.kristianjones.xyz {
+  tls /SSL/certificate.pem /SSL/certificate.key
+
+  browse
 }

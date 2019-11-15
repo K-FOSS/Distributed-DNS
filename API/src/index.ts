@@ -11,6 +11,8 @@ async function startAPI(): Promise<void> {
   const server = new Koa();
   const serverRouter = new KoaRouter();
 
+  console.log('Starting API');
+
   const dbConnection = ensureDbConnection();
 
   const apiServer = new ApolloServer({
@@ -24,8 +26,11 @@ async function startAPI(): Promise<void> {
 
   server.use(serverRouter.routes()).use(serverRouter.allowedMethods());
   const httpServer = await server.listen(80);
+  apiServer.installSubscriptionHandlers(httpServer);
+
   await dbConnection;
-  console.log(httpServer.connections);
+
+  console.log('API running and good to go');
 }
 
 startAPI();

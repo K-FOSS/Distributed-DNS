@@ -21,28 +21,68 @@ export const AppRoutes: AppRoute[] = [
     },
   },
   {
-    path: 'Test',
-    label: 'Test',
+    path: 'ACMEs',
+    label: 'ACMEs',
     imported: {
-      imported: import('UI/Routes/Test'),
-      path: 'Routes/Test/index.tsx',
+      imported: import('UI/Routes/ACMEs/ACMEs'),
+      path: 'Routes/ACMEs/ACMEs/index.tsx',
     },
+    children: [
+      {
+        path: ':acmeId',
+        label: 'ACME',
+        imported: {
+          imported: import('UI/Routes/ACMEs/ACME'),
+          path: 'Routes/ACMEs/ACME/index.tsx',
+        },
+      },
+    ],
   },
   {
-    path: 'Example',
-    label: 'Example',
+    path: 'Zones',
+    label: 'Zones',
     imported: {
-      imported: import('UI/Routes/Example'),
-      path: 'Routes/Example/index.tsx',
+      imported: import('UI/Routes/Zones/Zones'),
+      path: 'Routes/Zones/Zones.tsx',
     },
+    children: [
+      {
+        path: ':zoneId',
+        label: 'Zone',
+        imported: {
+          imported: import('UI/Routes/Zones/Zone'),
+          path: 'Routes/Zones/Zone/index.tsx',
+        },
+        children: [
+          {
+            path: 'Settings',
+            label: 'ZoneSettings',
+            imported: {
+              imported: import('UI/Routes/Zones/ZoneSettings'),
+              path: 'Routes/Zones/ZoneSettings/index.tsx',
+            },
+          },
+        ],
+      },
+    ],
   },
   {
-    path: 'Lab',
-    label: 'Lab',
+    path: 'Subscribers',
+    label: 'Subscribers',
     imported: {
-      imported: import('UI/Routes/Lab'),
-      path: 'Routes/Lab/index.tsx',
+      imported: import('UI/Routes/Subscribers/Subscribers'),
+      path: 'Routes/Subscribers/Subscribers.tsx',
     },
+    children: [
+      {
+        path: ':subscriberId',
+        label: 'Subscriber',
+        imported: {
+          imported: import('UI/Routes/Subscribers/Subscriber'),
+          path: 'Routes/Subscribers/Subscriber.tsx',
+        },
+      },
+    ],
   },
   {
     path: 'Login',
@@ -68,15 +108,5 @@ export const AppRoutes: AppRoute[] = [
       imported: import('UI/Routes/Admin/Home'),
       path: 'Routes/Admin/Home.tsx',
     },
-    children: [
-      {
-        path: 'Test',
-        label: 'Test',
-        imported: {
-          imported: import('UI/Routes/Admin/Test'),
-          path: 'Routes/Admin/Test.tsx',
-        },
-      },
-    ],
   },
 ];

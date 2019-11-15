@@ -28,8 +28,6 @@ export const useStyles = makeStyles((theme: Theme) =>
       width: '100%',
       minHeight: '195px',
       display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
       justifyContent: 'center',
     },
     headerTextDiv: {
@@ -42,6 +40,28 @@ export const useStyles = makeStyles((theme: Theme) =>
     headerText: {
       marginLeft: '1rem',
       marginRight: '1rem',
+    },
+    pageSectionRoot: {
+      background: '#eee',
+      display: 'flex',
+      minHeight: '100%',
+      flexDirection: 'column',
+      alignItems: 'center',
+    },
+    pageSection: {
+      maxWidth: '600px',
+    },
+    pageRoot: {
+      width: '100%',
+      height: '100%',
+    },
+    section: {
+      width: '100%',
+      padding: '1em',
+      margin: '1em',
+      display: 'flex',
+      justifyContent: 'center',
+      flexDirection: 'column',
     },
   }),
 );

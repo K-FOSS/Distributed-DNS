@@ -1,22 +1,26 @@
 // API/src/Modules/Zones/ZoneModel.ts
-import { ObjectType, ID, Field, UnauthorizedError } from 'type-graphql';
+import { Field, ID, ObjectType, UnauthorizedError } from 'type-graphql';
 import {
-  Entity,
-  BaseEntity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToMany,
-  JoinColumn,
-  CreateDateColumn,
-  FindOneOptions,
-  ManyToMany,
   AfterUpdate,
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  FindOneOptions,
+  JoinColumn,
+  ManyToMany,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Permission } from '../Permission/Permission';
 import { ResourceRecord } from '../ResourceRecords/ResourceRecordModel';
-import { ZonePermissions, ZoneAccessPermission } from './ZonePermissionModel';
-import { User } from '../Users/UserModel';
 import { Subscriber } from '../Subscribers/SubscriberModel';
 import { subscriberPubSub } from '../Subscribers/SubscriptionPubSub';
+import { User } from '../Users/UserModel';
+import { UserRole } from '../Users/UserRole';
+import { ZonePermissions } from './ZonePermissionModel';
+import { ZoneSettings } from './ZoneSettingsModel';
 
 @ObjectType()
 @Entity()
@@ -28,9 +32,13 @@ export class Zone extends BaseEntity {
   @CreateDateColumn()
   readonly createdAt: Date;
 
-  @Field()
-  @Column('varchar')
-  contact: string;
+  @OneToOne(() => ZoneSettings, {
+    cascade: ['insert', 'update'],
+  })
+  @JoinColumn()
+  zoneSettings: ZoneSettings;
+  @Column()
+  zoneSettingsId: string;
 
   @Field(() => Date, { nullable: true })
   async updatedDate(): Promise<Date | undefined> {
@@ -47,12 +55,24 @@ export class Zone extends BaseEntity {
   domainName: string;
 
   @Field(() => [ResourceRecord])
-  @OneToMany(() => ResourceRecord, (resourceRecord) => resourceRecord.zone)
+  @OneToMany(
+    () => ResourceRecord,
+    (resourceRecord) => resourceRecord.zone,
+    {
+      cascade: ['insert', 'update'],
+    },
+  )
   @JoinColumn()
   resourceRecords: ResourceRecord[];
 
   @Field(() => [ZonePermissions])
-  @OneToMany(() => ZonePermissions, (zonePermission) => zonePermission.zone)
+  @OneToMany(
+    () => ZonePermissions,
+    (zonePermission) => zonePermission.zone,
+    {
+      cascade: ['insert', 'update'],
+    },
+  )
   accessPermissions: ZonePermissions[];
 
   @Field(() => Subscriber)
@@ -61,7 +81,7 @@ export class Zone extends BaseEntity {
 
   async checkUserAuthorization(
     user: User,
-    requiredPermission: ZoneAccessPermission,
+    requiredPermission: Permission,
   ): Promise<Zone> {
     const authorization = await ZonePermissions.findOne({
       zoneId: this.id,
@@ -69,17 +89,20 @@ export class Zone extends BaseEntity {
     });
 
     if (
-      !authorization ||
-      !authorization.accessPermissions.includes(requiredPermission)
+      (authorization &&
+        authorization.accessPermissions.includes(requiredPermission)) ||
+      user.roles.includes(UserRole.ADMIN)
     )
-      throw new UnauthorizedError();
-    else return this;
+      return this;
+
+    throw new UnauthorizedError();
   }
 
   static async getUserZones(
     user: User,
-    requiredPermission: ZoneAccessPermission,
+    requiredPermission: Permission,
   ): Promise<Zone[]> {
+    if (user.roles.includes(UserRole.ADMIN)) return this.find();
     return this.createQueryBuilder('zone')
       .leftJoinAndSelect('zone.accessPermissions', 'zone_permissions')
       .where('zone_permissions.userId = :userId', { userId: user.id })
@@ -92,10 +115,12 @@ export class Zone extends BaseEntity {
   static async getUserZone(
     user: User,
     zoneId: string,
-    requiredPermission: ZoneAccessPermission,
+    requiredPermission: Permission,
     options?: FindOneOptions<Zone>,
   ): Promise<Zone> {
     const zone = await Zone.findOneOrFail(zoneId, options);
+
+    if (user.roles.includes(UserRole.ADMIN)) return zone;
     return zone.checkUserAuthorization(user, requiredPermission);
   }
 

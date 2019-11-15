@@ -1,0 +1,13 @@
+mutation CreateValueRR($zoneId: ID!, $input: CreateValueResourceRecordInput!) {
+  createValueResourceRecord(zoneId: $zoneId, input: $input) {
+    id
+    domainName
+    resourceRecords {
+      id
+      host
+      data
+      ttl
+      type
+    }
+  }
+}

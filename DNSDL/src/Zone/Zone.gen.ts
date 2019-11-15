@@ -8,15 +8,20 @@ export const Zone = gql`
   domainName
   id
   updatedDate
-  contact
+  zoneSettings {
+    contact
+  }
   resourceRecords {
     ...ResourceRecord
   }
 }
     ${ResourceRecord}`;export type ZoneFragment = (
   { __typename?: 'Zone' }
-  & Pick<Types.Zone, 'domainName' | 'id' | 'updatedDate' | 'contact'>
-  & { resourceRecords: Array<{ __typename?: 'ResourceRecord' }
+  & Pick<Types.Zone, 'domainName' | 'id' | 'updatedDate'>
+  & { zoneSettings: (
+    { __typename?: 'ZoneSettings' }
+    & Pick<Types.ZoneSettings, 'contact'>
+  ), resourceRecords: Array<{ __typename?: 'ResourceRecord' }
     & ResourceRecordFragment
   > }
 );

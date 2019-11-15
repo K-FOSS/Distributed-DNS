@@ -2,6 +2,7 @@
 import { DeepEntityPartial } from '@entity-factory/core';
 import { TypeormBlueprint } from '@entity-factory/typeorm';
 import { Zone } from './ZoneModel';
+import { ZoneSettings } from './ZoneSettingsModel';
 
 export class ZoneFactory extends TypeormBlueprint<Zone> {
   constructor() {
@@ -11,9 +12,10 @@ export class ZoneFactory extends TypeormBlueprint<Zone> {
 
     this.define(
       async ({ faker, factory }): Promise<DeepEntityPartial<Zone>> => {
+        const zoneSettings = await factory.for(ZoneSettings).create(1);
         return {
           domainName: faker.internet.domainName(),
-          contact: faker.internet.email(),
+          zoneSettingsId: zoneSettings.id,
         };
       },
     );

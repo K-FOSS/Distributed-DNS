@@ -1,0 +1,15 @@
+query ACMEs {
+  currentUser {
+    id
+    ACMEs {
+      id
+      name
+
+      contactEmail
+      
+      domains {
+        domains
+      }
+    }
+  }
+}

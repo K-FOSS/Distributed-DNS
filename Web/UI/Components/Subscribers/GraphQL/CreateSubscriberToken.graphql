@@ -1,0 +1,3 @@
+mutation CreateSubscriberToken($subscriberId: ID!) {
+  createSubscriberToken(subscriberId: $subscriberId)
+}

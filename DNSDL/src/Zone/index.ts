@@ -8,7 +8,7 @@ import { DATA_VOLUME } from '..';
 export async function handleZone(zone: ZoneFragment): Promise<void> {
   const zoneFile: ZONE = {
     soa: {
-      contact: zone.contact,
+      contact: zone.zoneSettings.contact,
       serial: '1',
       refresh: '2500',
       retry: '2500',

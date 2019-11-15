@@ -1,0 +1,94 @@
+version: '3.7'
+
+services:
+  Web:
+    image: docker.pkg.github.com/kristianfjones/docker-images/caddy2:alpine
+    command: ['run', '--config', '/etc/Caddy/Caddyfile.json']
+    restart: unless-stopped
+    container_name: Web
+    hostname: distributed-dns.kristianjones.dev
+    networks:
+      - Frontend
+    ports:
+      - 80:80
+      - 443:443/tcp
+      - 443:443/udp
+    volumes:
+      - Caddy_Config:/etc/Caddy
+
+  Web-Files:
+    image: docker.pkg.github.com/kristianfjones/docker-images/vs-code-alpine:latest
+    command:
+      [
+        '/usr/local/bin/code-server',
+        '/Config',
+        '--user-data-dir=/home/vs-code/.code/data',
+        '--extensions-dir=/home/vs-code/.code/extensions',
+      ]
+    restart: unless-stopped
+    networks:
+      - Frontend
+    ports:
+      - 85:8080
+    volumes:
+      - Caddy_Config:/Config/Caddy
+
+  Database:
+    image: postgres:11-alpine
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    networks:
+      Backend:
+        aliases:
+          - database
+          - db
+    volumes:
+      - DATABASE_Data:/var/lib/postgresql/data
+
+  API:
+    build: '../../API'
+    image: docker.pkg.github.com/kristianfjones/distributed-dns/distributed-dns-api:latest
+    depends_on:
+      - Database
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_DATABASE}
+      DB_PASSWORD: ${DB_PASSWORD}
+    networks:
+      Frontend:
+        aliases:
+          - api
+      Backend:
+        aliases:
+          - api
+
+  Web-UI:
+    build: '../../Web'
+    image: docker.pkg.github.com/kristianfjones/distributed-dns/distributed-dns-web:latest
+    depends_on:
+      - API
+    environment:
+      API_HOST: api
+      PUBLIC_URL: https://distributed-dns.kristianjones.dev
+    networks:
+      Frontend:
+        aliases:
+          - web-ui
+      Backend:
+        aliases:
+          - web-ui
+
+networks:
+  Frontend:
+    name: Frontend
+  Backend:
+    name: Backend
+
+volumes:
+  Caddy_Config:
+    driver: local
+  DATABASE_Data:
+    driver: local
+  Caddy_TLS:
+    driver: local

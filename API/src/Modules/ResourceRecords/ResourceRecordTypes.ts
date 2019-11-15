@@ -9,6 +9,7 @@ export enum ResourceRecordType {
   DNAME = 'DNAME',
   AAAA = 'AAAA',
   MX = 'MX',
+  SRV = 'SRV'
 }
 
 registerEnumType(ResourceRecordType, { name: 'ResourceRecordType' });

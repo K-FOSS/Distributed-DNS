@@ -14,12 +14,9 @@ enum ValueRecordTypes {
 registerEnumType(ValueRecordTypes, { name: 'ValueRecordType' });
 
 @InputType()
-export class CreateValueResourceRecordInput implements Partial<ResourceRecord> {
-  @Field()
-  zoneId: string;
-
+export class CreateValueResourceRecordInput {
   @Field(() => ValueRecordTypes)
-  recordType: ValueRecordTypes;
+  type: ValueRecordTypes;
 
   @Field(() => Int, { nullable: true })
   ttl?: number;
@@ -34,9 +31,6 @@ export class CreateValueResourceRecordInput implements Partial<ResourceRecord> {
 @InputType()
 export class CreateMXResourceRecordInput implements Partial<ResourceRecord> {
   @Field()
-  zoneId: string;
-
-  @Field()
   host: string;
 
   @Field(() => Int, { nullable: true })
@@ -47,4 +41,60 @@ export class CreateMXResourceRecordInput implements Partial<ResourceRecord> {
 
   @Field()
   value: string;
+}
+
+/**
+ * 
+ * 
+ *     service: string;
+    protocol: string;
+    host: string;
+    ttl?: number;
+    priority: number;
+    weight: number;
+    port: number;
+    target: string;
+ * 
+ * 
+ * 
+ */
+
+export enum SRVProtocol {
+  TCP = '_tcp',
+  UDP = '_udp',
+  TLS = '_tls',
+  LDAP = '_ldap',
+  HTTP = '_http',
+  OCSP = '_oscp'
+}
+
+registerEnumType(SRVProtocol, {
+  name: 'SRVProtocol'
+})
+
+@InputType()
+export class CreateSRVResourceRecordInput implements Partial<ResourceRecord> {
+  @Field()
+  host: string
+
+  @Field(() => Int, { nullable: true })
+  ttl?: number;
+
+  @Field()
+  service: string
+
+  @Field(() => SRVProtocol)
+  protocol: SRVProtocol
+
+  @Field(() => Int)
+  priority: number;
+
+  @Field(() => Int)
+  weight: number;
+
+  @Field(() => Int)
+  port: number;
+
+  @Field()
+  target: string
 }

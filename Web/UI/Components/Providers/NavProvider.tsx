@@ -38,7 +38,10 @@ export function NavProvider({
 
   useEffect(() => setNavOpen(() => false), [location.pathname]);
 
-  const Children = useMemo(() => route?.hideUI ? <></> : <>{children}</>, [route?.hideUI, children])
+  const Children = useMemo(() => (route?.hideUI ? <></> : <>{children}</>), [
+    route,
+    children,
+  ]);
 
   return (
     <NavContext.Provider value={{ navOpen, setNavOpen, toggleNav }}>

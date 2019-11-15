@@ -12,9 +12,15 @@ export interface AuthContext extends Context {
 }
 
 export async function getContext(ctx: KoaContext): Promise<Context> {
-  return {
-    currentUser: await getCurrentUser(ctx),
-  };
+  try {
+    return {
+      currentUser: await getCurrentUser(ctx),
+    };
+  } catch {
+    return {
+      currentUser: undefined,
+    };
+  }
 }
 
 let testCurrentUser: User | undefined;

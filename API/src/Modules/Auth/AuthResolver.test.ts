@@ -12,7 +12,7 @@ describe('Authentication Resolver', () => {
     const connection = await createConnection(getConnectionArgs(true));
     await connection.synchronize();
 
-    await Promise.all([User.delete({}), factory.for(Configuration).create(1)]);
+    await Promise.all([factory.for(Configuration).create(1)]);
   });
 
   describe('currentUser Query', () => {

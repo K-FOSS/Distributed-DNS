@@ -2,13 +2,11 @@
 import { factory } from 'API/Library/Factory';
 import { User } from '../Users/UserModel';
 import { Zone } from 'API/Modules/Zones/ZoneModel';
-import {
-  ZoneAccessPermission,
-  ZonePermissions,
-} from 'API/Modules/Zones/ZonePermissionModel';
+import { ZonePermissions } from 'API/Modules/Zones/ZonePermissionModel';
 import { execute } from 'API/Library/execute';
 import { getTestContext } from 'API/Context';
 import { ResourceRecordType } from './ResourceRecordTypes';
+import { Permission } from '../Permission/Permission';
 
 describe('Resource Records Resolver', () => {
   describe('Create Resource Records', () => {
@@ -21,18 +19,15 @@ describe('Resource Records Resolver', () => {
         await factory.for(ZonePermissions).create(1, {
           zoneId: zone.id,
           userId: user.id,
-          accessPermissions: [
-            ZoneAccessPermission.READ,
-            ZoneAccessPermission.WRITE,
-          ],
+          accessPermissions: [Permission.READ, Permission.WRITE],
         });
 
         const { data, errors } = await execute(
           `mutation {
           createValueResourceRecord(
+            zoneId: "${zone.id}"
             input: {
-              zoneId: "${zone.id}"
-              recordType: NS
+              type: NS
               value: "ns1.kristianjones.dev."
               host: "@"
             }

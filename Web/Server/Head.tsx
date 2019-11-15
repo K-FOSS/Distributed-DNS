@@ -22,7 +22,7 @@ export function Head({ sources }: HeadProps): React.ReactElement {
       <meta charSet='utf-8' />
 
       <link rel='shortcut icon' href='/favicon.ico' />
-      <title>Hello World</title>
+      <title>Distributed DNS</title>
       <meta
         name='viewport'
         content='width=device-width, initial-scale=1, maximum-scale=1'

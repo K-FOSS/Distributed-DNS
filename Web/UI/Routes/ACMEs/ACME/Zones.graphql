@@ -1,0 +1,11 @@
+query ACMEZones {
+  currentUser {
+    id
+    
+    zones {
+      id
+
+      domainName
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "prettier.trailingComma": "all",
+  "eslint.workingDirectories": [
+    { "directory": "Web", "changeProcessCWD": true },
+    { "directory": "API", "changeProcessCWD": true }
+  ]
+}

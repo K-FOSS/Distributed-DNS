@@ -1,19 +1,21 @@
 // API/src/Modules/ResourceRecords/ResourceRecordModel.ts
-import { ObjectType, ID, Field } from 'type-graphql';
+import { Max } from 'class-validator';
+import { Field, ID, ObjectType, Int } from 'type-graphql';
 import {
-  Entity,
-  BaseEntity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  UpdateDateColumn,
-  AfterUpdate,
   AfterInsert,
   AfterRemove,
+  AfterUpdate,
+  BaseEntity,
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
-import { ResourceRecordType } from './ResourceRecordTypes';
-import { Zone } from '../Zones/ZoneModel';
 import { subscriberPubSub } from '../Subscribers/SubscriptionPubSub';
+import { Zone } from '../Zones/ZoneModel';
+import { ResourceRecordType } from './ResourceRecordTypes';
 
 @ObjectType()
 @Entity()
@@ -24,6 +26,11 @@ export class ResourceRecord extends BaseEntity {
 
   @UpdateDateColumn()
   readonly updatedAt: Date;
+
+  @Column('int', { nullable: true })
+  @Field(() => Int, { nullable: true, defaultValue: 300 })
+  @Max(86400)
+  ttl?: number | null;
 
   @Field(() => ResourceRecordType)
   @Column({ type: 'enum', enum: ResourceRecordType })
@@ -37,7 +44,8 @@ export class ResourceRecord extends BaseEntity {
   @Column('text')
   data: string;
 
-  @ManyToOne(() => Zone)
+  @ManyToOne(() => Zone, (zone) => zone.resourceRecords)
+  @JoinColumn()
   zone: Zone;
   @Column()
   zoneId: string;
@@ -46,9 +54,7 @@ export class ResourceRecord extends BaseEntity {
   @AfterInsert()
   @AfterRemove()
   async updateZone(): Promise<void> {
-    subscriberPubSub.publish(
-      this.zoneId,
-      await Zone.findOneOrFail(this.zoneId),
-    );
+    const zone = await Zone.findOne(this.zoneId);
+    if (zone) subscriberPubSub.publish(this.zoneId, zone);
   }
 }

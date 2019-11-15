@@ -1,0 +1,22 @@
+mutation AddACMEDomain($acmeId: String!, $input: [ACMEDomainInput!]!) {
+  addACMEDomain(acmeId: $acmeId, input: $input) {
+    id
+
+    name
+
+    domains {
+      id
+
+      domains
+
+      zone {
+        id
+        domainName
+      }
+
+      domains
+    }
+
+    contactEmail
+  }
+}

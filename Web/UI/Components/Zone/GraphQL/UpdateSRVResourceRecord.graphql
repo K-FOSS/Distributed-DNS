@@ -1,0 +1,17 @@
+mutation updateSRVResourceRecord($resourceRecordId: ID!, $input: SRVResourceRecordInput!) {
+  updateSRVResourceRecord(resourceRecordId: $resourceRecordId, input: $input) {
+    id
+
+    resourceRecords {
+      id
+      
+      ttl
+
+      type
+
+      host
+
+      data
+    }
+  }
+}

@@ -106,10 +106,7 @@ export async function uiServer(
 
   const scriptStream = renderScriptTags({ sources: initialSources });
 
-  headStream.pipe(
-    ctx.res,
-    { end: false },
-  );
+  headStream.pipe(ctx.res, { end: false });
 
   const appStream = renderToNodeStream(sheets.collect(AppComponent));
 
@@ -121,10 +118,7 @@ export async function uiServer(
     renderToString(sheets.collect(AppComponent));
     ctx.res.write(`<style id="jss-server-side">${sheets.toString()}</style>`);
     ctx.res.write('</head><body><div id="app">');
-    appStream.pipe(
-      ctx.res,
-      { end: false },
-    );
+    appStream.pipe(ctx.res, { end: false });
   });
 
   appStream.on('end', () => {
@@ -135,16 +129,10 @@ export async function uiServer(
       APOLLO_STATE: cache.extract(),
     });
 
-    stateScriptStream.pipe(
-      ctx.res,
-      { end: false },
-    );
+    stateScriptStream.pipe(ctx.res, { end: false });
 
     stateScriptStream.on('end', () => {
-      scriptStream.pipe(
-        ctx.res,
-        { end: false },
-      );
+      scriptStream.pipe(ctx.res, { end: false });
     });
   });
 

@@ -7,8 +7,9 @@ export const ResourceRecord = gql`
   type
   host
   data
+  ttl
 }
     `;export type ResourceRecordFragment = (
   { __typename?: 'ResourceRecord' }
-  & Pick<Types.ResourceRecord, 'id' | 'type' | 'host' | 'data'>
+  & Pick<Types.ResourceRecord, 'id' | 'type' | 'host' | 'data' | 'ttl'>
 );

@@ -1,11 +1,11 @@
-FROM mhart/alpine-node:latest
+FROM docker.pkg.github.com/kristianfjones/docker-images/node-alpine:latest
 WORKDIR /app
 COPY package.json package-lock.json tsconfig.json tsconfig.build.json ./
 RUN npm ci
 COPY src ./src/
 RUN NODE_ENV=production npm run build
 
-FROM mhart/alpine-node:latest
+FROM docker.pkg.github.com/kristianfjones/docker-images/node-alpine:latest
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package.json package-lock.json ./

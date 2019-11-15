@@ -6,6 +6,7 @@ services:
       - 80:80
     volumes:
       - './Caddyfile:/etc/Caddyfile'
+      - './ACMEDL/data:/SSL'
   api:
     build:
       context: './API'
@@ -14,6 +15,7 @@ services:
     environment:
       DB_HOST: database
       DB_PASSWORD: pgpass
+      NODE_ENV: development
     volumes:
       - './API:/development'
       - './API.graphql:/API.graphql'
@@ -24,6 +26,13 @@ services:
     image: 'applicationtemplate-gen'
     volumes:
       - './Web:/data'
+  acmedl-gen:
+    build:
+      context: './Scripts/GraphQLCodegen'
+      dockerfile: 'Dockerfile'
+    image: 'applicationtemplate-gen'
+    volumes:
+      - './ACMEDL:/data'
   dnsdl-gen:
     build:
       context: './Scripts/GraphQLCodegen'
@@ -40,5 +49,27 @@ services:
     environment:
       POSTGRES_PASSWORD: pgpass
       POSTGRES_DB: application
+  NS1:
+    image: resystit/bind9:latest
+    restart: unless-stopped
+    container_name: 'NS'
+    ports:
+      - 53:53/tcp
+      - 53:53/udp
+    volumes:
+      - 'zoneFiles:/Zones'
+      - 'bindConfig:/etc/bind/'
+  DNSDL:
+    build: './DNSDL'
+    image: 'dnsdl'
+    environment:
+      SUBSCRIBER_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWJzY3JpYmVySWQiOiJiMzk2MDNmZi1hYmY3LTQ1ZmYtODNjYS00OGQxZmFkYmE0YTkiLCJpYXQiOjE1NzM3NTA4NTB9.IDWvf9xcp2Bf3X0ry9NRNnEualtVjfhdQ-mlTYkf444
+      API_URL: 'http://api/graphql'
+    volumes:
+      - 'zoneFiles:/data/Zones'
+      - 'bindConfig:/data/BIND'
+      - /var/run/docker.sock:/var/run/docker.sock
 volumes:
   databaseData:
+  zoneFiles:
+  bindConfig:

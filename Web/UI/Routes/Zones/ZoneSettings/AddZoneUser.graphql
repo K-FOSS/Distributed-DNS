@@ -1,0 +1,18 @@
+mutation AddZoneUser($zoneId: ID!, $input: ZoneUserInput!) {
+  addZoneUser(zoneId: $zoneId, input: $input) {
+    id
+    
+    accessPermissions {
+      id
+      
+      user {
+        id
+        
+        username
+        
+      }
+      
+      accessPermissions
+    }
+  }
+}

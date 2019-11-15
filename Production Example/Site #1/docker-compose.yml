@@ -1,0 +1,29 @@
+version: '3.7'
+services:
+  NS1:
+    image: resystit/bind9:latest
+    restart: unless-stopped
+    container_name: 'NS'
+    ports:
+      - 53:53/tcp
+      - 53:53/udp
+    volumes:
+      - zoneFiles:/Zones
+      - bindConfig:/etc/bind/
+  
+  DNSDL:
+    image: docker.pkg.github.com/kristianfjones/distributed-dns/distributed-dns-dnsdl:dnsdl
+    environment:
+      SUBSCRIBER_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWJzY3JpYmVySWQiOiJiMzk2MDNmZi1hYmY3LTQ1ZmYtODNjYS00OGQxZmFkYmE0YTkiLCJpYXQiOjE1NzM4Mzk1MDR9.RrAJINHIvwYMcw4hWx1KNWI3SiwfpVU7veo3JIFhdLY
+      API_URL: http://192.168.254.179/graphql
+    volumes:
+      - zoneFiles:/data/Zones
+      - bindConfig:/data/BIND
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  zoneFiles:
+    driver: local
+
+  bindConfig:
+    driver: local

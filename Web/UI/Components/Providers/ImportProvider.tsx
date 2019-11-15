@@ -69,11 +69,7 @@ interface UseImportInput<T> {
   Loader: () => React.ReactElement;
 }
 
-export function useImport({
-  imported,
-  path,
-  Loader,
-}: UseImportInput<ReactComponent>): ReactComponent {
+export function useImport<T>({ imported, path, Loader }: UseImportInput<T>): T {
   const { addImport } = useContext(ImportContext);
   const { imports } = useContext(ImportContext);
   const [result, setResult] = useState<ReactComponent>();

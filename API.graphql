@@ -3,9 +3,54 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type ACME {
+  id: ID!
+  name: String!
+  certificates: [Certificate!]!
+  domains: [ACMEDomain!]!
+  contactEmail: String!
+  ACMEToken: String!
+  acmeUserPermission: Permission!
+}
+
+type ACMEAccount {
+  id: ID!
+}
+
+type ACMEDomain {
+  id: ID!
+  zone: Zone!
+  domains: [String!]!
+}
+
+input ACMEDomainInput {
+  zoneId: String!
+  domains: [String!]!
+}
+
+input ACMEInput {
+  name: String!
+  email: String!
+}
+
+input ACMEUpdateInput {
+  name: String
+  email: String
+  addDomains: [ACMEDomainInput!]
+  removeDomains: [ID!]
+}
+
 type AuthResponse {
   token: String!
   currentUser: CurrentUser!
+}
+
+type Certificate {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  certificate: String!
+  privateKey: String!
 }
 
 type Configuration {
@@ -13,15 +58,21 @@ type Configuration {
 }
 
 input CreateMXResourceRecordInput {
-  zoneId: String!
   host: String!
   ttl: Int
   preference: Int!
   value: String!
 }
 
-input CreateSubscriberInput {
-  zoneIds: [String!]!
+input CreateSRVResourceRecordInput {
+  host: String!
+  ttl: Int
+  service: String!
+  protocol: SRVProtocol!
+  priority: Int!
+  weight: Int!
+  port: Int!
+  target: String!
 }
 
 input CreateUtilityInput {
@@ -29,8 +80,7 @@ input CreateUtilityInput {
 }
 
 input CreateValueResourceRecordInput {
-  zoneId: String!
-  recordType: ValueRecordType!
+  type: ValueRecordType!
   ttl: Int
   host: String!
   value: String!
@@ -41,6 +91,9 @@ type CurrentUser {
   username: String!
   email: String!
   roles: [UserRole!]!
+  subscribers: [Subscriber!]!
+  zones: [Zone!]!
+  ACMEs: [ACME!]!
 }
 
 """
@@ -54,20 +107,50 @@ input LoginInput {
 }
 
 type Mutation {
+  createACME(input: ACMEInput!): CurrentUser!
+  deleteACME(acmeId: String!): CurrentUser!
+  updateACME(input: ACMEUpdateInput!, acmeId: String!): ACME!
+  addACMEDomain(input: [ACMEDomainInput!]!, acmeId: String!): ACME!
+  generateCertificate(acmeId: String!): ACME!
+  revokeCertificate(certificateId: ID!): ACME!
   login(input: LoginInput!): AuthResponse!
   register(input: UserInput!): RegisterResponse!
   resetPasswordReset(input: RequestPasswordResetInput!): Boolean!
   initialConfiguration(user: UserInput!): Configuration!
-  createValueResourceRecord(input: CreateValueResourceRecordInput!): Zone!
-  createSubscriber(input: CreateSubscriberInput!): Subscriber!
-  addZoneToSubscription(subscriberId: String!, zoneId: String!): Subscriber!
+  createValueResourceRecord(input: CreateValueResourceRecordInput!, zoneId: ID!): Zone!
+  createMXResourceRecord(input: CreateMXResourceRecordInput!, zoneId: ID!): Zone!
+  createSRVResourceRecord(input: CreateSRVResourceRecordInput!, zoneId: ID!): Zone!
+  deleteResourceRecord(resourceRecordId: ID!): Zone!
+  updateValueResourceRecord(input: ValueResourceRecordInput!, resourceRecordId: ID!): Zone!
+  updateMXResourceRecord(input: MXResourceRecordInput!, resourceRecordId: ID!): Zone!
+  updateSRVResourceRecord(input: SRVResourceRecordInput!, resourceRecordId: ID!): Zone!
+  createSubscriber(input: SubscriberInput!): CurrentUser!
+  updateSubscriber(input: UpdateSubscriberInput!, subscriberId: ID!): Subscriber!
+  createSubscriberToken(subscriberId: ID!): String!
   createUtility(input: CreateUtilityInput!): Utility!
+  addZoneUser(input: ZoneUserInput!, zoneId: ID!): Zone!
+  removeZoneUser(zoneUserId: ID!, zoneId: ID!): Zone!
   createZone(input: ZoneInput!): Zone!
 }
 
+input MXResourceRecordInput {
+  host: String
+  ttl: Int
+  preference: Int
+  value: String
+}
+
+enum Permission {
+  READ
+  WRITE
+  ADMIN
+}
+
 type Query {
+  ACME(acmeId: String!): ACME!
   currentUser: CurrentUser
   hasSetup: Boolean!
+  subscriber(subscriberId: ID!): Subscriber!
   getSubscribedZones(subscriberToken: String!): [Zone!]!
   users: [User!]!
   user(userId: String!): User!
@@ -94,6 +177,7 @@ input ResetPasswordInput {
 
 type ResourceRecord {
   id: ID!
+  ttl: Int
   type: ResourceRecordType!
   host: String!
 
@@ -114,16 +198,53 @@ enum ResourceRecordType {
   DNAME
   AAAA
   MX
+  SRV
+}
+
+enum SRVProtocol {
+  TCP
+  UDP
+  TLS
+  LDAP
+  HTTP
+  OCSP
+}
+
+input SRVResourceRecordInput {
+  host: String
+  ttl: Int
+  service: String
+  protocol: SRVProtocol
+  priority: Int
+  weight: Int
+  port: Int
+  target: String
 }
 
 type Subscriber {
   id: ID!
+  name: String!
   subscribedZones: [Zone!]!
-  subscriberToken: String!
+  accessPermissions: [SubscriberAccess!]!
+}
+
+type SubscriberAccess {
+  id: ID!
+}
+
+input SubscriberInput {
+  name: String!
 }
 
 type Subscription {
+  certificateEvents(ACMEToken: String!): Certificate!
   subscribeToZones(subscriberToken: String!): Zone!
+}
+
+input UpdateSubscriberInput {
+  name: String
+  addZoneIds: [ID!]!
+  removeZoneIds: [ID!]!
 }
 
 type User {
@@ -157,27 +278,29 @@ enum ValueRecordType {
   TXT
 }
 
+input ValueResourceRecordInput {
+  host: String
+  ttl: Float
+  value: String
+}
+
 type Zone {
   id: ID!
-  contact: String!
   updatedDate: DateTime
   domainName: String!
   resourceRecords(filter: ResourceRecordFilter): [ResourceRecord!]!
   accessPermissions: [ZonePermissions!]!
   subscribers: [Subscriber!]!
-}
-
-enum ZoneAccessPermissions {
-  READ
-  WRITE
-  ADMIN
+  zoneSettings: ZoneSettings!
+  userPermission: Permission!
+  userPermissions: [Permission!]!
 }
 
 input ZoneInput {
   domainName: String!
 
   """The user requesting the zone"""
-  zoneOwnerUserId: String!
+  zoneUserIds: [String!]!
   ns: String!
   contact: String!
 }
@@ -185,5 +308,19 @@ input ZoneInput {
 type ZonePermissions {
   id: ID!
   user: User!
-  accessPermissions: [ZoneAccessPermissions!]!
+  accessPermissions: [Permission!]!
+}
+
+type ZoneSettings {
+  id: ID!
+  contact: String!
+}
+
+input ZoneSettingsInput {
+  stuff: String!
+}
+
+input ZoneUserInput {
+  userId: ID!
+  accessPermission: Permission!
 }

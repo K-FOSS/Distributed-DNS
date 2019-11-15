@@ -1,23 +1,36 @@
 // API/src/Modules/Subscribers/SubscribersResolver.ts
+import { AuthContext } from 'API/Context';
 import {
-  Resolver,
-  Mutation,
   Arg,
   Authorized,
   Ctx,
+  ID,
+  Mutation,
   Query,
-  Subscription,
+  Resolver,
   Root,
+  Subscription,
 } from 'type-graphql';
-import { Subscriber } from './SubscriberModel';
-import { CreateSubscriberInput } from './CreateSubscriberInput';
 import { Zone } from '../Zones/ZoneModel';
-import { AuthContext } from 'API/Context';
-import { ZoneAccessPermission } from '../Zones/ZonePermissionModel';
+import { SubscriberAccess } from './SubscriberAccessModel';
+import { Subscriber } from './SubscriberModel';
 import { subscriberPubSub } from './SubscriptionPubSub';
+import { UpdateSubscriberInput } from './UpdateSubscriberInput';
+import { SubscriberInput } from './SubscriberInput';
+import { CurrentUser } from '../Auth/CurrentUser';
+import { Permission } from '../Permission/Permission';
 
 @Resolver(() => Subscriber)
 export class SubscribersResolver {
+  @Authorized()
+  @Query(() => Subscriber)
+  async subscriber(
+    @Arg('subscriberId', () => ID) subscriberId: string,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Subscriber> {
+    return Subscriber.getSubscriber(subscriberId, currentUser);
+  }
+
   @Query(() => [Zone])
   async getSubscribedZones(
     @Arg('subscriberToken') subscriberToken: string,
@@ -27,44 +40,73 @@ export class SubscribersResolver {
   }
 
   @Authorized()
-  @Mutation(() => Subscriber)
+  @Mutation(() => CurrentUser)
   async createSubscriber(
-    @Arg('input') { zoneIds }: CreateSubscriberInput,
+    @Arg('input') input: SubscriberInput,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<CurrentUser> {
+    const subscriber = Subscriber.create(input);
+    const subscriberAccess = SubscriberAccess.create({
+      userId: currentUser.id,
+    });
+
+    subscriber.accessPermissions = [subscriberAccess];
+    await subscriber.save();
+
+    return currentUser;
+  }
+
+  @Authorized()
+  @Mutation(() => Subscriber)
+  async updateSubscriber(
+    @Arg('subscriberId', () => ID) subscriberId: string,
+    @Arg('input') input: UpdateSubscriberInput,
     @Ctx() { currentUser }: AuthContext,
   ): Promise<Subscriber> {
+    const subscriber = await Subscriber.getSubscriber(
+      subscriberId,
+      currentUser,
+    );
     const zonePromises: Promise<Zone>[] = [];
 
-    for (const zoneId of zoneIds)
+    for (const zoneId of input.addZoneIds)
       zonePromises.push(
-        Zone.getUserZone(currentUser, zoneId, ZoneAccessPermission.ADMIN),
+        Zone.getUserZone(currentUser, zoneId, Permission.ADMIN),
       );
+
+    const existingZones = (await subscriber.subscribedZones).filter(
+      ({ id }) => !input.removeZoneIds.includes(id),
+    );
 
     const zones = await Promise.all(zonePromises);
 
-    const subscriber = await Subscriber.create({
-      subscribedZones: zones,
-    }).save();
+    subscriber.subscribedZones = [...existingZones, ...zones];
+
+    if (input.name) subscriber.name = input.name;
+
+    await subscriber.save();
+
+    await Promise.all(
+      input.addZoneIds.map((zoneId) =>
+        subscriberPubSub.addZoneToSubscriber(subscriber.id, zoneId),
+      ),
+    );
 
     return subscriber;
   }
 
   @Authorized()
-  @Mutation(() => Subscriber)
-  async addZoneToSubscription(
-    @Arg('zoneId') zoneId: string,
-    @Arg('subscriberId') subscriberId: string,
+  @Mutation(() => String)
+  async createSubscriberToken(
+    @Arg('subscriberId', () => ID) subscriberId: string,
     @Ctx() { currentUser }: AuthContext,
-  ): Promise<Subscriber> {
-    const [zone, subscriber] = await Promise.all([
-      Zone.getUserZone(currentUser, zoneId, ZoneAccessPermission.ADMIN),
-      Subscriber.findOneOrFail({ id: subscriberId }),
-    ]);
+  ): Promise<string> {
+    const subscriber = await Subscriber.getSubscriber(
+      subscriberId,
+      currentUser,
+    );
 
-    subscriber.subscribedZones.push(zone);
-    await subscriber.save();
-    await subscriberPubSub.addZoneToSubscriber(subscriber.id, zone.id);
-
-    return subscriber.save();
+    return subscriber.subscriberToken();
   }
 
   @Subscription({

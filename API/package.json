@@ -36,6 +36,7 @@
     "@entity-factory/core": "^0.2.1",
     "@entity-factory/typeorm": "^0.2.1",
     "@jest/core": "24.8.0",
+    "@types/acme-client": "^3.0.0",
     "@types/bcryptjs": "^2.4.2",
     "@types/jest": "^24.0.18",
     "@types/jsonwebtoken": "^8.3.4",
@@ -57,25 +58,26 @@
     "jest": "^24.9.0",
     "jest-cli": "^24.8.0",
     "nodemon": "^1.19.2",
-    "prettier": "^1.18.2",
+    "prettier": "^1.19.1",
     "ts-jest": "^24.1.0",
-    "ts-node": "^8.4.1",
-    "typescript": "^3.6.3"
+    "ts-node": "^8.5.0",
+    "typescript": "^3.7.2"
   },
   "dependencies": {
-    "@koa/router": "^8.0.1",
+    "@koa/router": "^8.0.2",
     "@types/graphql": "^14.5.0",
-    "apollo-server-koa": "^2.9.4",
+    "acme-client": "^3.2.0",
+    "apollo-server-koa": "^2.9.8",
     "bcryptjs": "^2.4.3",
-    "class-validator": "^0.10.1",
+    "class-validator": "^0.11.0",
     "jsonwebtoken": "^8.5.1",
-    "koa": "^2.8.1",
-    "module-alias": "^2.2.1",
+    "koa": "^2.11.0",
+    "module-alias": "^2.2.2",
     "p-event": "^4.1.0",
     "pg": "^7.12.1",
     "reflect-metadata": "^0.1.13",
     "type-graphql": "^0.17.5",
-    "typeorm": "^0.2.19"
+    "typeorm": "^0.2.20"
   },
   "prettier": {
     "singleQuote": true,
