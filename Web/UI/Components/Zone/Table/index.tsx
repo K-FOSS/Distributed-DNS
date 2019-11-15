@@ -109,28 +109,22 @@ export function ZoneTable({ zoneData }: ZoneTableProps): React.ReactElement {
             variant: 'success',
           });
       } else {
-        const valueType =
-          ValueRecordType[
-            (input.type as unknown) as keyof typeof ValueRecordType
-          ];
-        if (valueType) {
-          console.log(ttl);
-          const response = await createValueRR({
-            variables: {
-              zoneId: zoneData.id,
-              input: {
-                ...input,
-                type: valueType,
-                ttl: ttl ? parseInt((ttl as unknown) as string) : undefined,
-                value: JSON.parse(data).value,
-              },
+        console.log(ttl);
+        const response = await createValueRR({
+          variables: {
+            zoneId: zoneData.id,
+            input: {
+              ...input,
+              type: input.type,
+              ttl: ttl ? parseInt((ttl as unknown) as string) : undefined,
+              value: JSON.parse(data).value,
             },
-          });
-          console.log(response);
-        }
+          },
+        });
+        console.log(response);
       }
     },
-    [zoneData, createValueRR, createMXRR],
+    [zoneData, createValueRR, createMXRR, createSRV, enqueueSnackbar],
   );
 
   const handleResourceRecordChanges = useCallback(
@@ -171,9 +165,9 @@ export function ZoneTable({ zoneData }: ZoneTableProps): React.ReactElement {
               priority: parseInt(priority),
               weight: parseInt(weight),
               port: parseInt(port),
-            }
-          }
-        })
+            },
+          },
+        });
 
         console.log('Change SRV', response);
       } else {

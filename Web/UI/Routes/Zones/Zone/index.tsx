@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ZoneTable } from 'UI/Components/Zone/Table';
 import { Header } from 'UI/Components/Styles/Header';
-import { useStyles } from './Styles';
+import { useZonePageStyles } from './Styles';
 import { useZoneQuery } from './Zone.gen';
 import IconButton from '@material-ui/core/IconButton';
 import SettingsCog from '@material-ui/icons/Settings';
@@ -15,13 +15,15 @@ interface ZoneParams {
 
 export default function ZonePage(): React.ReactElement {
   const { zoneId } = useParams<ZoneParams>();
-  const classes = useStyles();
+  const classes = useZonePageStyles();
   const { data } = useZoneQuery({ variables: { zoneId } });
 
   const userZonePermissions = useMemo(
     () => data?.zone?.userPermissions || [Permission.Read],
     [data],
   );
+
+  
 
   return (
     <>

@@ -14,6 +14,7 @@ export type Acme = {
    __typename?: 'ACME',
   id: Scalars['ID'],
   name: Scalars['String'],
+  certificates: Array<Certificate>,
   domains: Array<AcmeDomain>,
   contactEmail: Scalars['String'],
   ACMEToken: Scalars['String'],
@@ -57,6 +58,8 @@ export type AuthResponse = {
 export type Certificate = {
    __typename?: 'Certificate',
   id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
   certificate: Scalars['String'],
   privateKey: Scalars['String'],
 };
@@ -134,6 +137,7 @@ export type Mutation = {
   updateSubscriber: Subscriber,
   createUtility: Utility,
   addZoneUser: Zone,
+  removeZoneUser: Zone,
   createZone: Zone,
 };
 
@@ -244,6 +248,12 @@ export type MutationCreateUtilityArgs = {
 
 export type MutationAddZoneUserArgs = {
   input: ZoneUserInput,
+  zoneId: Scalars['ID']
+};
+
+
+export type MutationRemoveZoneUserArgs = {
+  zoneUserId: Scalars['ID'],
   zoneId: Scalars['ID']
 };
 
@@ -785,6 +795,31 @@ export type AcmeQuery = (
   & { ACME: (
     { __typename?: 'ACME' }
     & Pick<Acme, 'id' | 'name' | 'contactEmail'>
+    & { certificates: Array<(
+      { __typename?: 'Certificate' }
+      & Pick<Certificate, 'id' | 'createdAt'>
+    )>, domains: Array<(
+      { __typename?: 'ACMEDomain' }
+      & Pick<AcmeDomain, 'id' | 'domains'>
+      & { zone: (
+        { __typename?: 'Zone' }
+        & Pick<Zone, 'id' | 'domainName'>
+      ) }
+    )> }
+  ) }
+);
+
+export type AddAcmeDomainMutationVariables = {
+  acmeId: Scalars['String'],
+  input: Array<AcmeDomainInput>
+};
+
+
+export type AddAcmeDomainMutation = (
+  { __typename?: 'Mutation' }
+  & { addACMEDomain: (
+    { __typename?: 'ACME' }
+    & Pick<Acme, 'id' | 'name' | 'contactEmail'>
     & { domains: Array<(
       { __typename?: 'ACMEDomain' }
       & Pick<AcmeDomain, 'id' | 'domains'>
@@ -794,6 +829,45 @@ export type AcmeQuery = (
       ) }
     )> }
   ) }
+);
+
+export type GenerateCertificateMutationVariables = {
+  acmeId: Scalars['String']
+};
+
+
+export type GenerateCertificateMutation = (
+  { __typename?: 'Mutation' }
+  & { generateCertificate: (
+    { __typename?: 'ACME' }
+    & Pick<Acme, 'id'>
+    & { certificates: Array<(
+      { __typename?: 'Certificate' }
+      & Pick<Certificate, 'id' | 'createdAt'>
+    )>, domains: Array<(
+      { __typename?: 'ACMEDomain' }
+      & Pick<AcmeDomain, 'id' | 'domains'>
+      & { zone: (
+        { __typename?: 'Zone' }
+        & Pick<Zone, 'id' | 'domainName'>
+      ) }
+    )> }
+  ) }
+);
+
+export type AcmeZonesQueryVariables = {};
+
+
+export type AcmeZonesQuery = (
+  { __typename?: 'Query' }
+  & { currentUser: Maybe<(
+    { __typename?: 'CurrentUser' }
+    & Pick<CurrentUser, 'id'>
+    & { zones: Array<(
+      { __typename?: 'Zone' }
+      & Pick<Zone, 'id' | 'domainName'>
+    )> }
+  )> }
 );
 
 export type AcmEsQueryVariables = {};
@@ -874,6 +948,28 @@ export type AddZoneUserMutationVariables = {
 export type AddZoneUserMutation = (
   { __typename?: 'Mutation' }
   & { addZoneUser: (
+    { __typename?: 'Zone' }
+    & Pick<Zone, 'id'>
+    & { accessPermissions: Array<(
+      { __typename?: 'ZonePermissions' }
+      & Pick<ZonePermissions, 'id' | 'accessPermissions'>
+      & { user: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'username'>
+      ) }
+    )> }
+  ) }
+);
+
+export type RemoveZoneUserMutationVariables = {
+  zoneId: Scalars['ID'],
+  zoneUserId: Scalars['ID']
+};
+
+
+export type RemoveZoneUserMutation = (
+  { __typename?: 'Mutation' }
+  & { removeZoneUser: (
     { __typename?: 'Zone' }
     & Pick<Zone, 'id'>
     & { accessPermissions: Array<(

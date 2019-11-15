@@ -1,0 +1,17 @@
+mutation RemoveZoneUser($zoneId: ID!, $zoneUserId: ID!) {
+  removeZoneUser(zoneId: $zoneId, zoneUserId: $zoneUserId) {
+    id
+
+    accessPermissions {
+      id
+
+      user {
+        id
+
+        username
+      }
+
+      accessPermissions
+    }
+  }
+}

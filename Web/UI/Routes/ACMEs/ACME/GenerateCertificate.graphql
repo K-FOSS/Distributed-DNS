@@ -1,8 +1,6 @@
-query ACME($acmeId: String!) {
-  ACME(acmeId: $acmeId) {
+mutation GenerateCertificate($acmeId: String!) {
+  generateCertificate(acmeId: $acmeId) {
     id
-    
-    name
 
     certificates {
       id
@@ -22,7 +20,5 @@ query ACME($acmeId: String!) {
       
       domains
     }
-    
-    contactEmail
   }
 }

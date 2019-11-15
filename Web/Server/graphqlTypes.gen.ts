@@ -14,6 +14,7 @@ export type Acme = {
    __typename?: 'ACME',
   id: Scalars['ID'],
   name: Scalars['String'],
+  certificates: Array<Certificate>,
   domains: Array<AcmeDomain>,
   contactEmail: Scalars['String'],
   ACMEToken: Scalars['String'],
@@ -57,6 +58,8 @@ export type AuthResponse = {
 export type Certificate = {
    __typename?: 'Certificate',
   id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
   certificate: Scalars['String'],
   privateKey: Scalars['String'],
 };
@@ -134,6 +137,7 @@ export type Mutation = {
   updateSubscriber: Subscriber,
   createUtility: Utility,
   addZoneUser: Zone,
+  removeZoneUser: Zone,
   createZone: Zone,
 };
 
@@ -244,6 +248,12 @@ export type MutationCreateUtilityArgs = {
 
 export type MutationAddZoneUserArgs = {
   input: ZoneUserInput,
+  zoneId: Scalars['ID']
+};
+
+
+export type MutationRemoveZoneUserArgs = {
+  zoneUserId: Scalars['ID'],
   zoneId: Scalars['ID']
 };
 

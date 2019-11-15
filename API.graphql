@@ -6,6 +6,7 @@
 type ACME {
   id: ID!
   name: String!
+  certificates: [Certificate!]!
   domains: [ACMEDomain!]!
   contactEmail: String!
   ACMEToken: String!
@@ -45,6 +46,8 @@ type AuthResponse {
 
 type Certificate {
   id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
   certificate: String!
   privateKey: String!
 }
@@ -123,6 +126,7 @@ type Mutation {
   updateSubscriber(input: UpdateSubscriberInput!, subscriberId: ID!): Subscriber!
   createUtility(input: CreateUtilityInput!): Utility!
   addZoneUser(input: ZoneUserInput!, zoneId: ID!): Zone!
+  removeZoneUser(zoneUserId: ID!, zoneId: ID!): Zone!
   createZone(input: ZoneInput!): Zone!
 }
 

@@ -87,6 +87,21 @@ export class ZoneResolver {
     return zone;
   }
 
+  @Authorized()
+  @Mutation(() => Zone)
+  async removeZoneUser(@Arg('zoneId', () => ID) zoneId: string, @Arg('zoneUserId', () => ID) zoneUserId: string, @Ctx() { currentUser }: AuthContext): Promise<Zone> {
+    if (currentUser.id === zoneUserId) throw new ApolloError(`You can't remove yourself silly`, 'SILLY_HUMAN')
+    
+    const zone = await Zone.getUserZone(currentUser, zoneId, Permission.ADMIN, { relations: ['accessPermissions'] })
+    
+    const existingPermissions = zone.accessPermissions.find(({ userId: oldUserId }) => oldUserId === zoneUserId)
+    if (!existingPermissions) throw new ApolloError('USER IS NOT IN ZONE')
+
+    await existingPermissions.remove()
+
+    return zone
+  }
+
   @Authorized([UserRole.ADMIN])
   @Mutation(() => Zone)
   async createZone(@Arg('input')

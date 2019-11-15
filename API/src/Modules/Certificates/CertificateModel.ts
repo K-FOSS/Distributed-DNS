@@ -20,9 +20,11 @@ export class Certificate extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   readonly id: string;
 
+  @Field()
   @CreateDateColumn()
   readonly createdAt: Date;
 
+  @Field()
   @UpdateDateColumn()
   readonly updatedAt: Date;
 

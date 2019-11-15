@@ -19,9 +19,24 @@ export function AppBody(): React.ReactElement {
   const route = useRoute();
   const { roles } = useSession();
 
-  const isAuthorized = route?.roles ? route?.roles?.every((role) => roles.includes(role)) : true
+  const isAuthorized = route?.roles
+    ? route?.roles?.every((role) => roles.includes(role))
+    : true;
 
-  return <>{isAuthorized ? <AppRouter /> : <Redirect to={{ pathname: roles.includes(UserRole.User) ? '/' : '/Login', state: { pathName: route?.to } }}  />}</>;
+  return (
+    <>
+      {isAuthorized ? (
+        <AppRouter />
+      ) : (
+        <Redirect
+          to={{
+            pathname: roles.includes(UserRole.User) ? '/' : '/Login',
+            state: { pathName: route?.to },
+          }}
+        />
+      )}
+    </>
+  );
 }
 
 export function App(): React.ReactElement {

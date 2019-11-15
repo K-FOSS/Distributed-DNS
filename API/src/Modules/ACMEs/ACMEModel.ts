@@ -58,38 +58,55 @@ export class ACME extends BaseEntity {
   @Column({ type: 'varchar', default: 'ACME' })
   name: string;
 
-  @OneToMany(() => ACMEAccess, (acmeAccess) => acmeAccess.acme, {
-    cascade: true,
-  })
+  @OneToMany(
+    () => ACMEAccess,
+    (acmeAccess) => acmeAccess.acme,
+    {
+      cascade: true,
+    },
+  )
   permissions: ACMEAccess[];
 
-  @OneToOne(() => ACMEAccount, (acmeAccount) => acmeAccount.acme, {
-    cascade: ['insert', 'remove', 'update'],
-    onDelete: 'CASCADE',
-  })
+  @OneToOne(
+    () => ACMEAccount,
+    (acmeAccount) => acmeAccount.acme,
+    {
+      cascade: ['insert', 'remove', 'update'],
+      onDelete: 'CASCADE',
+    },
+  )
   @JoinColumn()
   acmeAccount: ACMEAccount;
   @Column()
   acmeAccountId: string;
 
-  @OneToMany(() => Certificate, (certificate) => certificate.acme, {
-    cascade: ['insert', 'update', 'remove'],
-  })
+  @Field(() => [Certificate])
+  @OneToMany(
+    () => Certificate,
+    (certificate) => certificate.acme,
+    {
+      cascade: ['insert', 'update', 'remove'],
+    },
+  )
   certificates: Certificate[];
 
   @Field(() => [ACMEDomain])
-  @OneToMany(() => ACMEDomain, (acmeDomain) => acmeDomain.acme, {
-    cascade: ['insert', 'remove', 'update'],
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(
+    () => ACMEDomain,
+    (acmeDomain) => acmeDomain.acme,
+    {
+      cascade: ['insert', 'remove', 'update'],
+      onDelete: 'CASCADE',
+    },
+  )
   @JoinColumn()
   domains: ACMEDomain[];
 
   @Field(() => String)
   async contactEmail(): Promise<string> {
-    const acmeAccount = await ACMEAccount.findOneOrFail(this.acmeAccountId)
+    const acmeAccount = await ACMEAccount.findOneOrFail(this.acmeAccountId);
 
-    return acmeAccount.email
+    return acmeAccount.email;
   }
 
   async addDomain(zoneId: string, domainNames: string[]): Promise<void> {

@@ -155,4 +155,9 @@ export class ACMEResolver {
   async domains(@Root() acme: ACME): Promise<ACMEDomain[]> {
     return ACMEDomain.find({ acmeId: acme.id });
   }
+
+  @FieldResolver(() => [Certificate])
+  async certificates(@Root() acme: ACME): Promise<Certificate[]> {
+    return Certificate.find({ where: { acmeId: acme.id } });
+  }
 }
