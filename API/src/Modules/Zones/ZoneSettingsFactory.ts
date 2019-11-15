@@ -10,7 +10,9 @@ export class ZoneSettingsFactory extends TypeormBlueprint<ZoneSettings> {
     this.type(ZoneSettings);
 
     this.define(
-      async ({ factory }): Promise<DeepEntityPartial<ZoneSettings>> => ({}),
+      async ({ factory, faker }): Promise<DeepEntityPartial<ZoneSettings>> => ({
+        contact: faker.internet.email(),
+      }),
     );
   }
 }

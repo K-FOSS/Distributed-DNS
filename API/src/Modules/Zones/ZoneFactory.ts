@@ -15,7 +15,6 @@ export class ZoneFactory extends TypeormBlueprint<Zone> {
         const zoneSettings = await factory.for(ZoneSettings).create(1);
         return {
           domainName: faker.internet.domainName(),
-          contact: faker.internet.email(),
           zoneSettingsId: zoneSettings.id,
         };
       },

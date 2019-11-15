@@ -25,7 +25,7 @@ export function SRVEditComponent({
 }: SRVComponentProps): React.ReactElement {
   const TextField = useImport({
     imported: import(
-      'UI/Components/Styles/Inputs/TextField/BaseTextField/index'
+      'UI/Components/Styles/Inputs/TextField/BaseTextField/index',
     ),
     path: 'Components/Styles/Inputs/TextField/BaseTextField/index.tsx',
     // TODO: TextField Skeleton Loader
@@ -70,10 +70,10 @@ export function SRVEditComponent({
         className={classes.doubleTextLeft}
         onChange={handleChange('protocol')}
         SelectProps={{
-          native: true
+          native: true,
         }}
         classes={{
-          root: classes.srvProtoSelect
+          root: classes.srvProtoSelect,
         }}
         fullWidth
       >
@@ -108,11 +108,9 @@ export function SRVEditComponent({
         label='Target'
         variant='outlined'
         value={valueObj.target}
-        InputProps={
-          {
-            className: classes.srvTargetField
-          }
-        }
+        InputProps={{
+          className: classes.srvTargetField,
+        }}
         onChange={handleChange('target')}
       />
     </div>

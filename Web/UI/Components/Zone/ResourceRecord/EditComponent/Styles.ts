@@ -10,10 +10,10 @@ export const useStyles = makeStyles((theme: Theme) =>
       marginRight: '1em',
     },
     srvTargetField: {
-      width: '-webkit-fill-available'
+      width: '-webkit-fill-available',
     },
     srvProtoSelect: {
-      width: '170px'
-    }
+      width: '170px',
+    },
   }),
 );

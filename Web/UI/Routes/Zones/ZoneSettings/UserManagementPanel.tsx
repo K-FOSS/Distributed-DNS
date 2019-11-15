@@ -35,7 +35,7 @@ export function UserManagementPanel({
 
   const TextField = useImport({
     imported: import(
-      'UI/Components/Styles/Inputs/TextField/BaseTextField/index'
+      'UI/Components/Styles/Inputs/TextField/BaseTextField/index',
     ),
     path: 'Components/Styles/Inputs/TextField/BaseTextField/index.tsx',
     // TODO: TextField Skeleton Loader

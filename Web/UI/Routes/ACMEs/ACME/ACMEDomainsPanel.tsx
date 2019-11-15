@@ -1,20 +1,17 @@
 // Web/UI/Routes/ACMEs/ACME/DomainsPanel.tsx
-import React, { useMemo, ChangeEvent, useState, useCallback } from 'react';
-import { AcmeQuery } from './ACME.gen';
-import { LabelListItem } from 'UI/Components/Styles/List/ListItems/LabelListItem';
-import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import DeleteIcon from '@material-ui/icons/Delete';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { PaperSection } from 'UI/Components/Styles/Section/PaperSection';
-import { BaseList } from 'UI/Components/Styles/List/BaseList';
-import { useAcmeZonesQuery } from './Zones.gen';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useImport } from 'UI/Components/Providers/ImportProvider';
-import { Loader } from 'UI/Components/Styles/Loader';
 import { BaseButton } from 'UI/Components/Styles/Button/BaseButton';
+import { BaseList } from 'UI/Components/Styles/List/BaseList';
+import { LabelListItem } from 'UI/Components/Styles/List/ListItems/LabelListItem';
+import { Loader } from 'UI/Components/Styles/Loader';
+import { PaperSection } from 'UI/Components/Styles/Section/PaperSection';
 import { Zone } from 'UI/GraphQL/graphqlTypes.gen';
-import { Permission } from 'Server/graphqlTypes.gen';
+import { AcmeQuery } from './ACME.gen';
 import { useAddAcmeDomainMutation } from './AddACMEDomains.gen';
+import { useAcmeZonesQuery } from './Zones.gen';
 
 interface ACMEDomainsPanelProps {
   acmeData: AcmeQuery | undefined;
@@ -41,7 +38,7 @@ export function ACMEDomainsPanel({
   const acmeId = useMemo(() => acmeData?.ACME.id || undefined, [acmeData]);
   const TextField = useImport({
     imported: import(
-      'UI/Components/Styles/Inputs/TextField/BaseTextField/index'
+      'UI/Components/Styles/Inputs/TextField/BaseTextField/index',
     ),
     path: 'Components/Styles/Inputs/TextField/BaseTextField/index.tsx',
     // TODO: TextField Skeleton Loader
@@ -61,10 +58,7 @@ export function ACMEDomainsPanel({
     const zoneId = value.zone?.id;
     const domains = value.domains?.split(',');
 
-    if (!acmeId || !zoneId || !domains) return
-
-
-
+    if (!acmeId || !zoneId || !domains) return;
 
     const response = await addACMEDomain({
       variables: {
@@ -81,8 +75,9 @@ export function ACMEDomainsPanel({
       <Typography variant='h4'>Domain Management</Typography>
       <BaseList>
         {(acmeData?.ACME.domains || []).map(
-          ({ zone: { id: zoneId, domainName }, domains }) => (
+          ({ zone: { id: zoneId, domainName }, domains, id }) => (
             <LabelListItem
+              key={id}
               label={{ primary: domainName, secondary: domains.join(',') }}
             ></LabelListItem>
           ),

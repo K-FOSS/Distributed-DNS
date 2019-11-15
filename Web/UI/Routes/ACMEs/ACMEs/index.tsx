@@ -26,13 +26,13 @@ export default function ACMEsPage(): React.ReactElement {
         variables: {
           input: {
             name: input.name,
-            email: input.contactEmail
+            email: input.contactEmail,
           },
         },
       });
       console.log(response);
     },
-    [],
+    [createACME],
   );
 
   const handleRowClick: RowClick<ACMEData> = useCallback(

@@ -2,27 +2,25 @@
 import MaterialTable from 'material-table';
 import { useSnackbar } from 'notistack';
 import React, { useCallback, useMemo } from 'react';
+import { useImport } from 'UI/Components/Providers/ImportProvider';
+import { Loader } from 'UI/Components/Styles/Loader';
 import {
-  ResourceRecordType,
   Permission,
-  ZoneQuery,
-  Zone,
   ResourceRecord,
-  ValueRecordType,
+  ResourceRecordType,
+  Zone,
 } from 'UI/GraphQL/graphqlTypes.gen';
+import { useCreateMxrrMutation } from '../GraphQL/CreateMXRR.gen';
+import { useCreateSrvrrMutation } from '../GraphQL/CreateSRVRR.gen';
 import { useCreateValueRrMutation } from '../GraphQL/CreateValueRR.gen';
 import { useDeleteResourceRecordMutation } from '../GraphQL/DeleteResourceRecord.gen';
+import { useUpdateMxResourceRecordMutation } from '../GraphQL/UpdateMXResourceRecord.gen';
+import { useUpdateSrvResourceRecordMutation } from '../GraphQL/UpdateSRVResourceRecord.gen';
 import { useUpdateResourceRecordMutation } from '../GraphQL/UpdateValueResourceRecord.gen';
-import { RREditComponent } from '../ResourceRecord/EditComponent';
-import { ResourceRecordSelect } from '../ResourceRecord/Select';
 import { RRData } from '../ResourceRecord';
 import { RRDataColumn } from '../ResourceRecord/DataColumn';
-import { Loader } from 'UI/Components/Styles/Loader';
-import { useImport } from 'UI/Components/Providers/ImportProvider';
-import { useCreateMxrrMutation } from '../GraphQL/CreateMXRR.gen';
-import { useUpdateMxResourceRecordMutation } from '../GraphQL/UpdateMXResourceRecord.gen';
-import { useCreateSrvrrMutation } from '../GraphQL/CreateSRVRR.gen';
-import { useUpdateSrvResourceRecordMutation } from '../GraphQL/UpdateSRVResourceRecord.gen';
+import { RREditComponent } from '../ResourceRecord/EditComponent';
+import { ResourceRecordSelect } from '../ResourceRecord/Select';
 
 type ResourceRecordData = { __typename?: 'ResourceRecord' } & Pick<
   ResourceRecord,
@@ -56,7 +54,7 @@ export function ZoneTable({ zoneData }: ZoneTableProps): React.ReactElement {
 
   const TextField = useImport({
     imported: import(
-      'UI/Components/Styles/Inputs/TextField/BaseTextField/index'
+      'UI/Components/Styles/Inputs/TextField/BaseTextField/index',
     ),
     path: 'Components/Styles/Inputs/TextField/BaseTextField/index.tsx',
     // TODO: TextField Skeleton Loader
@@ -154,7 +152,7 @@ export function ZoneTable({ zoneData }: ZoneTableProps): React.ReactElement {
             variant: 'success',
           });
       } else if (type === ResourceRecordType.Srv) {
-        const { priority, weight, port, ...inputData } = JSON.parse(data);
+        const { priority, weight, port } = JSON.parse(data);
 
         const response = await updateSRVResourceRecord({
           variables: {
@@ -188,7 +186,12 @@ export function ZoneTable({ zoneData }: ZoneTableProps): React.ReactElement {
           });
       }
     },
-    [updateValueResourceRecord, enqueueSnackbar, updateMXResourceRecord],
+    [
+      updateValueResourceRecord,
+      enqueueSnackbar,
+      updateMXResourceRecord,
+      updateSRVResourceRecord,
+    ],
   );
 
   const handleDeleteResourceRecord = useCallback(

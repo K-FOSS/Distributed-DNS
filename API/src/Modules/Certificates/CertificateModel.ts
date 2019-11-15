@@ -36,7 +36,10 @@ export class Certificate extends BaseEntity {
   @Column('text')
   readonly privateKey: string;
 
-  @ManyToOne(() => ACME, (acme) => acme.certificates)
+  @ManyToOne(
+    () => ACME,
+    (acme) => acme.certificates,
+  )
   acme: ACME;
   @Column()
   acmeId: string;

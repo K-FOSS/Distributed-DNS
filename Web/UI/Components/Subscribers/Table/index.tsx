@@ -34,7 +34,7 @@ export function SubscribersTable(): React.ReactElement {
           variant: 'success',
         });
     },
-    [createSubscriber],
+    [createSubscriber, enqueueSnackbar],
   );
 
   const handleEditSubscriber = useCallback(async (input: SubscriberData) => {

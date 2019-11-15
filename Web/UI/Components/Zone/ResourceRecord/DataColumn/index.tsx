@@ -14,7 +14,7 @@ const RRDataColumnComponent = {
   [ResourceRecordType.Mx]: MXResourceRecord,
   [ResourceRecordType.Ns]: ValueResourceRecord,
   [ResourceRecordType.Txt]: ValueResourceRecord,
-  [ResourceRecordType.Srv]: SRVResourceRecordDataColumn
+  [ResourceRecordType.Srv]: SRVResourceRecordDataColumn,
 };
 
 export function RRDataColumn(
