@@ -12,8 +12,8 @@ import { useSnackbar } from 'notistack';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import { useCreateSubscriberTokenMutation } from './GraphQL/CreateSubscriberToken.gen';
-import SyntaxHighlighter from 'react-syntax-highlighter';
-import { github } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+// import SyntaxHighlighter from 'react-syntax-highlighter';
+import Prism from 'react-syntax-highlighter/dist/cjs/prism';
 import { useConfig } from '../Providers/ConfigProvider';
 
 interface SubscriberPageProps {
@@ -23,7 +23,7 @@ interface SubscriberPageProps {
 export function SubscriberPage({
   subscriberId,
 }: SubscriberPageProps): React.ReactElement {
-  const { baseUrl } = useConfig()
+  const { baseUrl } = useConfig();
   const classes = useStyles();
   const { data } = useSubscriberQuery({ variables: { subscriberId } });
   const [selectedZones, setSelectedZones] = useState<ZoneData[]>([]);
@@ -162,9 +162,7 @@ volumes:
                 <Typography variant='body1'>
                   Docker-compose service example
                 </Typography>
-                <SyntaxHighlighter language='yaml' style={github}>
-                  {composeFile}
-                </SyntaxHighlighter>
+                <Prism language='yaml'>{composeFile}</Prism>
                 <TextField
                   label='Subscriber Token'
                   inputRef={tokenInputRef}
@@ -172,7 +170,7 @@ volumes:
                   style={{ marginTop: '1em' }}
                 />
                 <BaseButton
-                  label='Copy Token'
+                  label='Copy Token To Clipboard'
                   onClick={handleCopyTokenClick}
                   style={{ marginTop: '1em' }}
                   color='primary'

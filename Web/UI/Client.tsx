@@ -16,6 +16,16 @@ window.setImmediate = window.setTimeout;
 
 export let imports: ImportItem[] = [];
 
+if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+  window.addEventListener('load', async function() {
+    const worker = await navigator.serviceWorker.register(
+      '/service-worker.ts',
+      { scope: '/' },
+    );
+    console.log('SW registered: ', worker);
+  });
+}
+
 function CoreApp({ children }: PropsWithChildren<{}>): React.ReactElement {
   return (
     <BrowserRouter>
