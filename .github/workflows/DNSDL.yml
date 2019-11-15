@@ -4,7 +4,6 @@ on:
 jobs:
   Build:
     runs-on: ubuntu-latest
-    needs: [Test, Prettier, Lint]
     steps:
       - uses: actions/checkout@master
       - uses: textbook/git-checkout-submodule-action@master
