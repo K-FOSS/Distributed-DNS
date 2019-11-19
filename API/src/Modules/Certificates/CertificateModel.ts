@@ -1,17 +1,18 @@
 // API/src/Modules/Certificates/CertificateModel.ts
-import { ObjectType, Field, ID } from 'type-graphql';
+import { Field, ID, ObjectType } from 'type-graphql';
 import {
-  BaseEntity,
-  Entity,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  Column,
-  ManyToOne,
   AfterInsert,
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ACME } from '../ACMEs/ACMEModel';
-import { acmePubSub } from '../ACMEs/ACMEPubSub';
+import { SubscriberEventPayloadType } from '../Subscribers/SubscriberEventPayload';
+import { subscriberPubSub } from '../Subscribers/SubscriptionPubSub';
 
 @ObjectType()
 @Entity()
@@ -41,12 +42,15 @@ export class Certificate extends BaseEntity {
     (acme) => acme.certificates,
   )
   acme: ACME;
+
   @Column()
   acmeId: string;
 
   @AfterInsert()
   async emitEvent(): Promise<void> {
     console.log(`New Certificate`);
-    acmePubSub.publish(this.acmeId, this);
+    const acme = await ACME.findOneOrFail({ where: { id: this.acmeId } });
+
+    subscriberPubSub.publish(SubscriberEventPayloadType.UPDATE, acme);
   }
 }

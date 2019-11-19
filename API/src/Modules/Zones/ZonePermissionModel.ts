@@ -19,15 +19,24 @@ export class ZonePermissions extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   readonly id: string;
 
-  @ManyToOne(() => Zone, (zone) => zone.accessPermissions)
+  @ManyToOne(
+    () => Zone,
+    (zone) => zone.accessPermissions,
+    {
+      cascade: ['remove'],
+      onDelete: 'CASCADE',
+    },
+  )
   @JoinColumn()
   zone: Zone;
+
   @Column()
   zoneId: string;
 
   @Field(() => User)
   @ManyToOne(() => User, { lazy: true })
   user: Promise<User> | User;
+
   @Column()
   userId: string;
 

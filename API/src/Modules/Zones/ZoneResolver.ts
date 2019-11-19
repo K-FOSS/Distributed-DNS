@@ -22,6 +22,7 @@ import { ZoneSettings } from './ZoneSettingsModel';
 import { Permission, getPermission } from '../Permission/Permission';
 import { ZoneUserInput } from './ZoneSettingsInput';
 import { ApolloError } from 'apollo-server-koa';
+import { CurrentUser } from '../Auth/CurrentUser';
 
 @Resolver(() => Zone)
 export class ZoneResolver {
@@ -157,6 +158,27 @@ export class ZoneResolver {
     await zone.save();
 
     return zone;
+  }
+
+  @Authorized()
+  @Mutation(() => CurrentUser)
+  async deleteZone(
+    @Arg('zoneId', () => ID) zoneId: string,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<CurrentUser> {
+    const zone = await Zone.getUserZone(currentUser, zoneId, Permission.ADMIN);
+
+    const [zoneSettings] = await Promise.all([
+      ZoneSettings.findOneOrFail({
+        where: { id: zone.zoneSettingsId },
+      }),
+    ]);
+
+    await Promise.all([zoneSettings.remove()]);
+
+    await zone.remove();
+
+    return currentUser;
   }
 
   @FieldResolver(() => [ResourceRecord])

@@ -26,8 +26,12 @@ export class ACMEDomain extends BaseEntity {
   @UpdateDateColumn()
   readonly updatedAt: Date;
 
-  @ManyToOne(() => ACME, (acme) => acme.domains)
+  @ManyToOne(
+    () => ACME,
+    (acme) => acme.domains,
+  )
   acme: ACME;
+
   @Column()
   acmeId: string;
 
@@ -35,6 +39,7 @@ export class ACMEDomain extends BaseEntity {
   @ManyToOne(() => Zone, { cascade: ['insert'] })
   @JoinColumn()
   zone: Zone;
+
   @Column()
   zoneId: string;
 

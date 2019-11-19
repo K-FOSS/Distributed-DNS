@@ -136,7 +136,6 @@ export type Mutation = {
   updateMXResourceRecord: Zone,
   updateSRVResourceRecord: Zone,
   createSubscriber: CurrentUser,
-  updateSubscriber: Subscriber,
   createSubscriberToken: Scalars['String'],
   createUtility: Utility,
   addZoneUser: Zone,
@@ -243,12 +242,6 @@ export type MutationCreateSubscriberArgs = {
 };
 
 
-export type MutationUpdateSubscriberArgs = {
-  input: UpdateSubscriberInput,
-  subscriberId: Scalars['ID']
-};
-
-
 export type MutationCreateSubscriberTokenArgs = {
   subscriberId: Scalars['ID']
 };
@@ -294,7 +287,7 @@ export type Query = {
   currentUser?: Maybe<CurrentUser>,
   hasSetup: Scalars['Boolean'],
   subscriber: Subscriber,
-  getSubscribedZones: Array<Zone>,
+  getSubscribedEntities: Array<Zone>,
   users: Array<User>,
   user: User,
   utilities: Array<Utility>,
@@ -314,7 +307,7 @@ export type QuerySubscriberArgs = {
 };
 
 
-export type QueryGetSubscribedZonesArgs = {
+export type QueryGetSubscribedEntitiesArgs = {
   subscriberToken: Scalars['String']
 };
 
@@ -393,9 +386,12 @@ export type SrvResourceRecordInput = {
 export type Subscriber = {
    __typename?: 'Subscriber',
   id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  type: SubscriberType,
   name: Scalars['String'],
-  subscribedZones: Array<Zone>,
   accessPermissions: Array<SubscriberAccess>,
+  subscribedEntities: Array<SubscriberEntity>,
 };
 
 export type SubscriberAccess = {
@@ -403,14 +399,35 @@ export type SubscriberAccess = {
   id: Scalars['ID'],
 };
 
+export type SubscriberEntity = Acme | Zone;
+
+export type SubscriberEventPayload = {
+   __typename?: 'SubscriberEventPayload',
+  eventType: SubscriberPayloadType,
+  id: Scalars['ID'],
+  entity: SubscriberEntity,
+};
+
 export type SubscriberInput = {
   name: Scalars['String'],
+  type: SubscriberType,
 };
+
+export enum SubscriberPayloadType {
+  Create = 'CREATE',
+  Update = 'UPDATE',
+  Delete = 'DELETE'
+}
+
+export enum SubscriberType {
+  Tls = 'TLS',
+  Zone = 'ZONE'
+}
 
 export type Subscription = {
    __typename?: 'Subscription',
   certificateEvents: Certificate,
-  subscribeToZones: Zone,
+  subscribe: SubscriberEventPayload,
 };
 
 
@@ -419,14 +436,8 @@ export type SubscriptionCertificateEventsArgs = {
 };
 
 
-export type SubscriptionSubscribeToZonesArgs = {
+export type SubscriptionSubscribeArgs = {
   subscriberToken: Scalars['String']
-};
-
-export type UpdateSubscriberInput = {
-  name?: Maybe<Scalars['String']>,
-  addZoneIds: Array<Scalars['ID']>,
-  removeZoneIds: Array<Scalars['ID']>,
 };
 
 export type User = {
@@ -563,83 +574,6 @@ export type RegisterMutation = (
       { __typename?: 'CurrentUser' }
       & CurrentUserFragment
     ) }
-  ) }
-);
-
-export type CreateSubscriberMutationVariables = {
-  input: SubscriberInput
-};
-
-
-export type CreateSubscriberMutation = (
-  { __typename?: 'Mutation' }
-  & { createSubscriber: (
-    { __typename?: 'CurrentUser' }
-    & Pick<CurrentUser, 'id'>
-    & { subscribers: Array<(
-      { __typename?: 'Subscriber' }
-      & Pick<Subscriber, 'id' | 'name'>
-    )> }
-  ) }
-);
-
-export type CreateSubscriberTokenMutationVariables = {
-  subscriberId: Scalars['ID']
-};
-
-
-export type CreateSubscriberTokenMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'createSubscriberToken'>
-);
-
-export type SubscriberQueryVariables = {
-  subscriberId: Scalars['ID']
-};
-
-
-export type SubscriberQuery = (
-  { __typename?: 'Query' }
-  & { subscriber: (
-    { __typename?: 'Subscriber' }
-    & Pick<Subscriber, 'id' | 'name'>
-    & { subscribedZones: Array<(
-      { __typename?: 'Zone' }
-      & Pick<Zone, 'domainName' | 'id'>
-    )> }
-  ) }
-);
-
-export type SubscribersQueryVariables = {};
-
-
-export type SubscribersQuery = (
-  { __typename?: 'Query' }
-  & { currentUser: Maybe<(
-    { __typename?: 'CurrentUser' }
-    & Pick<CurrentUser, 'id'>
-    & { subscribers: Array<(
-      { __typename?: 'Subscriber' }
-      & Pick<Subscriber, 'id' | 'name'>
-    )> }
-  )> }
-);
-
-export type UpdateSubscriberMutationVariables = {
-  subscriberId: Scalars['ID'],
-  input: UpdateSubscriberInput
-};
-
-
-export type UpdateSubscriberMutation = (
-  { __typename?: 'Mutation' }
-  & { updateSubscriber: (
-    { __typename?: 'Subscriber' }
-    & Pick<Subscriber, 'id' | 'name'>
-    & { subscribedZones: Array<(
-      { __typename?: 'Zone' }
-      & Pick<Zone, 'domainName' | 'id'>
-    )> }
   ) }
 );
 
@@ -939,6 +873,58 @@ export type InitialConfigurationMutation = (
     { __typename?: 'Configuration' }
     & Pick<Configuration, 'id'>
   ) }
+);
+
+export type SubscriberQueryVariables = {
+  subscriberId: Scalars['ID']
+};
+
+
+export type SubscriberQuery = (
+  { __typename?: 'Query' }
+  & { subscriber: (
+    { __typename?: 'Subscriber' }
+    & Pick<Subscriber, 'id' | 'createdAt' | 'updatedAt' | 'name'>
+    & { subscribedEntities: Array<(
+      { __typename?: 'ACME' }
+      & Pick<Acme, 'id' | 'name'>
+    ) | (
+      { __typename?: 'Zone' }
+      & Pick<Zone, 'id' | 'domainName'>
+    )> }
+  ) }
+);
+
+export type CreateSubscriberMutationVariables = {
+  input: SubscriberInput
+};
+
+
+export type CreateSubscriberMutation = (
+  { __typename?: 'Mutation' }
+  & { createSubscriber: (
+    { __typename?: 'CurrentUser' }
+    & Pick<CurrentUser, 'id'>
+    & { subscribers: Array<(
+      { __typename?: 'Subscriber' }
+      & Pick<Subscriber, 'id' | 'type' | 'name'>
+    )> }
+  ) }
+);
+
+export type SubscribersQueryVariables = {};
+
+
+export type SubscribersQuery = (
+  { __typename?: 'Query' }
+  & { currentUser: Maybe<(
+    { __typename?: 'CurrentUser' }
+    & Pick<CurrentUser, 'id' | 'username'>
+    & { subscribers: Array<(
+      { __typename?: 'Subscriber' }
+      & Pick<Subscriber, 'id' | 'type' | 'name'>
+    )> }
+  )> }
 );
 
 export type ZoneQueryVariables = {

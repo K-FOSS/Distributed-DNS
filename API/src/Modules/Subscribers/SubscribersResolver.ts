@@ -11,14 +11,13 @@ import {
   Root,
   Subscription,
 } from 'type-graphql';
+import { CurrentUser } from '../Auth/CurrentUser';
 import { Zone } from '../Zones/ZoneModel';
 import { SubscriberAccess } from './SubscriberAccessModel';
-import { Subscriber } from './SubscriberModel';
-import { subscriberPubSub } from './SubscriptionPubSub';
-import { UpdateSubscriberInput } from './UpdateSubscriberInput';
+import { SubscriberEventPayload } from './SubscriberEventPayload';
 import { SubscriberInput } from './SubscriberInput';
-import { CurrentUser } from '../Auth/CurrentUser';
-import { Permission } from '../Permission/Permission';
+import { Subscriber, SubscriberEntities } from './SubscriberModel';
+import { subscriberPubSub } from './SubscriptionPubSub';
 
 @Resolver(() => Subscriber)
 export class SubscribersResolver {
@@ -32,11 +31,11 @@ export class SubscribersResolver {
   }
 
   @Query(() => [Zone])
-  async getSubscribedZones(
+  async getSubscribedEntities(
     @Arg('subscriberToken') subscriberToken: string,
-  ): Promise<Zone[]> {
+  ): Promise<typeof SubscriberEntities[]> {
     const subscriber = await Subscriber.getSubscriberFromToken(subscriberToken);
-    return subscriber.subscribedZones;
+    return subscriber.subscribedEntities;
   }
 
   @Authorized()
@@ -56,6 +55,23 @@ export class SubscribersResolver {
     return currentUser;
   }
 
+  @Mutation(() => Subscriber)
+  async testing(
+    @Arg('subscriberId', () => ID) subscriberId: string,
+    @Arg('zoneId', () => ID) zoneId: string,
+  ): Promise<Subscriber> {
+    const subscriber = await Subscriber.findOneOrFail({
+      where: { id: subscriberId },
+      relations: ['subscribedEntities'],
+    });
+    const zone = await Zone.findOneOrFail({ where: { id: zoneId } });
+
+    (await subscriber.subscribedEntities).push(zone);
+
+    return subscriber.save();
+  }
+
+  /*
   @Authorized()
   @Mutation(() => Subscriber)
   async updateSubscriber(
@@ -93,7 +109,7 @@ export class SubscribersResolver {
     );
 
     return subscriber;
-  }
+  } */
 
   @Authorized()
   @Mutation(() => String)
@@ -110,14 +126,15 @@ export class SubscribersResolver {
   }
 
   @Subscription({
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     subscribe: async (stuff, args) =>
       subscriberPubSub.subscribe(args.subscriberToken),
   })
-  subscribeToZones(
+  subscribe(
     @Arg('subscriberToken') subscriberToken: string,
-    @Root() root: Zone,
-  ): Zone {
+    @Root() root: SubscriberEventPayload,
+  ): SubscriberEventPayload {
     return root;
   }
 }

@@ -26,7 +26,10 @@ export class ACMEAccount extends BaseEntity {
   @UpdateDateColumn()
   readonly updatedAt: Date;
 
-  @OneToOne(() => ACME, (acme) => acme.acmeAccount)
+  @OneToOne(
+    () => ACME,
+    (acme) => acme.acmeAccount,
+  )
   acme: ACME;
 
   @Column('varchar')

@@ -136,7 +136,6 @@ export type Mutation = {
   updateMXResourceRecord: Zone,
   updateSRVResourceRecord: Zone,
   createSubscriber: CurrentUser,
-  updateSubscriber: Subscriber,
   createSubscriberToken: Scalars['String'],
   createUtility: Utility,
   addZoneUser: Zone,
@@ -243,12 +242,6 @@ export type MutationCreateSubscriberArgs = {
 };
 
 
-export type MutationUpdateSubscriberArgs = {
-  input: UpdateSubscriberInput,
-  subscriberId: Scalars['ID']
-};
-
-
 export type MutationCreateSubscriberTokenArgs = {
   subscriberId: Scalars['ID']
 };
@@ -294,7 +287,7 @@ export type Query = {
   currentUser?: Maybe<CurrentUser>,
   hasSetup: Scalars['Boolean'],
   subscriber: Subscriber,
-  getSubscribedZones: Array<Zone>,
+  getSubscribedEntities: Array<Zone>,
   users: Array<User>,
   user: User,
   utilities: Array<Utility>,
@@ -314,7 +307,7 @@ export type QuerySubscriberArgs = {
 };
 
 
-export type QueryGetSubscribedZonesArgs = {
+export type QueryGetSubscribedEntitiesArgs = {
   subscriberToken: Scalars['String']
 };
 
@@ -393,9 +386,12 @@ export type SrvResourceRecordInput = {
 export type Subscriber = {
    __typename?: 'Subscriber',
   id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  type: SubscriberType,
   name: Scalars['String'],
-  subscribedZones: Array<Zone>,
   accessPermissions: Array<SubscriberAccess>,
+  subscribedEntities: Array<SubscriberEntity>,
 };
 
 export type SubscriberAccess = {
@@ -403,14 +399,35 @@ export type SubscriberAccess = {
   id: Scalars['ID'],
 };
 
+export type SubscriberEntity = Acme | Zone;
+
+export type SubscriberEventPayload = {
+   __typename?: 'SubscriberEventPayload',
+  eventType: SubscriberPayloadType,
+  id: Scalars['ID'],
+  entity: SubscriberEntity,
+};
+
 export type SubscriberInput = {
   name: Scalars['String'],
+  type: SubscriberType,
 };
+
+export enum SubscriberPayloadType {
+  Create = 'CREATE',
+  Update = 'UPDATE',
+  Delete = 'DELETE'
+}
+
+export enum SubscriberType {
+  Tls = 'TLS',
+  Zone = 'ZONE'
+}
 
 export type Subscription = {
    __typename?: 'Subscription',
   certificateEvents: Certificate,
-  subscribeToZones: Zone,
+  subscribe: SubscriberEventPayload,
 };
 
 
@@ -419,14 +436,8 @@ export type SubscriptionCertificateEventsArgs = {
 };
 
 
-export type SubscriptionSubscribeToZonesArgs = {
+export type SubscriptionSubscribeArgs = {
   subscriberToken: Scalars['String']
-};
-
-export type UpdateSubscriberInput = {
-  name?: Maybe<Scalars['String']>,
-  addZoneIds: Array<Scalars['ID']>,
-  removeZoneIds: Array<Scalars['ID']>,
 };
 
 export type User = {

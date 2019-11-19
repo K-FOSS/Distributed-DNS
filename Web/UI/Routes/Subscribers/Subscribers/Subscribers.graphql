@@ -1,8 +1,14 @@
 query Subscribers {
   currentUser {
     id
+
+    username
+
     subscribers {
       id
+
+      type
+
       name
     }
   }

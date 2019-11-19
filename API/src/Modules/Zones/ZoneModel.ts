@@ -12,6 +12,8 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  AfterRemove,
+  BeforeRemove,
 } from 'typeorm';
 import { Permission } from '../Permission/Permission';
 import { ResourceRecord } from '../ResourceRecords/ResourceRecordModel';
@@ -21,6 +23,7 @@ import { User } from '../Users/UserModel';
 import { UserRole } from '../Users/UserRole';
 import { ZonePermissions } from './ZonePermissionModel';
 import { ZoneSettings } from './ZoneSettingsModel';
+import { SubscriberEventPayloadType } from '../Subscribers/SubscriberEventPayload';
 
 @ObjectType()
 @Entity()
@@ -33,10 +36,12 @@ export class Zone extends BaseEntity {
   readonly createdAt: Date;
 
   @OneToOne(() => ZoneSettings, {
-    cascade: ['insert', 'update'],
+    cascade: ['insert', 'update', 'remove'],
+    onDelete: 'CASCADE',
   })
   @JoinColumn()
   zoneSettings: ZoneSettings;
+
   @Column()
   zoneSettingsId: string;
 
@@ -60,6 +65,7 @@ export class Zone extends BaseEntity {
     (resourceRecord) => resourceRecord.zone,
     {
       cascade: ['insert', 'update'],
+      onDelete: 'CASCADE',
     },
   )
   @JoinColumn()
@@ -71,6 +77,7 @@ export class Zone extends BaseEntity {
     (zonePermission) => zonePermission.zone,
     {
       cascade: ['insert', 'update'],
+      onDelete: 'CASCADE',
     },
   )
   accessPermissions: ZonePermissions[];
@@ -120,12 +127,24 @@ export class Zone extends BaseEntity {
   ): Promise<Zone> {
     const zone = await Zone.findOneOrFail(zoneId, options);
 
+    console.log(zone);
+
     if (user.roles.includes(UserRole.ADMIN)) return zone;
     return zone.checkUserAuthorization(user, requiredPermission);
   }
 
+  @BeforeRemove()
+  async beforeRemove(): Promise<void> {
+    console.log('Removing');
+  }
+
   @AfterUpdate()
   updateZone(): void {
-    subscriberPubSub.publish(this.id, this);
+    subscriberPubSub.publish(SubscriberEventPayloadType.UPDATE, this);
+  }
+
+  @AfterRemove()
+  zoneDeleted(): void {
+    console.log('Zone Deleted', this);
   }
 }

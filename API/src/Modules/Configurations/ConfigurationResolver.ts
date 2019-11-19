@@ -15,11 +15,10 @@ export class ConfigurationResovler {
 
   @hasSetup(false)
   @Mutation(() => Configuration)
-  async initialConfiguration(@Arg('user')
-  {
-    password,
-    ...initialUser
-  }: UserInput): Promise<Configuration> {
+  async initialConfiguration(
+    @Arg('user')
+    { password, ...initialUser }: UserInput,
+  ): Promise<Configuration> {
     const initialAdmin = User.create({
       ...initialUser,
       roles: [UserRole.USER, UserRole.ADMIN],

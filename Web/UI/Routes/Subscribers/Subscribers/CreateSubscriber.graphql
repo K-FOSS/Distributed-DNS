@@ -1,8 +1,12 @@
 mutation CreateSubscriber($input: SubscriberInput!) {
   createSubscriber(input: $input) {
     id
+
     subscribers {
       id
+
+      type
+
       name
     }
   }

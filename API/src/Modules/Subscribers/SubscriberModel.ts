@@ -1,26 +1,39 @@
 // API/src/Modules/Subscribers/SubscriberModel.ts
-import { Field, ID, ObjectType, ForbiddenError } from 'type-graphql';
-import { sign, verify } from 'jsonwebtoken';
+import {
+  createUnionType,
+  Field,
+  ID,
+  ObjectType,
+  ForbiddenError,
+} from 'type-graphql';
 import {
   BaseEntity,
-  Entity,
+  Column,
+  CreateDateColumn,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  Entity,
+  OneToMany,
   ManyToMany,
   JoinTable,
-  Column,
-  BeforeUpdate,
-  OneToMany,
-  AfterUpdate,
 } from 'typeorm';
+import { ACME } from '../ACMEs/ACMEModel';
 import { Zone } from '../Zones/ZoneModel';
+import { SubscriberAccess } from './SubscriberAccessModel';
 import { config } from 'API/Config';
 import { ApolloError } from 'apollo-server-koa';
-import { SubscriberAccess } from './SubscriberAccessModel';
 import { User } from '../Users/UserModel';
+import { verify, sign } from 'jsonwebtoken';
+import { SubscriberType } from './SubscriberType';
 
 interface SubscriberTokenPayload {
   subscriberId: string;
 }
+
+export const SubscriberEntities = createUnionType({
+  name: 'SubscriberEntity',
+  types: () => [ACME, Zone],
+});
 
 @ObjectType()
 @Entity()
@@ -30,13 +43,20 @@ export class Subscriber extends BaseEntity {
   readonly id: string;
 
   @Field()
+  @CreateDateColumn()
+  readonly createdAt: Date;
+
+  @Field()
+  @UpdateDateColumn()
+  readonly updatedAt: Date;
+
+  @Field(() => SubscriberType)
+  @Column({ enum: SubscriberType })
+  readonly type: SubscriberType;
+
+  @Field()
   @Column('varchar', { default: 'Subs' })
   name: string;
-
-  @Field(() => Zone)
-  @ManyToMany(() => Zone, { cascade: ['insert', 'update'], lazy: true })
-  @JoinTable()
-  subscribedZones: Zone[];
 
   @Field(() => [SubscriberAccess])
   @OneToMany(
@@ -47,6 +67,11 @@ export class Subscriber extends BaseEntity {
     },
   )
   accessPermissions: SubscriberAccess[];
+
+  @Field(() => [SubscriberEntities])
+  @ManyToMany(() => Zone || ACME, { cascade: ['insert', 'update'], lazy: true })
+  @JoinTable()
+  subscribedEntities: typeof SubscriberEntities[];
 
   subscriberToken(): string {
     const payload: SubscriberTokenPayload = { subscriberId: this.id };
@@ -96,11 +121,5 @@ export class Subscriber extends BaseEntity {
     if (!subscriber) throw new ForbiddenError();
 
     return subscriber;
-  }
-
-  @BeforeUpdate()
-  @AfterUpdate()
-  async beforeUpdate(item: Subscriber, b: string): Promise<void> {
-    console.log(item, b);
   }
 }

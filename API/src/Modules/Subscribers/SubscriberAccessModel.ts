@@ -18,14 +18,19 @@ export class SubscriberAccess extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   readonly id: string;
 
-  @ManyToOne(() => Subscriber, (subscriber) => subscriber.accessPermissions)
+  @ManyToOne(
+    () => Subscriber,
+    (subscriber) => subscriber.accessPermissions,
+  )
   @JoinColumn()
   subscriber: Subscriber;
+
   @Column()
   subscriberId: string;
 
   @ManyToOne(() => User)
   user: Promise<User> | User;
+
   @Column()
   userId: string;
 }

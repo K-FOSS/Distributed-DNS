@@ -75,10 +75,6 @@ input CreateSRVResourceRecordInput {
   target: String!
 }
 
-input CreateUtilityInput {
-  name: String!
-}
-
 input CreateValueResourceRecordInput {
   type: ValueRecordType!
   ttl: Int
@@ -125,12 +121,12 @@ type Mutation {
   updateMXResourceRecord(input: MXResourceRecordInput!, resourceRecordId: ID!): Zone!
   updateSRVResourceRecord(input: SRVResourceRecordInput!, resourceRecordId: ID!): Zone!
   createSubscriber(input: SubscriberInput!): CurrentUser!
-  updateSubscriber(input: UpdateSubscriberInput!, subscriberId: ID!): Subscriber!
+  testing(zoneId: ID!, subscriberId: ID!): Subscriber!
   createSubscriberToken(subscriberId: ID!): String!
-  createUtility(input: CreateUtilityInput!): Utility!
   addZoneUser(input: ZoneUserInput!, zoneId: ID!): Zone!
   removeZoneUser(zoneUserId: ID!, zoneId: ID!): Zone!
   createZone(input: ZoneInput!): Zone!
+  deleteZone(zoneId: ID!): CurrentUser!
 }
 
 input MXResourceRecordInput {
@@ -151,11 +147,9 @@ type Query {
   currentUser: CurrentUser
   hasSetup: Boolean!
   subscriber(subscriberId: ID!): Subscriber!
-  getSubscribedZones(subscriberToken: String!): [Zone!]!
+  getSubscribedEntities(subscriberToken: String!): [Zone!]!
   users: [User!]!
   user(userId: String!): User!
-  utilities: [Utility!]!
-  helloWorld: String!
   zones: [Zone!]!
   zone(zoneId: String!): Zone!
 }
@@ -223,28 +217,44 @@ input SRVResourceRecordInput {
 
 type Subscriber {
   id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  type: SubscriberType!
   name: String!
-  subscribedZones: [Zone!]!
   accessPermissions: [SubscriberAccess!]!
+  subscribedEntities: [SubscriberEntity!]!
 }
 
 type SubscriberAccess {
   id: ID!
 }
 
+union SubscriberEntity = ACME | Zone
+
+type SubscriberEventPayload {
+  eventType: SubscriberPayloadType!
+  id: ID!
+  entity: SubscriberEntity!
+}
+
 input SubscriberInput {
   name: String!
+  type: SubscriberType!
+}
+
+enum SubscriberPayloadType {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+enum SubscriberType {
+  TLS
+  ZONE
 }
 
 type Subscription {
-  certificateEvents(ACMEToken: String!): Certificate!
-  subscribeToZones(subscriberToken: String!): Zone!
-}
-
-input UpdateSubscriberInput {
-  name: String
-  addZoneIds: [ID!]!
-  removeZoneIds: [ID!]!
+  subscribe(subscriberToken: String!): SubscriberEventPayload!
 }
 
 type User {
@@ -262,11 +272,6 @@ enum UserRole {
   GUEST
   USER
   ADMIN
-}
-
-type Utility {
-  id: ID!
-  name: String!
 }
 
 enum ValueRecordType {

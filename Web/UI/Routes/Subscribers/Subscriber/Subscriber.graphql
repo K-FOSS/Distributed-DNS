@@ -1,0 +1,25 @@
+query Subscriber($subscriberId: ID!) {
+  subscriber(subscriberId: $subscriberId) {
+    id
+
+    createdAt
+
+    updatedAt
+
+    name
+
+    subscribedEntities {
+      ... on Zone {
+        id
+
+        domainName
+      }
+
+      ... on ACME {
+        id
+
+        name
+      }
+    }
+  }
+}

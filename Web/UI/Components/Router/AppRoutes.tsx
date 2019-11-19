@@ -71,7 +71,7 @@ export const AppRoutes: AppRoute[] = [
     label: 'Subscribers',
     imported: {
       imported: import('UI/Routes/Subscribers/Subscribers'),
-      path: 'Routes/Subscribers/Subscribers.tsx',
+      path: 'Routes/Subscribers/Subscribers/index.tsx',
     },
     children: [
       {
@@ -79,7 +79,7 @@ export const AppRoutes: AppRoute[] = [
         label: 'Subscriber',
         imported: {
           imported: import('UI/Routes/Subscribers/Subscriber'),
-          path: 'Routes/Subscribers/Subscriber.tsx',
+          path: 'Routes/Subscribers/Subscriber/index.tsx',
         },
       },
     ],

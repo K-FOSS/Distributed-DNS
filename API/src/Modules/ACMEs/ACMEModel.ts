@@ -33,7 +33,7 @@ import { ACMEDomain } from './ACMEDomainModel';
 import { createOrder } from './Actions/CreateOrder';
 
 export const directoryUrl =
-  process.env['NODE_ENV'] === 'production'
+  process.env.NODE_ENV === 'production'
     ? directory.letsencrypt.production
     : directory.letsencrypt.staging;
 
@@ -77,6 +77,7 @@ export class ACME extends BaseEntity {
   )
   @JoinColumn()
   acmeAccount: ACMEAccount;
+
   @Column()
   acmeAccountId: string;
 
