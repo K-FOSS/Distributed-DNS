@@ -145,6 +145,7 @@ export type Mutation = {
   addSubscriberUser: Subscriber,
   removeSubscriberUser: Subscriber,
   addEntityToSubscriber: Subscriber,
+  removeEntityFromSubscriber: Subscriber,
   createSubscriberToken: Scalars['String'],
   addZoneUser: Zone,
   removeZoneUser: Zone,
@@ -265,6 +266,12 @@ export type MutationRemoveSubscriberUserArgs = {
 
 export type MutationAddEntityToSubscriberArgs = {
   newEntities: Array<EntityInput>,
+  subscriberId: Scalars['ID']
+};
+
+
+export type MutationRemoveEntityFromSubscriberArgs = {
+  entityIds: Array<Scalars['ID']>,
   subscriberId: Scalars['ID']
 };
 
@@ -911,6 +918,27 @@ export type NewEntityQuery = (
       & Pick<Acme, 'id' | 'name'>
     )> }
   )> }
+);
+
+export type RemoveEntityFromSubscriberMutationVariables = {
+  subscriberId: Scalars['ID'],
+  entityIds: Array<Scalars['ID']>
+};
+
+
+export type RemoveEntityFromSubscriberMutation = (
+  { __typename?: 'Mutation' }
+  & { removeEntityFromSubscriber: (
+    { __typename?: 'Subscriber' }
+    & Pick<Subscriber, 'id' | 'createdAt' | 'updatedAt' | 'name'>
+    & { subscribedEntities: Array<(
+      { __typename?: 'ACME' }
+      & Pick<Acme, 'id' | 'name'>
+    ) | (
+      { __typename?: 'Zone' }
+      & Pick<Zone, 'id' | 'domainName'>
+    )> }
+  ) }
 );
 
 export type SubscriberQueryVariables = {

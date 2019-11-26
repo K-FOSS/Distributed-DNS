@@ -48,7 +48,7 @@ export class SubscriberPubSub {
 
     this.ee.emit(subscriber.id);
 
-    await timeout(5000);
+    await timeout(1500);
 
     // const newEntities: Promise<typeof SubscriberEntities[]> = []
 

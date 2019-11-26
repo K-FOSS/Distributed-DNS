@@ -226,32 +226,43 @@ export class SubscribersResolver {
       Permission.WRITE,
     );
 
-    const zoneEntities = await subscriber.subscribedZoneEntities;
-    const tlsEntities = await subscriber.subscribedTLSEntities;
+    const [zoneEntities, tlsEntities] = await Promise.all([
+      subscriber.subscribedZoneEntities,
+      subscriber.subscribedTLSEntities,
+    ]);
 
-    for (const { entityType, entityId } of newEntities) {
-      let entity: typeof SubscriberEntities;
+    await Promise.all(
+      newEntities.map(async ({ entityType, entityId }) => {
+        let entity: typeof SubscriberEntities;
 
-      if (entityType === EntityType.ZONE) {
-        entity = await Zone.getUserZone(currentUser, entityId, Permission.READ);
-        zoneEntities.push(entity);
-      } else if (entityType === EntityType.TLS) {
-        entity = await ACME.getUserACME(
-          entityId,
-          currentUser,
-          {},
-          Permission.READ,
-        );
+        if (entityType === EntityType.ZONE) {
+          entity = await Zone.getUserZone(
+            currentUser,
+            entityId,
+            Permission.READ,
+          );
+          zoneEntities.push(entity);
+        } else if (entityType === EntityType.TLS) {
+          entity = await ACME.getUserACME(
+            entityId,
+            currentUser,
+            {},
+            Permission.READ,
+          );
 
-        tlsEntities.push(entity);
-      } else throw new Error('INVALID ENTITY');
+          tlsEntities.push(entity);
+        } else throw new Error('INVALID ENTITY');
 
-      if (!entity) throw new Error('INVALID ENTITY');
-    }
+        if (!entity) throw new Error('INVALID ENTITY');
+      }),
+    );
 
     await subscriber.save();
 
-    await subscriberPubSub.updateSubscriber(subscriber.id, newEntities);
+    setTimeout(
+      () => subscriberPubSub.updateSubscriber(subscriber.id, newEntities),
+      500,
+    );
 
     return subscriber;
   }
@@ -269,13 +280,15 @@ export class SubscribersResolver {
       Permission.WRITE,
     );
 
-    const zoneEntities = await subscriber.subscribedZoneEntities;
-    const tlsEntities = await subscriber.subscribedTLSEntities;
+    const [zoneEntities, tlsEntities] = await Promise.all([
+      subscriber.subscribedZoneEntities,
+      subscriber.subscribedTLSEntities,
+    ]);
 
-    for (const entityId of entityIds) {
+    entityIds.forEach((entityId) => {
       const zoneIndex = zoneEntities.findIndex(({ id }) => id === entityId);
       const tlsIndex = tlsEntities.findIndex(({ id }) => id === entityId);
-      console.log(zoneIndex);
+
       if (zoneEntities[zoneIndex]) {
         subscriberPubSub.publish(
           SubscriberEventPayloadType.DELETE,
@@ -293,10 +306,7 @@ export class SubscribersResolver {
 
         subscriberPubSub.ee.emit(subscriber.id);
       }
-    }
-
-    console.log(zoneEntities);
-    console.log(subscriber.subscribedZoneEntities);
+    });
 
     await subscriber.save();
 

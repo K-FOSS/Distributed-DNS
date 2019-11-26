@@ -145,6 +145,7 @@ export type Mutation = {
   addSubscriberUser: Subscriber,
   removeSubscriberUser: Subscriber,
   addEntityToSubscriber: Subscriber,
+  removeEntityFromSubscriber: Subscriber,
   createSubscriberToken: Scalars['String'],
   addZoneUser: Zone,
   removeZoneUser: Zone,
@@ -265,6 +266,12 @@ export type MutationRemoveSubscriberUserArgs = {
 
 export type MutationAddEntityToSubscriberArgs = {
   newEntities: Array<EntityInput>,
+  subscriberId: Scalars['ID']
+};
+
+
+export type MutationRemoveEntityFromSubscriberArgs = {
+  entityIds: Array<Scalars['ID']>,
   subscriberId: Scalars['ID']
 };
 

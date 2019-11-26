@@ -1,0 +1,28 @@
+mutation RemoveEntityFromSubscriber($subscriberId: ID!, $entityIds: [ID!]!) {
+  removeEntityFromSubscriber(
+    subscriberId: $subscriberId
+    entityIds: $entityIds
+  ) {
+    id
+
+    createdAt
+
+    updatedAt
+
+    name
+
+    subscribedEntities {
+      ... on Zone {
+        id
+
+        domainName
+      }
+
+      ... on ACME {
+        id
+
+        name
+      }
+    }
+  }
+}

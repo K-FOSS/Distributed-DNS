@@ -124,8 +124,6 @@ export class Zone extends BaseEntity {
   ): Promise<Zone> {
     const zone = await Zone.findOneOrFail(zoneId, options);
 
-    console.log(zone);
-
     if (user.roles.includes(UserRole.ADMIN)) return zone;
     return zone.checkUserAuthorization(user, requiredPermission);
   }

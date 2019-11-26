@@ -3,6 +3,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import SettingsCog from '@material-ui/icons/Settings';
 import DeleteIcon from '@material-ui/icons/Delete';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
 import React, { useMemo, useCallback, useState } from 'react';
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -22,6 +23,8 @@ import { EntityType, SubscriberEntity } from 'UI/GraphQL/graphqlTypes.gen';
 import { BaseButton } from 'UI/Components/Styles/Button/BaseButton';
 import { useNewEntityQuery } from './NewEntity.gen';
 import { useAddEntityToSubscriberMutation } from './AddEntityToSubscriber.gen';
+import { useRemoveEntityFromSubscriberMutation } from './RemoveEntityFromSubscriber.gen';
+import { useSnackbar } from 'notistack';
 
 interface SubscriberPageParams {
   subscriberId: string;
@@ -29,25 +32,46 @@ interface SubscriberPageParams {
 
 export default function SubscriberPage(): React.ReactElement {
   const { subscriberId } = useParams<SubscriberPageParams>();
+  const { enqueueSnackbar } = useSnackbar();
 
   const styles = useSubscriberPageStyles();
   const classes = useStyles();
   const TextField = useTextField();
 
   const { data } = useSubscriberQuery({ variables: { subscriberId } });
-  const { data: newEntitiesData, error, loading } = useNewEntityQuery();
+  const { data: newEntitiesData } = useNewEntityQuery();
 
   const [addEntityToSubscriber] = useAddEntityToSubscriberMutation();
+  const [removeEntityFromSubscriber] = useRemoveEntityFromSubscriberMutation();
 
   const [newEntity, setNewEntity] = useState<SubscriberEntity>();
   const [entityType, setEntityType] = useState<EntityType>(EntityType.Zone);
+
+  const handleRemoveEntityFromSubscriber = useCallback(
+    async (entityId: string) => {
+      const response = await removeEntityFromSubscriber({
+        variables: {
+          subscriberId,
+          entityIds: [entityId],
+        },
+      });
+
+      if (response.data?.removeEntityFromSubscriber) {
+        console.log(response);
+      } else {
+        console.error(`Delete entity failed`);
+        enqueueSnackbar('Failed to delete entity from Subscription', {
+          variant: 'error',
+        });
+      }
+    },
+    [subscriberId, removeEntityFromSubscriber, enqueueSnackbar],
+  );
 
   const userSubscriberPermissions = useMemo(
     () => data?.subscriber?.userPermissions || [Permission.Read],
     [data],
   );
-
-  console.log(userSubscriberPermissions);
 
   const entityList = useMemo(
     () =>
@@ -61,14 +85,16 @@ export default function SubscriberPage(): React.ReactElement {
             label={{ primary: name, secondary: type }}
           >
             {userSubscriberPermissions.includes(Permission.Write) && (
-              <IconButton onClick={() => console.log('Delete')}>
+              <IconButton
+                onClick={() => handleRemoveEntityFromSubscriber(entity.id)}
+              >
                 <DeleteIcon />
               </IconButton>
             )}
           </LabelListItem>
         );
       }),
-    [data, userSubscriberPermissions],
+    [data, userSubscriberPermissions, handleRemoveEntityFromSubscriber],
   );
 
   const handleAddNewEntity = useCallback(async () => {
@@ -178,7 +204,12 @@ export default function SubscriberPage(): React.ReactElement {
                     color='primary'
                     variant='contained'
                     fullWidth
-                  />
+                  >
+                    <CircularProgress
+                      style={{ color: 'white', marginRight: '1em' }}
+                      size={25}
+                    />
+                  </BaseButton>
                 </Grid>
               </Grid>
             )}
