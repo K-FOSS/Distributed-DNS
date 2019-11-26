@@ -142,6 +142,7 @@ export type Mutation = {
   updateMXResourceRecord: Zone,
   updateSRVResourceRecord: Zone,
   createSubscriber: CurrentUser,
+  deleteSubscriber: CurrentUser,
   addSubscriberUser: Subscriber,
   removeSubscriberUser: Subscriber,
   addEntityToSubscriber: Subscriber,
@@ -249,6 +250,11 @@ export type MutationUpdateSrvResourceRecordArgs = {
 
 export type MutationCreateSubscriberArgs = {
   input: SubscriberInput
+};
+
+
+export type MutationDeleteSubscriberArgs = {
+  subscriberId: Scalars['ID']
 };
 
 

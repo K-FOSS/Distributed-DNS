@@ -1,10 +1,13 @@
 import * as Types from '../../graphqlTypes.gen';
 
+import { AcmeFragment } from '../../ACME/GraphQL/ACME.gen';
 import { ZoneFragment } from '../../Zones/Zone.gen';
+
 
 
 import gql from 'graphql-tag';
 import { Zone } from '../../Zones/Zone.gen';
+import { Acme } from '../../ACME/GraphQL/ACME.gen';
 
 export const GetSubscribedEntities = gql`
     query getSubscribedEntities($subscriberToken: String!) {
@@ -13,11 +16,12 @@ export const GetSubscribedEntities = gql`
       ...Zone
     }
     ... on ACME {
-      id
+      ...ACME
     }
   }
 }
-    ${Zone}`;
+    ${Zone}
+${Acme}`;
 export type GetSubscribedEntitiesQueryVariables = {
   subscriberToken: Types.Scalars['String']
 };
@@ -27,7 +31,7 @@ export type GetSubscribedEntitiesQuery = (
   { __typename?: 'Query' }
   & { getSubscribedEntities: Array<(
     { __typename?: 'ACME' }
-    & Pick<Types.Acme, 'id'>
+    & AcmeFragment
   ) | (
     { __typename?: 'Zone' }
     & ZoneFragment

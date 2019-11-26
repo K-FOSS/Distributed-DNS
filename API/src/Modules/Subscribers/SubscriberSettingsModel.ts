@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   Entity,
+  JoinColumn,
 } from 'typeorm';
 import { Subscriber } from './SubscriberModel';
 
@@ -26,7 +27,8 @@ export class SubscriberSettings extends BaseEntity {
   @UpdateDateColumn()
   readonly updatedAt: Date;
 
-  @OneToOne(() => Subscriber, { cascade: ['remove'], onDelete: 'CASCADE' })
+  @OneToOne(() => Subscriber, { onDelete: 'CASCADE' })
+  @JoinColumn()
   readonly subscriber: Subscriber;
 
   @Column()

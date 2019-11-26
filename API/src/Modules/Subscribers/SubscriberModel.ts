@@ -19,7 +19,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  AfterInsert,
   FindOneOptions,
 } from 'typeorm';
 import { ACME } from '../ACMEs/ACMEModel';
@@ -152,14 +151,5 @@ export class Subscriber extends BaseEntity {
 
     if (user.roles.includes(UserRole.ADMIN)) return subscriber;
     return subscriber.checkUserAuthorization(user, requiredPermission);
-  }
-
-  @AfterInsert()
-  async createSubscriberSettings(): Promise<void> {
-    const subscriberSettings = SubscriberSettings.create({
-      subscriberId: this.id,
-    });
-
-    await subscriberSettings.save();
   }
 }

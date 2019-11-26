@@ -13,16 +13,17 @@ import { restartBINDContainer } from '../Docker'
  */
 export async function createUpdateZoneFile(zone: ZoneFragment): Promise<void> {
   const currentState = await loadState()
-  console.log(currentState)
 
   let zoneState = currentState.zones.find(({ id }) => id === zone.id)
   if (zoneState) {
-    console.log('Zone already exists')
-    console.log(zoneState)
-
     if (zoneState.updatedDate === zone.updatedDate) return
 
     console.log('Updating existing zone')
+
+    currentState.zones[currentState.zones.indexOf(zoneState)] = {
+      ...currentState.zones[currentState.zones.indexOf(zoneState)],
+      updatedDate: zone.updatedDate,
+    }
   } else {
     zoneState = {
       id: zone.id,

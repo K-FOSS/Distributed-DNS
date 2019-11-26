@@ -28,6 +28,7 @@ import { EntityInput } from './EntityInput';
 import { EntityType } from './EntityType';
 import { Zone } from '../Zones/ZoneModel';
 import { ACME } from '../ACMEs/ACMEModel';
+import { SubscriberSettings } from './SubscriberSettingsModel';
 
 @Resolver(() => Subscriber)
 export class SubscribersResolver {
@@ -69,12 +70,33 @@ export class SubscribersResolver {
     const subscriber = Subscriber.create(input);
     await subscriber.save();
 
+    const subscriberSettings = SubscriberSettings.create({
+      subscriberId: subscriber.id,
+    });
+    await subscriberSettings.save();
+
     const subscriberAccess = SubscriberAccess.create({
       userId: currentUser.id,
       accessPermissions: [Permission.READ, Permission.WRITE, Permission.ADMIN],
       subscriberId: subscriber.id,
     });
     await subscriberAccess.save();
+
+    return currentUser;
+  }
+
+  @Authorized()
+  @Mutation(() => CurrentUser)
+  async deleteSubscriber(
+    @Arg('subscriberId', () => ID) subscriberId: string,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<CurrentUser> {
+    const subscriber = await Subscriber.getSubscriber(
+      currentUser,
+      subscriberId,
+      Permission.ADMIN,
+    );
+    await subscriber.remove();
 
     return currentUser;
   }

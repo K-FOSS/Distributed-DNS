@@ -2,6 +2,7 @@
 import { getSubscribedEntities } from './getSubscribedEntities'
 import { createUpdateZoneFile, deleteZone } from '../Zones'
 import { loadState } from '../State'
+import { createUpdateACME } from '../ACME'
 
 /**
  * Pulls the current Zones & TLS Certificates on the Subscriber
@@ -19,9 +20,9 @@ export async function pullSubscribedEntities(): Promise<any> {
       ),
   )
   for (const zoneToDelete of toDeleteZones) await deleteZone(zoneToDelete.id)
-  console.log('Zones to delete', toDeleteZones)
 
   for (const entity of subscribedEntities) {
     if ('domainName' in entity) await createUpdateZoneFile(entity)
+    else if ('name' in entity) await createUpdateACME(entity)
   }
 }

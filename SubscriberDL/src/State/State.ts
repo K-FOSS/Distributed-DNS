@@ -3,11 +3,6 @@ import { config } from '../Config/'
 
 export const statePath = `${config.dataPath}/State/state.json`
 
-export interface ResourceRecordState {
-  id: string
-  data: string
-}
-
 export interface ZoneState {
   /**
    * Zone database ID
@@ -25,10 +20,18 @@ export interface ZoneState {
   updatedDate: Date
 }
 
+interface ACMEState {
+  id: string
+  name: string
+  updatedDate: Date
+}
+
 export interface SubscriberDLState {
   zones: ZoneState[]
+  ACMEs: ACMEState[]
 }
 
 export const defaultState: SubscriberDLState = {
   zones: [],
+  ACMEs: [],
 }

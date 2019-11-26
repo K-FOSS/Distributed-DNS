@@ -131,6 +131,7 @@ type Mutation {
   updateMXResourceRecord(input: MXResourceRecordInput!, resourceRecordId: ID!): Zone!
   updateSRVResourceRecord(input: SRVResourceRecordInput!, resourceRecordId: ID!): Zone!
   createSubscriber(input: SubscriberInput!): CurrentUser!
+  deleteSubscriber(subscriberId: ID!): CurrentUser!
   addSubscriberUser(input: UserPermissionInput!, subscriberId: ID!): Subscriber!
   removeSubscriberUser(userId: ID!, subscriberId: ID!): Subscriber!
   addEntityToSubscriber(newEntities: [EntityInput!]!, subscriberId: ID!): Subscriber!

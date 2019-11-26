@@ -22,6 +22,9 @@ export class SubscriberAccess extends BaseEntity {
   @ManyToOne(
     () => Subscriber,
     (subscriber) => subscriber.accessPermissions,
+    {
+      onDelete: 'CASCADE',
+    },
   )
   @JoinColumn()
   subscriber: Subscriber;

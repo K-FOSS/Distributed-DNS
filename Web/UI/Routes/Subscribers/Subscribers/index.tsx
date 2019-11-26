@@ -7,8 +7,12 @@ import { useHistory } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { useCreateSubscriberMutation } from './CreateSubscriber.gen';
 import { Subscriber, Permission } from 'UI/GraphQL/graphqlTypes.gen';
+import { useDeleteSubscriberMutation } from './DeleteSubscriber.gen';
 
-type SubscriberData = Pick<Subscriber, 'id' | 'name'>;
+type SubscriberData = Pick<
+  Subscriber,
+  'id' | 'name' | 'userAccess' | 'userPermissions'
+>;
 
 type RowClick<T> = (
   event?: React.MouseEvent,
@@ -19,8 +23,11 @@ type RowClick<T> = (
 export default function SubscribersPage(): React.ReactElement {
   const { enqueueSnackbar } = useSnackbar();
   const history = useHistory();
+
   const { data } = useSubscribersQuery();
+
   const [createSubscriber] = useCreateSubscriberMutation();
+  const [deleteSubscriber] = useDeleteSubscriberMutation();
 
   const handleAddSubscriber = useCallback(
     async (input: SubscriberData) => {
@@ -30,6 +37,12 @@ export default function SubscribersPage(): React.ReactElement {
         enqueueSnackbar('Successfully added subscriber', {
           variant: 'success',
         });
+      else {
+        console.error('Error occurred during the creation of a Subscriber');
+        enqueueSnackbar(
+          'Unknown error occurred during the creation of a subscriber',
+        );
+      }
     },
     [createSubscriber, enqueueSnackbar],
   );
@@ -37,6 +50,29 @@ export default function SubscribersPage(): React.ReactElement {
   const handleEditSubscriber = useCallback(async (input: SubscriberData) => {
     console.log(input);
   }, []);
+
+  const handleDeleteSubscriber = useCallback(
+    async (subscriberData: SubscriberData) => {
+      const response = await deleteSubscriber({
+        variables: {
+          subscriberId: subscriberData.id,
+        },
+      });
+
+      if (response.data?.deleteSubscriber)
+        enqueueSnackbar('Successfully deleted Subscriber', {
+          variant: 'success',
+        });
+      else {
+        console.error(
+          'Unknown error occurred during the deletion of the Subscriber',
+        );
+        enqueueSnackbar('Unknown error occurred during deletion');
+      }
+      console.log('Deleting Subscriber: ', subscriberData);
+    },
+    [deleteSubscriber, enqueueSnackbar],
+  );
 
   const handleRowClick: RowClick<SubscriberData> = useCallback(
     (a, rowData) => rowData && history.push(`/Subscribers/${rowData.id}`),
@@ -59,7 +95,7 @@ export default function SubscribersPage(): React.ReactElement {
             rowData.userPermissions.includes(Permission.Write),
           onRowAdd: handleAddSubscriber,
           onRowUpdate: handleEditSubscriber,
-          onRowDelete: async (a) => console.log(a),
+          onRowDelete: handleDeleteSubscriber,
         }}
       />
     </>

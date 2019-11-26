@@ -1,10 +1,13 @@
 import * as Types from '../../graphqlTypes.gen';
 
+import { AcmeFragment } from '../../ACME/GraphQL/ACME.gen';
 import { ZoneFragment } from '../../Zones/Zone.gen';
+
 
 
 import gql from 'graphql-tag';
 import { Zone } from '../../Zones/Zone.gen';
+import { Acme } from '../../ACME/GraphQL/ACME.gen';
 
 export const Subscribe = gql`
     subscription Subscribe($subscriberToken: String!) {
@@ -17,19 +20,13 @@ export const Subscribe = gql`
         ...Zone
       }
       ... on ACME {
-        id
-        name
-        certificates {
-          id
-          createdAt
-          certificate
-          privateKey
-        }
+        ...ACME
       }
     }
   }
 }
-    ${Zone}`;
+    ${Zone}
+${Acme}`;
 export type SubscribeSubscriptionVariables = {
   subscriberToken: Types.Scalars['String']
 };
@@ -42,11 +39,7 @@ export type SubscribeSubscription = (
     & Pick<Types.SubscriberEventPayload, 'eventType' | 'id'>
     & { entity: (
       { __typename?: 'ACME' }
-      & Pick<Types.Acme, 'id' | 'name'>
-      & { certificates: Array<(
-        { __typename?: 'Certificate' }
-        & Pick<Types.Certificate, 'id' | 'createdAt' | 'certificate' | 'privateKey'>
-      )> }
+      & AcmeFragment
     ) | (
       { __typename?: 'Zone' }
       & ZoneFragment

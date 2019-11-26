@@ -5,7 +5,7 @@ query getSubscribedEntities($subscriberToken: String!) {
     }
 
     ... on ACME {
-      id
+      ...ACME
     }
   }
 }

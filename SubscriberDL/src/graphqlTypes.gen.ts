@@ -142,9 +142,11 @@ export type Mutation = {
   updateMXResourceRecord: Zone,
   updateSRVResourceRecord: Zone,
   createSubscriber: CurrentUser,
+  deleteSubscriber: CurrentUser,
   addSubscriberUser: Subscriber,
   removeSubscriberUser: Subscriber,
   addEntityToSubscriber: Subscriber,
+  removeEntityFromSubscriber: Subscriber,
   createSubscriberToken: Scalars['String'],
   addZoneUser: Zone,
   removeZoneUser: Zone,
@@ -251,6 +253,11 @@ export type MutationCreateSubscriberArgs = {
 };
 
 
+export type MutationDeleteSubscriberArgs = {
+  subscriberId: Scalars['ID']
+};
+
+
 export type MutationAddSubscriberUserArgs = {
   input: UserPermissionInput,
   subscriberId: Scalars['ID']
@@ -265,6 +272,12 @@ export type MutationRemoveSubscriberUserArgs = {
 
 export type MutationAddEntityToSubscriberArgs = {
   newEntities: Array<EntityInput>,
+  subscriberId: Scalars['ID']
+};
+
+
+export type MutationRemoveEntityFromSubscriberArgs = {
+  entityIds: Array<Scalars['ID']>,
   subscriberId: Scalars['ID']
 };
 
@@ -541,6 +554,15 @@ export type ZoneSettings = {
   contact: Scalars['String'],
 };
 
+export type AcmeFragment = (
+  { __typename?: 'ACME' }
+  & Pick<Acme, 'id' | 'name'>
+  & { certificates: Array<(
+    { __typename?: 'Certificate' }
+    & Pick<Certificate, 'id' | 'createdAt' | 'certificate' | 'privateKey'>
+  )> }
+);
+
 export type GetSubscribedEntitiesQueryVariables = {
   subscriberToken: Scalars['String']
 };
@@ -550,7 +572,7 @@ export type GetSubscribedEntitiesQuery = (
   { __typename?: 'Query' }
   & { getSubscribedEntities: Array<(
     { __typename?: 'ACME' }
-    & Pick<Acme, 'id'>
+    & AcmeFragment
   ) | (
     { __typename?: 'Zone' }
     & ZoneFragment
@@ -569,11 +591,7 @@ export type SubscribeSubscription = (
     & Pick<SubscriberEventPayload, 'eventType' | 'id'>
     & { entity: (
       { __typename?: 'ACME' }
-      & Pick<Acme, 'id' | 'name'>
-      & { certificates: Array<(
-        { __typename?: 'Certificate' }
-        & Pick<Certificate, 'id' | 'createdAt' | 'certificate' | 'privateKey'>
-      )> }
+      & AcmeFragment
     ) | (
       { __typename?: 'Zone' }
       & ZoneFragment
