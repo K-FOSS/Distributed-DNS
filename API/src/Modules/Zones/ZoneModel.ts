@@ -36,7 +36,6 @@ export class Zone extends BaseEntity {
   readonly createdAt: Date;
 
   @OneToOne(() => ZoneSettings, {
-    cascade: ['insert', 'update', 'remove'],
     onDelete: 'CASCADE',
   })
   @JoinColumn()
@@ -45,14 +44,14 @@ export class Zone extends BaseEntity {
   @Column()
   zoneSettingsId: string;
 
-  @Field(() => Date, { nullable: true })
-  async updatedDate(): Promise<Date | undefined> {
+  @Field(() => Date)
+  async updatedDate(): Promise<Date> {
     const resourceRecord = await ResourceRecord.getRepository().findOne(
       undefined,
       { order: { updatedAt: 'DESC' } },
     );
 
-    return resourceRecord ? resourceRecord.updatedAt : undefined;
+    return resourceRecord?.updatedAt || new Date();
   }
 
   @Field()
@@ -64,7 +63,6 @@ export class Zone extends BaseEntity {
     () => ResourceRecord,
     (resourceRecord) => resourceRecord.zone,
     {
-      cascade: ['insert', 'update'],
       onDelete: 'CASCADE',
     },
   )
@@ -76,7 +74,6 @@ export class Zone extends BaseEntity {
     () => ZonePermissions,
     (zonePermission) => zonePermission.zone,
     {
-      cascade: ['insert', 'update'],
       onDelete: 'CASCADE',
     },
   )

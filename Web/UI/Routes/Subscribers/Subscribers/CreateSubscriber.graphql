@@ -5,8 +5,6 @@ mutation CreateSubscriber($input: SubscriberInput!) {
     subscribers {
       id
 
-      type
-
       name
     }
   }

@@ -88,10 +88,6 @@ export type CreateSrvResourceRecordInput = {
   target: Scalars['String'],
 };
 
-export type CreateUtilityInput = {
-  name: Scalars['String'],
-};
-
 export type CreateValueResourceRecordInput = {
   type: ValueRecordType,
   ttl?: Maybe<Scalars['Int']>,
@@ -136,11 +132,13 @@ export type Mutation = {
   updateMXResourceRecord: Zone,
   updateSRVResourceRecord: Zone,
   createSubscriber: CurrentUser,
+  addSubscriberUser: Subscriber,
+  removeSubscriberUser: Subscriber,
   createSubscriberToken: Scalars['String'],
-  createUtility: Utility,
   addZoneUser: Zone,
   removeZoneUser: Zone,
   createZone: Zone,
+  deleteZone: CurrentUser,
 };
 
 
@@ -242,18 +240,25 @@ export type MutationCreateSubscriberArgs = {
 };
 
 
+export type MutationAddSubscriberUserArgs = {
+  input: UserPermissionInput,
+  subscriberId: Scalars['ID']
+};
+
+
+export type MutationRemoveSubscriberUserArgs = {
+  userId: Scalars['ID'],
+  subscriberId: Scalars['ID']
+};
+
+
 export type MutationCreateSubscriberTokenArgs = {
   subscriberId: Scalars['ID']
 };
 
 
-export type MutationCreateUtilityArgs = {
-  input: CreateUtilityInput
-};
-
-
 export type MutationAddZoneUserArgs = {
-  input: ZoneUserInput,
+  input: UserPermissionInput,
   zoneId: Scalars['ID']
 };
 
@@ -266,6 +271,11 @@ export type MutationRemoveZoneUserArgs = {
 
 export type MutationCreateZoneArgs = {
   input: ZoneInput
+};
+
+
+export type MutationDeleteZoneArgs = {
+  zoneId: Scalars['ID']
 };
 
 export type MxResourceRecordInput = {
@@ -287,11 +297,9 @@ export type Query = {
   currentUser?: Maybe<CurrentUser>,
   hasSetup: Scalars['Boolean'],
   subscriber: Subscriber,
-  getSubscribedEntities: Array<Zone>,
+  getSubscribedEntities: Array<SubscriberEntity>,
   users: Array<User>,
   user: User,
-  utilities: Array<Utility>,
-  helloWorld: Scalars['String'],
   zones: Array<Zone>,
   zone: Zone,
 };
@@ -388,15 +396,19 @@ export type Subscriber = {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
-  type: SubscriberType,
   name: Scalars['String'],
   accessPermissions: Array<SubscriberAccess>,
   subscribedEntities: Array<SubscriberEntity>,
+  subscriberSettings: SubscriberSettings,
+  userAccess: Permission,
+  userPermissions: Array<Permission>,
 };
 
 export type SubscriberAccess = {
    __typename?: 'SubscriberAccess',
   id: Scalars['ID'],
+  user: User,
+  accessPermissions: Array<Permission>,
 };
 
 export type SubscriberEntity = Acme | Zone;
@@ -410,7 +422,6 @@ export type SubscriberEventPayload = {
 
 export type SubscriberInput = {
   name: Scalars['String'],
-  type: SubscriberType,
 };
 
 export enum SubscriberPayloadType {
@@ -419,20 +430,16 @@ export enum SubscriberPayloadType {
   Delete = 'DELETE'
 }
 
-export enum SubscriberType {
-  Tls = 'TLS',
-  Zone = 'ZONE'
-}
+export type SubscriberSettings = {
+   __typename?: 'SubscriberSettings',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+};
 
 export type Subscription = {
    __typename?: 'Subscription',
-  certificateEvents: Certificate,
   subscribe: SubscriberEventPayload,
-};
-
-
-export type SubscriptionCertificateEventsArgs = {
-  ACMEToken: Scalars['String']
 };
 
 
@@ -452,17 +459,16 @@ export type UserInput = {
   password: Scalars['String'],
 };
 
+export type UserPermissionInput = {
+  userId: Scalars['ID'],
+  accessPermission: Permission,
+};
+
 export enum UserRole {
   Guest = 'GUEST',
   User = 'USER',
   Admin = 'ADMIN'
 }
-
-export type Utility = {
-   __typename?: 'Utility',
-  id: Scalars['ID'],
-  name: Scalars['String'],
-};
 
 export enum ValueRecordType {
   A = 'A',
@@ -516,15 +522,6 @@ export type ZoneSettings = {
    __typename?: 'ZoneSettings',
   id: Scalars['ID'],
   contact: Scalars['String'],
-};
-
-export type ZoneSettingsInput = {
-  stuff: Scalars['String'],
-};
-
-export type ZoneUserInput = {
-  userId: Scalars['ID'],
-  accessPermission: Permission,
 };
 
 export type CurrentUserFragment = (
@@ -726,21 +723,6 @@ export type CreateZoneMutation = (
   ) }
 );
 
-export type ZonesQueryVariables = {};
-
-
-export type ZonesQuery = (
-  { __typename?: 'Query' }
-  & { currentUser: Maybe<(
-    { __typename?: 'CurrentUser' }
-    & Pick<CurrentUser, 'id'>
-    & { zones: Array<(
-      { __typename?: 'Zone' }
-      & Pick<Zone, 'domainName' | 'id' | 'userPermissions'>
-    )> }
-  )> }
-);
-
 export type AcmeQueryVariables = {
   acmeId: Scalars['String']
 };
@@ -884,13 +866,87 @@ export type SubscriberQuery = (
   { __typename?: 'Query' }
   & { subscriber: (
     { __typename?: 'Subscriber' }
-    & Pick<Subscriber, 'id' | 'createdAt' | 'updatedAt' | 'name'>
+    & Pick<Subscriber, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'userPermissions'>
     & { subscribedEntities: Array<(
       { __typename?: 'ACME' }
       & Pick<Acme, 'id' | 'name'>
     ) | (
       { __typename?: 'Zone' }
       & Pick<Zone, 'id' | 'domainName'>
+    )> }
+  ) }
+);
+
+export type AddSubscriberUserMutationVariables = {
+  subscriberId: Scalars['ID'],
+  input: UserPermissionInput
+};
+
+
+export type AddSubscriberUserMutation = (
+  { __typename?: 'Mutation' }
+  & { addSubscriberUser: (
+    { __typename?: 'Subscriber' }
+    & Pick<Subscriber, 'id' | 'name' | 'updatedAt'>
+    & { subscriberSettings: (
+      { __typename?: 'SubscriberSettings' }
+      & Pick<SubscriberSettings, 'id'>
+    ), accessPermissions: Array<(
+      { __typename?: 'SubscriberAccess' }
+      & Pick<SubscriberAccess, 'id' | 'accessPermissions'>
+      & { user: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'username'>
+      ) }
+    )> }
+  ) }
+);
+
+export type RemoveSubscriberUserMutationVariables = {
+  subscriberId: Scalars['ID'],
+  userId: Scalars['ID']
+};
+
+
+export type RemoveSubscriberUserMutation = (
+  { __typename?: 'Mutation' }
+  & { removeSubscriberUser: (
+    { __typename?: 'Subscriber' }
+    & Pick<Subscriber, 'id' | 'name' | 'updatedAt'>
+    & { subscriberSettings: (
+      { __typename?: 'SubscriberSettings' }
+      & Pick<SubscriberSettings, 'id'>
+    ), accessPermissions: Array<(
+      { __typename?: 'SubscriberAccess' }
+      & Pick<SubscriberAccess, 'id' | 'accessPermissions'>
+      & { user: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'username'>
+      ) }
+    )> }
+  ) }
+);
+
+export type SubscriberSettingsQueryVariables = {
+  subscriberId: Scalars['ID']
+};
+
+
+export type SubscriberSettingsQuery = (
+  { __typename?: 'Query' }
+  & { subscriber: (
+    { __typename?: 'Subscriber' }
+    & Pick<Subscriber, 'id' | 'name' | 'updatedAt'>
+    & { subscriberSettings: (
+      { __typename?: 'SubscriberSettings' }
+      & Pick<SubscriberSettings, 'id'>
+    ), accessPermissions: Array<(
+      { __typename?: 'SubscriberAccess' }
+      & Pick<SubscriberAccess, 'id' | 'accessPermissions'>
+      & { user: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'username'>
+      ) }
     )> }
   ) }
 );
@@ -907,7 +963,7 @@ export type CreateSubscriberMutation = (
     & Pick<CurrentUser, 'id'>
     & { subscribers: Array<(
       { __typename?: 'Subscriber' }
-      & Pick<Subscriber, 'id' | 'type' | 'name'>
+      & Pick<Subscriber, 'id' | 'name'>
     )> }
   ) }
 );
@@ -922,7 +978,7 @@ export type SubscribersQuery = (
     & Pick<CurrentUser, 'id' | 'username'>
     & { subscribers: Array<(
       { __typename?: 'Subscriber' }
-      & Pick<Subscriber, 'id' | 'type' | 'name'>
+      & Pick<Subscriber, 'id' | 'name' | 'userAccess' | 'userPermissions'>
     )> }
   )> }
 );
@@ -949,7 +1005,7 @@ export type ZoneQuery = (
 
 export type AddZoneUserMutationVariables = {
   zoneId: Scalars['ID'],
-  input: ZoneUserInput
+  input: UserPermissionInput
 };
 
 
@@ -1013,4 +1069,36 @@ export type ZoneSettingsQuery = (
       & Pick<ZoneSettings, 'id' | 'contact'>
     ) }
   ) }
+);
+
+export type DeleteZoneMutationVariables = {
+  zoneId: Scalars['ID']
+};
+
+
+export type DeleteZoneMutation = (
+  { __typename?: 'Mutation' }
+  & { deleteZone: (
+    { __typename?: 'CurrentUser' }
+    & Pick<CurrentUser, 'id' | 'username'>
+    & { zones: Array<(
+      { __typename?: 'Zone' }
+      & Pick<Zone, 'id' | 'domainName' | 'userPermissions'>
+    )> }
+  ) }
+);
+
+export type ZonesPageQueryVariables = {};
+
+
+export type ZonesPageQuery = (
+  { __typename?: 'Query' }
+  & { currentUser: Maybe<(
+    { __typename?: 'CurrentUser' }
+    & Pick<CurrentUser, 'id' | 'username'>
+    & { zones: Array<(
+      { __typename?: 'Zone' }
+      & Pick<Zone, 'id' | 'domainName' | 'userPermissions'>
+    )> }
+  )> }
 );

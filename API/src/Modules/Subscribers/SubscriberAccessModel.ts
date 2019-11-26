@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { User } from '../Users/UserModel';
 import { Subscriber } from './SubscriberModel';
+import { Permission } from '../Permission/Permission';
 
 @ObjectType()
 @Entity()
@@ -28,9 +29,14 @@ export class SubscriberAccess extends BaseEntity {
   @Column()
   subscriberId: string;
 
-  @ManyToOne(() => User)
+  @Field(() => User)
+  @ManyToOne(() => User, { lazy: true })
   user: Promise<User> | User;
 
   @Column()
   userId: string;
+
+  @Field(() => [Permission])
+  @Column({ enum: Permission, type: 'enum', array: true })
+  accessPermissions: Permission[];
 }

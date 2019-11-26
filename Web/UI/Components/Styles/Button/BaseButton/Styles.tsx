@@ -6,7 +6,7 @@ export const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     button: {
       marginTop: '1em !important',
-      color: ({
+      background: ({
         mainColor,
       }: Omit<
         BaseButtonProps,

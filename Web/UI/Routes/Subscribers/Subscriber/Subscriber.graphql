@@ -21,5 +21,7 @@ query Subscriber($subscriberId: ID!) {
         name
       }
     }
+
+    userPermissions
   }
 }

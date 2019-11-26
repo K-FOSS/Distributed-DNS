@@ -10,14 +10,21 @@ import {
   Resolver,
   Root,
   Subscription,
+  FieldResolver,
 } from 'type-graphql';
 import { CurrentUser } from '../Auth/CurrentUser';
-import { Zone } from '../Zones/ZoneModel';
 import { SubscriberAccess } from './SubscriberAccessModel';
 import { SubscriberEventPayload } from './SubscriberEventPayload';
 import { SubscriberInput } from './SubscriberInput';
 import { Subscriber, SubscriberEntities } from './SubscriberModel';
 import { subscriberPubSub } from './SubscriptionPubSub';
+import { Permission, getPermission } from '../Permission/Permission';
+import { ApolloError } from 'apollo-server-koa';
+import { UserPermissionInput } from '../Permission/UserInput';
+import { EntityInput } from './EntityInput';
+import { EntityType } from './EntityType';
+import { Zone } from '../Zones/ZoneModel';
+import { ACME } from '../ACMEs/ACMEModel';
 
 @Resolver(() => Subscriber)
 export class SubscribersResolver {
@@ -27,15 +34,27 @@ export class SubscribersResolver {
     @Arg('subscriberId', () => ID) subscriberId: string,
     @Ctx() { currentUser }: AuthContext,
   ): Promise<Subscriber> {
-    return Subscriber.getSubscriber(subscriberId, currentUser);
+    return Subscriber.getSubscriber(
+      currentUser,
+      subscriberId,
+      Permission.READ,
+      {
+        relations: ['accessPermissions'],
+      },
+    );
   }
 
-  @Query(() => [Zone])
+  @Query(() => [SubscriberEntities])
   async getSubscribedEntities(
     @Arg('subscriberToken') subscriberToken: string,
   ): Promise<typeof SubscriberEntities[]> {
     const subscriber = await Subscriber.getSubscriberFromToken(subscriberToken);
-    return subscriber.subscribedEntities;
+    return (
+      await Promise.all([
+        subscriber.subscribedZoneEntities,
+        subscriber.subscribedTLSEntities,
+      ])
+    ).flat();
   }
 
   @Authorized()
@@ -47,6 +66,7 @@ export class SubscribersResolver {
     const subscriber = Subscriber.create(input);
     const subscriberAccess = SubscriberAccess.create({
       userId: currentUser.id,
+      accessPermissions: [Permission.READ, Permission.WRITE, Permission.ADMIN],
     });
 
     subscriber.accessPermissions = [subscriberAccess];
@@ -55,6 +75,85 @@ export class SubscribersResolver {
     return currentUser;
   }
 
+  @Authorized()
+  @Mutation(() => Subscriber)
+  async addSubscriberUser(
+    @Arg('subscriberId', () => ID) subscriberId: string,
+    @Arg('input') { userId, accessPermission }: UserPermissionInput,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Subscriber> {
+    const subscriber = await Subscriber.getSubscriber(
+      currentUser,
+      subscriberId,
+      Permission.ADMIN,
+    );
+
+    const subscriberPermissions = await SubscriberAccess.find({
+      where: {
+        subscriberId: subscriber.id,
+      },
+    });
+
+    const existingPermissions = subscriberPermissions.find(
+      ({ userId: oldUserId }) => oldUserId === userId,
+    );
+    if (existingPermissions) throw new ApolloError('USER ALREADY IN ZONE');
+
+    let newUserAccessPermission: Permission[];
+
+    if (accessPermission === Permission.ADMIN)
+      newUserAccessPermission = [
+        Permission.READ,
+        Permission.WRITE,
+        Permission.ADMIN,
+      ];
+    else if (accessPermission === Permission.WRITE)
+      newUserAccessPermission = [Permission.READ, Permission.WRITE];
+    else if (accessPermission === Permission.READ)
+      newUserAccessPermission = [Permission.READ];
+
+    const userAccess = SubscriberAccess.create({
+      userId: userId,
+      accessPermissions: newUserAccessPermission!,
+      subscriberId: subscriber.id,
+    });
+
+    await userAccess.save();
+
+    return subscriber;
+  }
+
+  @Authorized()
+  @Mutation(() => Subscriber)
+  async removeSubscriberUser(
+    @Arg('subscriberId', () => ID) subscriberId: string,
+    @Arg('userId', () => ID) userId: string,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Subscriber> {
+    if (currentUser.id === userId)
+      throw new ApolloError(`You can't remove yourself silly`, 'SILLY_HUMAN');
+
+    const subscriber = await Subscriber.getSubscriber(
+      currentUser,
+      subscriberId,
+      Permission.ADMIN,
+    );
+
+    const subscriberPermissions = await SubscriberAccess.findOne({
+      where: {
+        subscriberId: subscriber.id,
+        userId,
+      },
+    });
+    if (!subscriberPermissions)
+      throw new ApolloError('USER IS NOT IN SUBSCRIBER');
+
+    await subscriberPermissions.remove();
+
+    return subscriber;
+  }
+
+  /*
   @Mutation(() => Subscriber)
   async testing(
     @Arg('subscriberId', () => ID) subscriberId: string,
@@ -71,7 +170,6 @@ export class SubscribersResolver {
     return subscriber.save();
   }
 
-  /*
   @Authorized()
   @Mutation(() => Subscriber)
   async updateSubscriber(
@@ -112,14 +210,58 @@ export class SubscribersResolver {
   } */
 
   @Authorized()
+  @Mutation(() => Subscriber)
+  async addEntityToSubscriber(
+    @Arg('subscriberId', () => ID) subscriberId: string,
+    @Arg('newEntities', () => [EntityInput]) newEntities: EntityInput[],
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Subscriber> {
+    const subscriber = await Subscriber.getSubscriber(
+      currentUser,
+      subscriberId,
+      Permission.ADMIN,
+    );
+
+    const zoneEntities = await subscriber.subscribedZoneEntities;
+    const tlsEntities = await subscriber.subscribedTLSEntities;
+
+    for (const { entityType, entityId } of newEntities) {
+      let entity: typeof SubscriberEntities;
+
+      if (entityType === EntityType.ZONE) {
+        entity = await Zone.getUserZone(currentUser, entityId, Permission.READ);
+        zoneEntities.push(entity);
+      } else if (entityType === EntityType.TLS) {
+        entity = await ACME.getUserACME(
+          entityId,
+          currentUser,
+          {},
+          Permission.READ,
+        );
+
+        tlsEntities.push(entity);
+      } else throw new Error('INVALID ENTITY');
+
+      if (!entity) throw new Error('INVALID ENTITY');
+    }
+
+    await subscriber.save();
+
+    await subscriberPubSub.updateSubscriber(subscriber.id, newEntities);
+
+    return subscriber;
+  }
+
+  @Authorized()
   @Mutation(() => String)
   async createSubscriberToken(
     @Arg('subscriberId', () => ID) subscriberId: string,
     @Ctx() { currentUser }: AuthContext,
   ): Promise<string> {
     const subscriber = await Subscriber.getSubscriber(
-      subscriberId,
       currentUser,
+      subscriberId,
+      Permission.ADMIN,
     );
 
     return subscriber.subscriberToken();
@@ -136,5 +278,59 @@ export class SubscribersResolver {
     @Root() root: SubscriberEventPayload,
   ): SubscriberEventPayload {
     return root;
+  }
+
+  @Authorized()
+  @FieldResolver(() => Permission)
+  async userAccess(
+    @Root() { id }: Subscriber,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Permission> {
+    const userAccess = await SubscriberAccess.findOneOrFail({
+      where: { subscriberId: id, userId: currentUser.id },
+    });
+
+    try {
+      return getPermission(userAccess.accessPermissions);
+    } catch {
+      throw new ApolloError('PERMISSIONS ERROR');
+    }
+  }
+
+  @Authorized()
+  @FieldResolver(() => [Permission])
+  async userPermissions(
+    @Root() { id }: Subscriber,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Permission[]> {
+    const userPermission = await SubscriberAccess.findOneOrFail({
+      where: { subscriberId: id, userId: currentUser.id },
+    });
+
+    return userPermission.accessPermissions;
+  }
+
+  @Authorized()
+  @FieldResolver()
+  async accessPermissions(
+    @Root() subscriber: Subscriber,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<SubscriberAccess[]> {
+    await subscriber.checkUserAuthorization(currentUser, Permission.ADMIN);
+
+    return SubscriberAccess.find({
+      where: {
+        subscriberId: subscriber.id,
+      },
+    });
+  }
+
+  @FieldResolver(() => [SubscriberEntities])
+  async subscribedEntities(
+    @Root() { subscribedZoneEntities, subscribedTLSEntities }: Subscriber,
+  ): Promise<typeof SubscriberEntities[]> {
+    return (
+      await Promise.all([subscribedZoneEntities, subscribedTLSEntities])
+    ).flat();
   }
 }

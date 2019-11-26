@@ -1,0 +1,30 @@
+subscription Subscribe($subscriberToken: String!) {
+  subscribe(subscriberToken: $subscriberToken) {
+    eventType
+
+    id
+
+    eventType
+
+    entity {
+      ... on Zone {
+        ...Zone
+      }
+      ... on ACME {
+        id
+
+        name
+
+        certificates {
+          id
+
+          createdAt
+
+          certificate
+
+          privateKey
+        }
+      }
+    }
+  }
+}

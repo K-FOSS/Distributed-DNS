@@ -7,6 +7,7 @@ import { PageSectionRoot } from 'UI/Components/Styles/Section/PageSectionRoot';
 import { User } from 'UI/GraphQL/graphqlTypes.gen';
 import { UserManagementPanel } from './UserManagementPanel';
 import { useZoneSettingsQuery } from './ZoneSettings.gen';
+import { ZoneManagementPanel } from './ZoneManagementPanel';
 
 interface ZoneSettingsPageParams {
   zoneId: string;

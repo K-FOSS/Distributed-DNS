@@ -26,20 +26,15 @@ services:
     image: 'applicationtemplate-gen'
     volumes:
       - './Web:/data'
-  acmedl-gen:
+
+  SubscriberDL-GQLGen:
     build:
       context: './Scripts/GraphQLCodegen'
       dockerfile: 'Dockerfile'
     image: 'applicationtemplate-gen'
     volumes:
-      - './ACMEDL:/data'
-  dnsdl-gen:
-    build:
-      context: './Scripts/GraphQLCodegen'
-      dockerfile: 'Dockerfile'
-    image: 'applicationtemplate-gen'
-    volumes:
-      - './DNSDL:/data'
+      - './SubscriberDL:/data'
+
   database:
     image: postgres:11-alpine
     ports:
@@ -49,6 +44,7 @@ services:
     environment:
       POSTGRES_PASSWORD: pgpass
       POSTGRES_DB: application
+
   NS1:
     image: resystit/bind9:latest
     restart: unless-stopped
@@ -56,20 +52,27 @@ services:
     ports:
       - 53:53/tcp
       - 53:53/udp
+      - 55:53/udp
     volumes:
-      - 'zoneFiles:/Zones'
-      - 'bindConfig:/etc/bind/'
-  DNSDL:
-    build: './DNSDL'
-    image: 'dnsdl'
+      - zoneFiles:/zones
+      - bindConfig:/etc/bind/
+    labels:
+      - com.distributed-dns.bind=true
+
+  SubscriberDL:
+    build: './SubscriberDL'
+    image: 'subscriber-dl'
     environment:
-      SUBSCRIBER_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWJzY3JpYmVySWQiOiJiMzk2MDNmZi1hYmY3LTQ1ZmYtODNjYS00OGQxZmFkYmE0YTkiLCJpYXQiOjE1NzM3NTA4NTB9.IDWvf9xcp2Bf3X0ry9NRNnEualtVjfhdQ-mlTYkf444
-      API_URL: 'http://api/graphql'
+      SUBSCRIBER_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWJzY3JpYmVySWQiOiJmY2NkMzVlZS1jODQyLTRkZWItODg1Mi1iODI2Mjk2N2NjNTYiLCJpYXQiOjE1NzQ3MTg2MTB9.IJSEASiuJOFteJ2F1rXNc6Fu5lETQQ7LGw-6MbqwpUI
+      API_URL: 'http://api'
     volumes:
-      - 'zoneFiles:/data/Zones'
-      - 'bindConfig:/data/BIND'
+      - zoneFiles:/data/Zones
+      - bindConfig:/data/BIND
+      - state:/data/State
       - /var/run/docker.sock:/var/run/docker.sock
+
 volumes:
   databaseData:
   zoneFiles:
   bindConfig:
+  state:

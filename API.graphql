@@ -97,6 +97,16 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 """
 scalar DateTime
 
+input EntityInput {
+  entityType: EntityType!
+  entityId: ID!
+}
+
+enum EntityType {
+  TLS
+  ZONE
+}
+
 input LoginInput {
   username: String!
   password: String!
@@ -121,9 +131,11 @@ type Mutation {
   updateMXResourceRecord(input: MXResourceRecordInput!, resourceRecordId: ID!): Zone!
   updateSRVResourceRecord(input: SRVResourceRecordInput!, resourceRecordId: ID!): Zone!
   createSubscriber(input: SubscriberInput!): CurrentUser!
-  testing(zoneId: ID!, subscriberId: ID!): Subscriber!
+  addSubscriberUser(input: UserPermissionInput!, subscriberId: ID!): Subscriber!
+  removeSubscriberUser(userId: ID!, subscriberId: ID!): Subscriber!
+  addEntityToSubscriber(newEntities: [EntityInput!]!, subscriberId: ID!): Subscriber!
   createSubscriberToken(subscriberId: ID!): String!
-  addZoneUser(input: ZoneUserInput!, zoneId: ID!): Zone!
+  addZoneUser(input: UserPermissionInput!, zoneId: ID!): Zone!
   removeZoneUser(zoneUserId: ID!, zoneId: ID!): Zone!
   createZone(input: ZoneInput!): Zone!
   deleteZone(zoneId: ID!): CurrentUser!
@@ -147,7 +159,7 @@ type Query {
   currentUser: CurrentUser
   hasSetup: Boolean!
   subscriber(subscriberId: ID!): Subscriber!
-  getSubscribedEntities(subscriberToken: String!): [Zone!]!
+  getSubscribedEntities(subscriberToken: String!): [SubscriberEntity!]!
   users: [User!]!
   user(userId: String!): User!
   zones: [Zone!]!
@@ -219,14 +231,18 @@ type Subscriber {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  type: SubscriberType!
   name: String!
   accessPermissions: [SubscriberAccess!]!
+  subscriberSettings: SubscriberSettings!
+  userAccess: Permission!
+  userPermissions: [Permission!]!
   subscribedEntities: [SubscriberEntity!]!
 }
 
 type SubscriberAccess {
   id: ID!
+  user: User!
+  accessPermissions: [Permission!]!
 }
 
 union SubscriberEntity = ACME | Zone
@@ -239,7 +255,6 @@ type SubscriberEventPayload {
 
 input SubscriberInput {
   name: String!
-  type: SubscriberType!
 }
 
 enum SubscriberPayloadType {
@@ -248,9 +263,10 @@ enum SubscriberPayloadType {
   DELETE
 }
 
-enum SubscriberType {
-  TLS
-  ZONE
+type SubscriberSettings {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type Subscription {
@@ -266,6 +282,11 @@ input UserInput {
   username: String!
   email: String!
   password: String!
+}
+
+input UserPermissionInput {
+  userId: ID!
+  accessPermission: Permission!
 }
 
 enum UserRole {
@@ -291,7 +312,7 @@ input ValueResourceRecordInput {
 
 type Zone {
   id: ID!
-  updatedDate: DateTime
+  updatedDate: DateTime!
   domainName: String!
   resourceRecords(filter: ResourceRecordFilter): [ResourceRecord!]!
   accessPermissions: [ZonePermissions!]!
@@ -319,13 +340,4 @@ type ZonePermissions {
 type ZoneSettings {
   id: ID!
   contact: String!
-}
-
-input ZoneSettingsInput {
-  stuff: String!
-}
-
-input ZoneUserInput {
-  userId: ID!
-  accessPermission: Permission!
 }

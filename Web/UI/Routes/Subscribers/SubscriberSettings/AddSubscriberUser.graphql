@@ -1,0 +1,25 @@
+mutation AddSubscriberUser($subscriberId: ID!, $input: UserPermissionInput!) {
+  addSubscriberUser(subscriberId: $subscriberId, input: $input) {
+    id
+
+    name
+
+    updatedAt
+
+    subscriberSettings {
+      id
+    }
+
+    accessPermissions {
+      id
+
+      user {
+        id
+
+        username
+      }
+
+      accessPermissions
+    }
+  }
+}

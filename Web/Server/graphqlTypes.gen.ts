@@ -88,10 +88,6 @@ export type CreateSrvResourceRecordInput = {
   target: Scalars['String'],
 };
 
-export type CreateUtilityInput = {
-  name: Scalars['String'],
-};
-
 export type CreateValueResourceRecordInput = {
   type: ValueRecordType,
   ttl?: Maybe<Scalars['Int']>,
@@ -136,11 +132,13 @@ export type Mutation = {
   updateMXResourceRecord: Zone,
   updateSRVResourceRecord: Zone,
   createSubscriber: CurrentUser,
+  addSubscriberUser: Subscriber,
+  removeSubscriberUser: Subscriber,
   createSubscriberToken: Scalars['String'],
-  createUtility: Utility,
   addZoneUser: Zone,
   removeZoneUser: Zone,
   createZone: Zone,
+  deleteZone: CurrentUser,
 };
 
 
@@ -242,18 +240,25 @@ export type MutationCreateSubscriberArgs = {
 };
 
 
+export type MutationAddSubscriberUserArgs = {
+  input: UserPermissionInput,
+  subscriberId: Scalars['ID']
+};
+
+
+export type MutationRemoveSubscriberUserArgs = {
+  userId: Scalars['ID'],
+  subscriberId: Scalars['ID']
+};
+
+
 export type MutationCreateSubscriberTokenArgs = {
   subscriberId: Scalars['ID']
 };
 
 
-export type MutationCreateUtilityArgs = {
-  input: CreateUtilityInput
-};
-
-
 export type MutationAddZoneUserArgs = {
-  input: ZoneUserInput,
+  input: UserPermissionInput,
   zoneId: Scalars['ID']
 };
 
@@ -266,6 +271,11 @@ export type MutationRemoveZoneUserArgs = {
 
 export type MutationCreateZoneArgs = {
   input: ZoneInput
+};
+
+
+export type MutationDeleteZoneArgs = {
+  zoneId: Scalars['ID']
 };
 
 export type MxResourceRecordInput = {
@@ -287,11 +297,9 @@ export type Query = {
   currentUser?: Maybe<CurrentUser>,
   hasSetup: Scalars['Boolean'],
   subscriber: Subscriber,
-  getSubscribedEntities: Array<Zone>,
+  getSubscribedEntities: Array<SubscriberEntity>,
   users: Array<User>,
   user: User,
-  utilities: Array<Utility>,
-  helloWorld: Scalars['String'],
   zones: Array<Zone>,
   zone: Zone,
 };
@@ -388,15 +396,19 @@ export type Subscriber = {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
-  type: SubscriberType,
   name: Scalars['String'],
   accessPermissions: Array<SubscriberAccess>,
   subscribedEntities: Array<SubscriberEntity>,
+  subscriberSettings: SubscriberSettings,
+  userAccess: Permission,
+  userPermissions: Array<Permission>,
 };
 
 export type SubscriberAccess = {
    __typename?: 'SubscriberAccess',
   id: Scalars['ID'],
+  user: User,
+  accessPermissions: Array<Permission>,
 };
 
 export type SubscriberEntity = Acme | Zone;
@@ -410,7 +422,6 @@ export type SubscriberEventPayload = {
 
 export type SubscriberInput = {
   name: Scalars['String'],
-  type: SubscriberType,
 };
 
 export enum SubscriberPayloadType {
@@ -419,20 +430,16 @@ export enum SubscriberPayloadType {
   Delete = 'DELETE'
 }
 
-export enum SubscriberType {
-  Tls = 'TLS',
-  Zone = 'ZONE'
-}
+export type SubscriberSettings = {
+   __typename?: 'SubscriberSettings',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+};
 
 export type Subscription = {
    __typename?: 'Subscription',
-  certificateEvents: Certificate,
   subscribe: SubscriberEventPayload,
-};
-
-
-export type SubscriptionCertificateEventsArgs = {
-  ACMEToken: Scalars['String']
 };
 
 
@@ -452,17 +459,16 @@ export type UserInput = {
   password: Scalars['String'],
 };
 
+export type UserPermissionInput = {
+  userId: Scalars['ID'],
+  accessPermission: Permission,
+};
+
 export enum UserRole {
   Guest = 'GUEST',
   User = 'USER',
   Admin = 'ADMIN'
 }
-
-export type Utility = {
-   __typename?: 'Utility',
-  id: Scalars['ID'],
-  name: Scalars['String'],
-};
 
 export enum ValueRecordType {
   A = 'A',
@@ -516,15 +522,6 @@ export type ZoneSettings = {
    __typename?: 'ZoneSettings',
   id: Scalars['ID'],
   contact: Scalars['String'],
-};
-
-export type ZoneSettingsInput = {
-  stuff: Scalars['String'],
-};
-
-export type ZoneUserInput = {
-  userId: Scalars['ID'],
-  accessPermission: Permission,
 };
 
 export type HasSetupQueryVariables = {};

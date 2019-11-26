@@ -1,7 +1,6 @@
 // Web/UI/Components/Zone/ResourceRecord/EditComoponent/MXComponent.tsx
-import React, { useCallback, ChangeEvent, useMemo } from 'react';
-import { useImport } from 'UI/Components/Providers/ImportProvider';
-import { Loader } from 'UI/Components/Styles/Loader';
+import React, { ChangeEvent, useCallback, useMemo } from 'react';
+import { useTextField } from 'UI/Components/Styles/Form/useTextField';
 import { useStyles } from './Styles';
 
 interface MXComponentProps {
@@ -18,14 +17,7 @@ export function MXEditComponent({
   value,
   onChange,
 }: MXComponentProps): React.ReactElement {
-  const TextField = useImport({
-    imported: import(
-      'UI/Components/Styles/Inputs/TextField/BaseTextField/index',
-    ),
-    path: 'Components/Styles/Inputs/TextField/BaseTextField/index.tsx',
-    // TODO: TextField Skeleton Loader
-    Loader,
-  });
+  const TextField = useTextField();
   const classes = useStyles();
 
   const valueObj = useMemo(

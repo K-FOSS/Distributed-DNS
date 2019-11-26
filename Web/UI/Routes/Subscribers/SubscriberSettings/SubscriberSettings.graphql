@@ -1,0 +1,25 @@
+query SubscriberSettings($subscriberId: ID!) {
+  subscriber(subscriberId: $subscriberId) {
+    id
+
+    name
+
+    updatedAt
+
+    subscriberSettings {
+      id
+    }
+
+    accessPermissions {
+      id
+
+      user {
+        id
+
+        username
+      }
+
+      accessPermissions
+    }
+  }
+}

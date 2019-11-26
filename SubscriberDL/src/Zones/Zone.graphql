@@ -1,0 +1,15 @@
+fragment Zone on Zone {
+  id
+
+  domainName
+
+  updatedDate
+
+  zoneSettings {
+    contact
+  }
+
+  resourceRecords {
+    ...ResourceRecord
+  }
+}

@@ -1,0 +1,15 @@
+mutation DeleteZone($zoneId: ID!) {
+  deleteZone(zoneId: $zoneId) {
+    id
+
+    username
+
+    zones {
+      id
+
+      domainName
+
+      userPermissions
+    }
+  }
+}

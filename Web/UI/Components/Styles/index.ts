@@ -49,7 +49,8 @@ export const useStyles = makeStyles((theme: Theme) =>
       alignItems: 'center',
     },
     pageSection: {
-      maxWidth: '600px',
+      maxWidth: '80vw',
+      minWidth: '30vw',
     },
     pageRoot: {
       width: '100%',
@@ -58,10 +59,11 @@ export const useStyles = makeStyles((theme: Theme) =>
     section: {
       width: '100%',
       padding: '1em',
-      margin: '1em',
+      marginTop: '1em',
       display: 'flex',
       justifyContent: 'center',
       flexDirection: 'column',
+      alignItems: 'center',
     },
   }),
 );

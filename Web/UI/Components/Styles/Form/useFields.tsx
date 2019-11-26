@@ -1,10 +1,9 @@
 // Web/UI/Components/Styles/Form/useField.tsx
 import React, { useMemo } from 'react';
-import { useImport } from 'UI/Components/Providers/ImportProvider';
+import { ValidationError } from 'UI/Utils/useApolloErrors';
 import { useStyles } from './Styles';
 import { Register } from './types';
-import { ValidationError } from 'UI/Utils/useApolloErrors';
-import { Loader } from '../Loader';
+import { useTextField } from './useTextField';
 
 export enum FieldType {
   TEXT = 'text',
@@ -71,14 +70,7 @@ export function useFields({
   errors,
 }: UseFieldsInput): UseFields {
   const classes = useStyles({});
-  const TextField = useImport({
-    imported: import(
-      'UI/Components/Styles/Inputs/TextField/BaseTextField/index',
-    ),
-    path: 'Components/Styles/Inputs/TextField/BaseTextField/index.tsx',
-    // TODO: TextField Skeleton Loader
-    Loader,
-  });
+  const TextField = useTextField();
 
   return useMemo(
     () => (
@@ -129,6 +121,7 @@ export function useFields({
         })}
       </>
     ),
-    [fields, errors, classes.fieldStyle, register],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fields, errors, classes.fieldStyle, register, TextField],
   );
 }

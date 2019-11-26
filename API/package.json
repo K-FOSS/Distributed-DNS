@@ -9,7 +9,8 @@
     "build": "tsc",
     "test": "jest",
     "prettier": "prettier -c src/**/*.ts",
-    "lint": "eslint ./src/*.ts"
+    "lint": "eslint ./src/*.ts",
+    "orm": "ts-node ./src/bin/orm.ts"
   },
   "jest": {
     "transform": {
@@ -38,6 +39,7 @@
     "@jest/core": "24.8.0",
     "@types/acme-client": "^3.0.0",
     "@types/bcryptjs": "^2.4.2",
+    "@types/fs-extra": "^8.0.1",
     "@types/jest": "^24.0.18",
     "@types/jsonwebtoken": "^8.3.4",
     "@types/koa__router": "^8.0.0",
@@ -60,7 +62,7 @@
     "nodemon": "^1.19.2",
     "prettier": "^1.19.1",
     "ts-jest": "^24.1.0",
-    "ts-node": "^8.5.0",
+    "ts-node": "^8.5.2",
     "typescript": "^3.7.2"
   },
   "dependencies": {
@@ -70,6 +72,7 @@
     "apollo-server-koa": "^2.9.8",
     "bcryptjs": "^2.4.3",
     "class-validator": "^0.11.0",
+    "fs-extra": "^8.1.0",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.11.0",
     "module-alias": "^2.2.2",
@@ -77,7 +80,8 @@
     "pg": "^7.12.1",
     "reflect-metadata": "^0.1.13",
     "type-graphql": "^0.17.5",
-    "typeorm": "^0.2.20"
+    "typeorm": "^0.2.20",
+    "yaml": "^1.7.2"
   },
   "prettier": {
     "singleQuote": true,

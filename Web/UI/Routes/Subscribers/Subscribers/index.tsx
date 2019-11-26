@@ -6,10 +6,9 @@ import MaterialTable from 'material-table';
 import { useHistory } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { useCreateSubscriberMutation } from './CreateSubscriber.gen';
-import { Subscriber, SubscriberType } from 'UI/GraphQL/graphqlTypes.gen';
-import { SubscriberTypeSelect } from './SubscriberTypeSelect';
+import { Subscriber, Permission } from 'UI/GraphQL/graphqlTypes.gen';
 
-type SubscriberData = Pick<Subscriber, 'id' | 'name' | 'type'>;
+type SubscriberData = Pick<Subscriber, 'id' | 'name'>;
 
 type RowClick<T> = (
   event?: React.MouseEvent,
@@ -50,21 +49,17 @@ export default function SubscribersPage(): React.ReactElement {
       <MaterialTable
         title='Subscribers'
         style={{ margin: '1em' }}
-        columns={[
-          { title: 'Name', field: 'name' },
-          {
-            title: 'Type',
-            field: 'type',
-            editComponent: SubscriberTypeSelect,
-            editable: 'onAdd',
-            initialEditValue: SubscriberType.Zone,
-          },
-        ]}
+        columns={[{ title: 'Name', field: 'name' }]}
         data={data && data.currentUser ? data.currentUser.subscribers : []}
         onRowClick={handleRowClick}
         editable={{
+          isDeletable: (rowData) =>
+            rowData.userPermissions.includes(Permission.Admin),
+          isEditable: (rowData) =>
+            rowData.userPermissions.includes(Permission.Write),
           onRowAdd: handleAddSubscriber,
           onRowUpdate: handleEditSubscriber,
+          onRowDelete: async (a) => console.log(a),
         }}
       />
     </>

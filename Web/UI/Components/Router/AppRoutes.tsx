@@ -43,7 +43,7 @@ export const AppRoutes: AppRoute[] = [
     label: 'Zones',
     imported: {
       imported: import('UI/Routes/Zones/Zones'),
-      path: 'Routes/Zones/Zones.tsx',
+      path: 'Routes/Zones/Zones/index.tsx',
     },
     children: [
       {
@@ -81,6 +81,16 @@ export const AppRoutes: AppRoute[] = [
           imported: import('UI/Routes/Subscribers/Subscriber'),
           path: 'Routes/Subscribers/Subscriber/index.tsx',
         },
+        children: [
+          {
+            path: 'Settings',
+            label: 'SubscriberSettings',
+            imported: {
+              imported: import('UI/Routes/Subscribers/SubscriberSettings'),
+              path: 'Routes/Subscribers/SubscriberSettings/index.tsx',
+            },
+          },
+        ],
       },
     ],
   },

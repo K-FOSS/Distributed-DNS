@@ -45,9 +45,10 @@ export async function performAuthorizations(
 
       resourceRecord.data = JSON.stringify({ value: keyAuthorization });
       resourceRecord.host = host;
-      domain.zone.resourceRecords.push(resourceRecord);
+      resourceRecord.zoneId = domain.zoneId;
+      await resourceRecord.save();
+
       tempRecords.push(resourceRecord);
-      await domain.zone.save();
 
       /* Notify ACME provider that challenge is satisfied */
       await client.completeChallenge(challenge);

@@ -1,0 +1,11 @@
+query getSubscribedEntities($subscriberToken: String!) {
+  getSubscribedEntities(subscriberToken: $subscriberToken) {
+    ... on Zone {
+      ...Zone
+    }
+
+    ... on ACME {
+      id
+    }
+  }
+}

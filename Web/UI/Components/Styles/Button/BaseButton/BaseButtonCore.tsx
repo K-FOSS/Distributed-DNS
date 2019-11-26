@@ -15,7 +15,7 @@ export default function BaseButtonCore({
   children,
   ...props
 }: PropsWithChildren<BaseButtonProps>): React.ReactElement {
-  const classes = useStyles({});
+  const classes = useStyles(props);
 
   return useMemo(
     () => (

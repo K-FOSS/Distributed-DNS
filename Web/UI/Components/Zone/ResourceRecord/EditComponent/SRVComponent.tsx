@@ -1,9 +1,8 @@
 // Web/UI/Components/Zone/ResourceRecord/EditComponent/SRVComponent.tsx
-import React, { useCallback, ChangeEvent, useMemo } from 'react';
-import { useImport } from 'UI/Components/Providers/ImportProvider';
-import { Loader } from 'UI/Components/Styles/Loader';
-import { useStyles } from './Styles';
+import React, { ChangeEvent, useCallback, useMemo } from 'react';
+import { useTextField } from 'UI/Components/Styles/Form/useTextField';
 import { SrvProtocol } from 'UI/GraphQL/graphqlTypes.gen';
+import { useStyles } from './Styles';
 
 interface SRVComponentProps {
   value: string;
@@ -23,14 +22,7 @@ export function SRVEditComponent({
   value,
   onChange,
 }: SRVComponentProps): React.ReactElement {
-  const TextField = useImport({
-    imported: import(
-      'UI/Components/Styles/Inputs/TextField/BaseTextField/index',
-    ),
-    path: 'Components/Styles/Inputs/TextField/BaseTextField/index.tsx',
-    // TODO: TextField Skeleton Loader
-    Loader,
-  });
+  const TextField = useTextField();
   const classes = useStyles();
 
   const valueObj = useMemo(

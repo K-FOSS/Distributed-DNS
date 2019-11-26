@@ -1,0 +1,21 @@
+
+$ORIGIN nslab.kristianjones.dev.
+
+@ IN SOA ns.kristianjones.dev. me.kristianjones.dev. (
+  1                   ; serial number
+  2500                       ; refresh period
+  2500                        ; retry period
+  2500                     ; expire time
+  300                     ) ; minimum ttl
+
+
+
+; NS Records 
+@	IN	NS	ns.kristianjones.dev.
+
+; A Records 
+@	IN	A	2.2.2.2
+vmc	IN	A	2.2.2.2
+
+; SRV Records 
+_minecraft._tcp.vmc	IN	SRV	0	0	7777	mc
