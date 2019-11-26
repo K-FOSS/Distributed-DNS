@@ -107,6 +107,16 @@ export type CurrentUser = {
 };
 
 
+export type EntityInput = {
+  entityType: EntityType,
+  entityId: Scalars['ID'],
+};
+
+export enum EntityType {
+  Tls = 'TLS',
+  Zone = 'ZONE'
+}
+
 export type LoginInput = {
   username: Scalars['String'],
   password: Scalars['String'],
@@ -134,6 +144,7 @@ export type Mutation = {
   createSubscriber: CurrentUser,
   addSubscriberUser: Subscriber,
   removeSubscriberUser: Subscriber,
+  addEntityToSubscriber: Subscriber,
   createSubscriberToken: Scalars['String'],
   addZoneUser: Zone,
   removeZoneUser: Zone,
@@ -248,6 +259,12 @@ export type MutationAddSubscriberUserArgs = {
 
 export type MutationRemoveSubscriberUserArgs = {
   userId: Scalars['ID'],
+  subscriberId: Scalars['ID']
+};
+
+
+export type MutationAddEntityToSubscriberArgs = {
+  newEntities: Array<EntityInput>,
   subscriberId: Scalars['ID']
 };
 
@@ -398,10 +415,10 @@ export type Subscriber = {
   updatedAt: Scalars['DateTime'],
   name: Scalars['String'],
   accessPermissions: Array<SubscriberAccess>,
-  subscribedEntities: Array<SubscriberEntity>,
   subscriberSettings: SubscriberSettings,
   userAccess: Permission,
   userPermissions: Array<Permission>,
+  subscribedEntities: Array<SubscriberEntity>,
 };
 
 export type SubscriberAccess = {
@@ -488,7 +505,7 @@ export type ValueResourceRecordInput = {
 export type Zone = {
    __typename?: 'Zone',
   id: Scalars['ID'],
-  updatedDate?: Maybe<Scalars['DateTime']>,
+  updatedDate: Scalars['DateTime'],
   domainName: Scalars['String'],
   resourceRecords: Array<ResourceRecord>,
   accessPermissions: Array<ZonePermissions>,

@@ -14,7 +14,10 @@ import {
 } from 'type-graphql';
 import { CurrentUser } from '../Auth/CurrentUser';
 import { SubscriberAccess } from './SubscriberAccessModel';
-import { SubscriberEventPayload } from './SubscriberEventPayload';
+import {
+  SubscriberEventPayload,
+  SubscriberEventPayloadType,
+} from './SubscriberEventPayload';
 import { SubscriberInput } from './SubscriberInput';
 import { Subscriber, SubscriberEntities } from './SubscriberModel';
 import { subscriberPubSub } from './SubscriptionPubSub';
@@ -64,13 +67,14 @@ export class SubscribersResolver {
     @Ctx() { currentUser }: AuthContext,
   ): Promise<CurrentUser> {
     const subscriber = Subscriber.create(input);
+    await subscriber.save();
+
     const subscriberAccess = SubscriberAccess.create({
       userId: currentUser.id,
       accessPermissions: [Permission.READ, Permission.WRITE, Permission.ADMIN],
+      subscriberId: subscriber.id,
     });
-
-    subscriber.accessPermissions = [subscriberAccess];
-    await subscriber.save();
+    await subscriberAccess.save();
 
     return currentUser;
   }
@@ -219,7 +223,7 @@ export class SubscribersResolver {
     const subscriber = await Subscriber.getSubscriber(
       currentUser,
       subscriberId,
-      Permission.ADMIN,
+      Permission.WRITE,
     );
 
     const zoneEntities = await subscriber.subscribedZoneEntities;
@@ -248,6 +252,53 @@ export class SubscribersResolver {
     await subscriber.save();
 
     await subscriberPubSub.updateSubscriber(subscriber.id, newEntities);
+
+    return subscriber;
+  }
+
+  @Authorized()
+  @Mutation(() => Subscriber)
+  async removeEntityFromSubscriber(
+    @Arg('subscriberId', () => ID) subscriberId: string,
+    @Arg('entityIds', () => [ID]) entityIds: string[],
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Subscriber> {
+    const subscriber = await Subscriber.getSubscriber(
+      currentUser,
+      subscriberId,
+      Permission.WRITE,
+    );
+
+    const zoneEntities = await subscriber.subscribedZoneEntities;
+    const tlsEntities = await subscriber.subscribedTLSEntities;
+
+    for (const entityId of entityIds) {
+      const zoneIndex = zoneEntities.findIndex(({ id }) => id === entityId);
+      const tlsIndex = tlsEntities.findIndex(({ id }) => id === entityId);
+      console.log(zoneIndex);
+      if (zoneEntities[zoneIndex]) {
+        subscriberPubSub.publish(
+          SubscriberEventPayloadType.DELETE,
+          zoneEntities[zoneIndex],
+        );
+        zoneEntities.splice(zoneIndex, 1);
+
+        subscriberPubSub.ee.emit(subscriber.id);
+      } else if (tlsEntities[tlsIndex]) {
+        subscriberPubSub.publish(
+          SubscriberEventPayloadType.DELETE,
+          tlsEntities[tlsIndex],
+        );
+        tlsEntities.splice(tlsIndex, 1);
+
+        subscriberPubSub.ee.emit(subscriber.id);
+      }
+    }
+
+    console.log(zoneEntities);
+    console.log(subscriber.subscribedZoneEntities);
+
+    await subscriber.save();
 
     return subscriber;
   }

@@ -7,7 +7,7 @@ import {
 } from './GraphQL/Subscribe.gen'
 import { config } from '../Config'
 import { SubscriberPayloadType } from '../graphqlTypes.gen'
-import { createUpdateZoneFile } from '../Zones'
+import { createUpdateZoneFile, deleteZone } from '../Zones'
 
 export async function subscribeToChanges(): Promise<void> {
   const subscription = apolloClient.subscribe<
@@ -33,6 +33,12 @@ export async function subscribeToChanges(): Promise<void> {
           console.log(data.subscribe.entity)
         }
         console.log(data.subscribe)
+      } else if (data.subscribe.eventType === SubscriberPayloadType.Delete) {
+        if ('domainName' in data.subscribe.entity) {
+          await deleteZone(data.subscribe.id)
+        } else if ('privateKey' in data.subscribe.entity) {
+          console.log('Delete a Cert')
+        }
       }
     },
   })

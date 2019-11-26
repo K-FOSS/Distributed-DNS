@@ -23,8 +23,6 @@ async function startSubscriberDL(): Promise<void> {
 
   const entities = await pullSubscribedEntities()
 
-  console.log(entities)
-
   subscribeToChanges()
 }
 

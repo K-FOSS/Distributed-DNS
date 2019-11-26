@@ -1,10 +1,20 @@
 // Web/UI/Utils/initApollo.ts
 import { ApolloClient } from 'apollo-client';
 import { createHttpLink } from 'apollo-link-http';
-import { NormalizedCacheObject, InMemoryCache } from 'apollo-cache-inmemory';
+import {
+  NormalizedCacheObject,
+  InMemoryCache,
+  IntrospectionFragmentMatcher,
+} from 'apollo-cache-inmemory';
 import { ApolloCache } from 'apollo-cache';
 import fetch from 'isomorphic-unfetch';
 import { onError as onErrorLink, ErrorHandler } from 'apollo-link-error';
+
+import introspectionResult from 'UI/GraphQL/introspection-result.json';
+
+const fragmentMatcher = new IntrospectionFragmentMatcher({
+  introspectionQueryResultData: introspectionResult,
+});
 
 interface InitClientParams {
   baseUrl: string;
@@ -18,7 +28,7 @@ export function initApollo({
   baseUrl,
   initialState,
   token,
-  cache = new InMemoryCache().restore(initialState || {}),
+  cache = new InMemoryCache({ fragmentMatcher }).restore(initialState || {}),
   onError = () => console.log('Error'),
 }: InitClientParams): ApolloClient<NormalizedCacheObject> {
   const errorLink = onErrorLink(onError);

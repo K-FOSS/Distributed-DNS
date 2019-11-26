@@ -1,0 +1,19 @@
+query NewEntity {
+  currentUser {
+    id
+
+    username
+
+    zones {
+      id
+
+      domainName
+    }
+
+    ACMEs {
+      id
+
+      name
+    }
+  }
+}

@@ -1,0 +1,31 @@
+mutation AddEntityToSubscriber(
+  $subscriberId: ID!
+  $newEntities: [EntityInput!]!
+) {
+  addEntityToSubscriber(
+    subscriberId: $subscriberId
+    newEntities: $newEntities
+  ) {
+    id
+
+    createdAt
+
+    updatedAt
+
+    name
+
+    subscribedEntities {
+      ... on Zone {
+        id
+
+        domainName
+      }
+
+      ... on ACME {
+        id
+
+        name
+      }
+    }
+  }
+}

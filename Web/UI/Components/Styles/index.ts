@@ -47,6 +47,7 @@ export const useStyles = makeStyles((theme: Theme) =>
       minHeight: '100%',
       flexDirection: 'column',
       alignItems: 'center',
+      padding: '1em',
     },
     pageSection: {
       maxWidth: '80vw',

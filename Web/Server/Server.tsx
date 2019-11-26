@@ -1,7 +1,10 @@
 // Web/Server/Server.tsx
 import { getDataFromTree, renderToStringWithData } from '@apollo/react-ssr';
 import ServerStyleSheets from '@material-ui/styles/ServerStyleSheets';
-import { InMemoryCache } from 'apollo-cache-inmemory';
+import {
+  InMemoryCache,
+  IntrospectionFragmentMatcher,
+} from 'apollo-cache-inmemory';
 import { readJSON } from 'fs-extra';
 import { Context } from 'koa';
 import React from 'react';
@@ -21,6 +24,7 @@ import {
   ImportProvider,
 } from 'UI/Components/Providers/ImportProvider';
 import { SnackbarProvider } from 'notistack';
+import introspectionResult from 'UI/GraphQL/introspection-result.json';
 
 const manifestFile = `dist/public/parcel-manifest.json`;
 
@@ -60,7 +64,11 @@ export async function uiServer(
 
   const sheets = new ServerStyleSheets();
 
-  const cache = new InMemoryCache();
+  const fragmentMatcher = new IntrospectionFragmentMatcher({
+    introspectionQueryResultData: introspectionResult,
+  });
+
+  const cache = new InMemoryCache({ fragmentMatcher });
 
   const AppComponent = (
     <StaticRouter location={ctx.url} context={context}>

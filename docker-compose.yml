@@ -54,8 +54,8 @@ services:
       - 53:53/udp
       - 55:53/udp
     volumes:
-      - zoneFiles:/zones
-      - bindConfig:/etc/bind/
+      - ./SubscriberDL/data/Zones:/zones
+      - ./SubscriberDL/data/BIND:/etc/bind/
     labels:
       - com.distributed-dns.bind=true
 

@@ -1,14 +1,27 @@
 // Web/UI/Routes/Subscribers/Subscriber/index.tsx
-import React, { useMemo } from 'react';
-import { Header } from 'UI/Components/Styles/Header';
-import { useParams } from 'react-router';
-import { useSubscriberQuery } from './Subscriber.gen';
-import { useSubscriberPageStyles } from './Styles';
-import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
 import SettingsCog from '@material-ui/icons/Settings';
+import DeleteIcon from '@material-ui/icons/Delete';
+import Grid from '@material-ui/core/Grid';
+import React, { useMemo, useCallback, useState } from 'react';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';
 import { Permission } from 'Server/graphqlTypes.gen';
+import { useStyles } from 'UI/Components/Styles';
+import { Header } from 'UI/Components/Styles/Header';
+import { PageSectionRoot } from 'UI/Components/Styles/Section/PageSectionRoot';
+import { PaperSection } from 'UI/Components/Styles/Section/PaperSection';
+import { useSubscriberPageStyles } from './Styles';
+import { useSubscriberQuery } from './Subscriber.gen';
+import { BaseList } from 'UI/Components/Styles/List/BaseList';
+import { LabelListItem } from 'UI/Components/Styles/List/ListItems/LabelListItem';
+import { useTextField } from 'UI/Components/Styles/Form/useTextField';
+import { EntityType, SubscriberEntity } from 'UI/GraphQL/graphqlTypes.gen';
+import { BaseButton } from 'UI/Components/Styles/Button/BaseButton';
+import { useNewEntityQuery } from './NewEntity.gen';
+import { useAddEntityToSubscriberMutation } from './AddEntityToSubscriber.gen';
 
 interface SubscriberPageParams {
   subscriberId: string;
@@ -18,13 +31,68 @@ export default function SubscriberPage(): React.ReactElement {
   const { subscriberId } = useParams<SubscriberPageParams>();
 
   const styles = useSubscriberPageStyles();
+  const classes = useStyles();
+  const TextField = useTextField();
 
   const { data } = useSubscriberQuery({ variables: { subscriberId } });
+  const { data: newEntitiesData, error, loading } = useNewEntityQuery();
+
+  const [addEntityToSubscriber] = useAddEntityToSubscriberMutation();
+
+  const [newEntity, setNewEntity] = useState<SubscriberEntity>();
+  const [entityType, setEntityType] = useState<EntityType>(EntityType.Zone);
 
   const userSubscriberPermissions = useMemo(
     () => data?.subscriber?.userPermissions || [Permission.Read],
     [data],
   );
+
+  console.log(userSubscriberPermissions);
+
+  const entityList = useMemo(
+    () =>
+      (data?.subscriber.subscribedEntities || []).map((entity) => {
+        const type = 'name' in entity ? 'TLS' : 'Zone';
+
+        const name = 'name' in entity ? entity.name : entity.domainName;
+        return (
+          <LabelListItem
+            key={entity.id}
+            label={{ primary: name, secondary: type }}
+          >
+            {userSubscriberPermissions.includes(Permission.Write) && (
+              <IconButton onClick={() => console.log('Delete')}>
+                <DeleteIcon />
+              </IconButton>
+            )}
+          </LabelListItem>
+        );
+      }),
+    [data, userSubscriberPermissions],
+  );
+
+  const handleAddNewEntity = useCallback(async () => {
+    console.log('Adding new Entity');
+    if (!newEntity) {
+      console.error('New Entity must be selected');
+
+      return;
+    }
+
+    const response = await addEntityToSubscriber({
+      variables: {
+        subscriberId,
+        newEntities: [
+          {
+            entityId: newEntity.id,
+            entityType,
+          },
+        ],
+      },
+    });
+
+    console.log(response);
+  }, [subscriberId, newEntity, addEntityToSubscriber, entityType]);
 
   console.log(data);
 
@@ -43,8 +111,84 @@ export default function SubscriberPage(): React.ReactElement {
         </Link>
       </Header>
 
-      <div>
-        <Typography variant='h5'>Subscriber Entities</Typography>
+      <div className={classes.pageRoot}>
+        <PageSectionRoot>
+          <PaperSection>
+            <Typography variant='h4'>Entities</Typography>
+            <BaseList style={{ width: '100%' }}>{entityList}</BaseList>
+            {userSubscriberPermissions.includes(Permission.Write) && (
+              <Grid
+                container
+                direction='row'
+                spacing={1}
+                alignItems='center'
+                justify='center'
+              >
+                <Grid item xs={5} md={5} lg={5}>
+                  <Autocomplete
+                    options={
+                      entityType === EntityType.Zone
+                        ? newEntitiesData?.currentUser?.zones
+                        : newEntitiesData?.currentUser?.ACMEs
+                    }
+                    getOptionLabel={(option: SubscriberEntity) =>
+                      'domainName' in option ? option.domainName : option.name
+                    }
+                    value={newEntity}
+                    onChange={(test, entity) => setNewEntity(entity)}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label='New Entity'
+                        fullWidth
+                        variant='outlined'
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={4} md={3} lg={4}>
+                  <TextField
+                    select
+                    variant='outlined'
+                    value={entityType}
+                    onChange={({ target }) =>
+                      setEntityType(target.value as any)
+                    }
+                    SelectProps={{
+                      native: true,
+                    }}
+                    fullWidth
+                  >
+                    {Object.entries(EntityType).map(([, value], i) => (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    ))}
+                  </TextField>
+                </Grid>
+
+                <Grid item xs={3} lg={2} md={2}>
+                  <BaseButton
+                    label='Add'
+                    onClick={handleAddNewEntity}
+                    style={{
+                      height: '100%',
+                      width: '100%',
+                    }}
+                    color='primary'
+                    variant='contained'
+                    fullWidth
+                  />
+                </Grid>
+              </Grid>
+            )}
+          </PaperSection>
+          {userSubscriberPermissions.includes(Permission.Write) && (
+            <PaperSection>
+              <Typography variant='h4'>Client Configuration</Typography>
+            </PaperSection>
+          )}
+        </PageSectionRoot>
       </div>
     </>
   );
