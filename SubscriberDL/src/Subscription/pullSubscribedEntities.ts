@@ -1,7 +1,7 @@
 // SubscriberDL/src/Subscription/pullSubscribedEntities.ts
 import { getSubscribedEntities } from './getSubscribedEntities'
 import { createUpdateZoneFile, deleteZone } from '../Zones'
-import { loadState } from '../State'
+import { loadState, saveState } from '../State'
 import { createUpdateACME } from '../ACME'
 
 /**
@@ -24,5 +24,11 @@ export async function pullSubscribedEntities(): Promise<any> {
   for (const entity of subscribedEntities) {
     if ('domainName' in entity) await createUpdateZoneFile(entity)
     else if ('name' in entity) await createUpdateACME(entity)
+    else if ('TLSOutputMode' in entity) {
+      const currentState = await loadState()
+
+      currentState.Settings = { ...entity }
+      await saveState(currentState)
+    }
   }
 }

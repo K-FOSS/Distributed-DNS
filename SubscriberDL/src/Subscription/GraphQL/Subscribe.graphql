@@ -13,6 +13,10 @@ subscription Subscribe($subscriberToken: String!) {
       ... on ACME {
         ...ACME
       }
+
+      ... on SubscriberSettings {
+        TLSOutputMode
+      }
     }
   }
 }

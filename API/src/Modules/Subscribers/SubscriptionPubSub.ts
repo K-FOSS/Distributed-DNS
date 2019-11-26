@@ -10,6 +10,7 @@ import {
 import { EntityType } from './EntityType';
 import { ACME } from '../ACMEs/ACMEModel';
 import { EntityInput } from './EntityInput';
+import { SubscriberSettings } from './SubscriberSettingsModel';
 
 interface EventSubscriber {
   Id: string;
@@ -88,6 +89,11 @@ export class SubscriberPubSub {
         await Promise.all([
           subscription.subscribedZoneEntities,
           subscription.subscribedTLSEntities,
+          SubscriberSettings.findOne({
+            where: {
+              subscriberId: subscription.id,
+            },
+          }),
         ])
       ).flat())
         entityIds.push(id);

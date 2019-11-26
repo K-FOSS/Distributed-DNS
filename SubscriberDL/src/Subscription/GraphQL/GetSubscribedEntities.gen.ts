@@ -18,6 +18,9 @@ export const GetSubscribedEntities = gql`
     ... on ACME {
       ...ACME
     }
+    ... on SubscriberSettings {
+      TLSOutputMode
+    }
   }
 }
     ${Zone}
@@ -35,5 +38,8 @@ export type GetSubscribedEntitiesQuery = (
   ) | (
     { __typename?: 'Zone' }
     & ZoneFragment
+  ) | (
+    { __typename?: 'SubscriberSettings' }
+    & Pick<Types.SubscriberSettings, 'TLSOutputMode'>
   )> }
 );

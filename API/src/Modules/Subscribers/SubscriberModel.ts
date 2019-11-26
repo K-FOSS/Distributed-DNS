@@ -35,7 +35,7 @@ interface SubscriberTokenPayload {
 
 export const SubscriberEntities = createUnionType({
   name: 'SubscriberEntity',
-  types: () => [ACME, Zone],
+  types: () => [ACME, Zone, SubscriberSettings],
 });
 
 @ObjectType()

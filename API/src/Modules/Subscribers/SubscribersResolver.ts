@@ -29,6 +29,7 @@ import { EntityType } from './EntityType';
 import { Zone } from '../Zones/ZoneModel';
 import { ACME } from '../ACMEs/ACMEModel';
 import { SubscriberSettings } from './SubscriberSettingsModel';
+import { SubscriberSettingsInput } from './SubscriberSettingsInput';
 
 @Resolver(() => Subscriber)
 export class SubscribersResolver {
@@ -57,6 +58,11 @@ export class SubscribersResolver {
       await Promise.all([
         subscriber.subscribedZoneEntities,
         subscriber.subscribedTLSEntities,
+        SubscriberSettings.findOneOrFail({
+          where: {
+            subscriberId: subscriber.id,
+          },
+        }),
       ])
     ).flat();
   }
@@ -175,6 +181,31 @@ export class SubscribersResolver {
       throw new ApolloError('USER IS NOT IN SUBSCRIBER');
 
     await subscriberPermissions.remove();
+
+    return subscriber;
+  }
+
+  @Authorized()
+  @Mutation(() => Subscriber)
+  async updateSubscriber(
+    @Arg('subscriberId', () => ID) subscriberId: string,
+    @Arg('input') input: SubscriberSettingsInput,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<Subscriber> {
+    const subscriber = await Subscriber.getSubscriber(
+      currentUser,
+      subscriberId,
+      Permission.ADMIN,
+    );
+
+    const subscriberSettings = await SubscriberSettings.findOneOrFail({
+      where: {
+        subscriberId: subscriber.id,
+      },
+    });
+    subscriberSettings.TLSOutputMode = input.TLSOutputMode;
+
+    await subscriberSettings.save();
 
     return subscriber;
   }

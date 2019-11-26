@@ -145,6 +145,7 @@ export type Mutation = {
   deleteSubscriber: CurrentUser,
   addSubscriberUser: Subscriber,
   removeSubscriberUser: Subscriber,
+  updateSubscriber: Subscriber,
   addEntityToSubscriber: Subscriber,
   removeEntityFromSubscriber: Subscriber,
   createSubscriberToken: Scalars['String'],
@@ -266,6 +267,12 @@ export type MutationAddSubscriberUserArgs = {
 
 export type MutationRemoveSubscriberUserArgs = {
   userId: Scalars['ID'],
+  subscriberId: Scalars['ID']
+};
+
+
+export type MutationUpdateSubscriberArgs = {
+  input: SubscriberSettingsInput,
   subscriberId: Scalars['ID']
 };
 
@@ -465,7 +472,17 @@ export type SubscriberSettings = {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  TLSOutputMode: SubscriberTlsOutputMode,
 };
+
+export type SubscriberSettingsInput = {
+  TLSOutputMode: SubscriberTlsOutputMode,
+};
+
+export enum SubscriberTlsOutputMode {
+  Dual = 'DUAL',
+  Single = 'SINGLE'
+}
 
 export type Subscription = {
    __typename?: 'Subscription',
@@ -1029,7 +1046,7 @@ export type SubscriberSettingsQuery = (
     & Pick<Subscriber, 'id' | 'name' | 'updatedAt'>
     & { subscriberSettings: (
       { __typename?: 'SubscriberSettings' }
-      & Pick<SubscriberSettings, 'id'>
+      & Pick<SubscriberSettings, 'id' | 'TLSOutputMode'>
     ), accessPermissions: Array<(
       { __typename?: 'SubscriberAccess' }
       & Pick<SubscriberAccess, 'id' | 'accessPermissions'>
@@ -1038,6 +1055,24 @@ export type SubscriberSettingsQuery = (
         & Pick<User, 'id' | 'username'>
       ) }
     )> }
+  ) }
+);
+
+export type UpdateSubscriberMutationVariables = {
+  subscriberId: Scalars['ID'],
+  input: SubscriberSettingsInput
+};
+
+
+export type UpdateSubscriberMutation = (
+  { __typename?: 'Mutation' }
+  & { updateSubscriber: (
+    { __typename?: 'Subscriber' }
+    & Pick<Subscriber, 'id'>
+    & { subscriberSettings: (
+      { __typename?: 'SubscriberSettings' }
+      & Pick<SubscriberSettings, 'id' | 'TLSOutputMode'>
+    ) }
   ) }
 );
 

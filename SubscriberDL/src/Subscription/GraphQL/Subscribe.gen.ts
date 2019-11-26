@@ -22,6 +22,9 @@ export const Subscribe = gql`
       ... on ACME {
         ...ACME
       }
+      ... on SubscriberSettings {
+        TLSOutputMode
+      }
     }
   }
 }
@@ -43,6 +46,9 @@ export type SubscribeSubscription = (
     ) | (
       { __typename?: 'Zone' }
       & ZoneFragment
+    ) | (
+      { __typename?: 'SubscriberSettings' }
+      & Pick<Types.SubscriberSettings, 'TLSOutputMode'>
     ) }
   ) }
 );

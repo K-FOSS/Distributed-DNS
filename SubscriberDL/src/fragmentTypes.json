@@ -1,1 +1,1 @@
-{"__schema":{"types":[{"kind":"UNION","name":"SubscriberEntity","possibleTypes":[{"name":"ACME"},{"name":"Zone"}]}]}}
+{"__schema":{"types":[{"kind":"UNION","name":"SubscriberEntity","possibleTypes":[{"name":"ACME"},{"name":"Zone"},{"name":"SubscriberSettings"}]}]}}

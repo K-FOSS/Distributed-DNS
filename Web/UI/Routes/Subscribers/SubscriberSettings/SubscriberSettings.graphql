@@ -8,6 +8,8 @@ query SubscriberSettings($subscriberId: ID!) {
 
     subscriberSettings {
       id
+
+      TLSOutputMode
     }
 
     accessPermissions {

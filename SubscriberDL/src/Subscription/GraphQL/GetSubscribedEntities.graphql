@@ -7,5 +7,9 @@ query getSubscribedEntities($subscriberToken: String!) {
     ... on ACME {
       ...ACME
     }
+
+    ... on SubscriberSettings {
+      TLSOutputMode
+    }
   }
 }

@@ -1,6 +1,6 @@
 // SubscriberDL/src/Subscription/getSubscribedEntities.ts
 import { config } from '../Config'
-import { Acme } from '../graphqlTypes.gen'
+import { Acme, SubscriberSettings } from '../graphqlTypes.gen'
 import { apolloClient } from '../Library/apollo'
 import { ZoneFragment } from '../Zones/Zone.gen'
 import {
@@ -9,7 +9,10 @@ import {
   GetSubscribedEntitiesQueryVariables,
 } from './GraphQL/GetSubscribedEntities.gen'
 
-type SubscribedEntities = ZoneFragment | Pick<Acme, 'id'>
+type SubscribedEntities =
+  | ZoneFragment
+  | Pick<Acme, 'id'>
+  | Pick<SubscriberSettings, 'TLSOutputMode'>
 
 export async function getSubscribedEntities(): Promise<SubscribedEntities[]> {
   const { data, errors } = await apolloClient.query<

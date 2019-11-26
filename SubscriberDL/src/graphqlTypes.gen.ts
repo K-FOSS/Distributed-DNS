@@ -145,6 +145,7 @@ export type Mutation = {
   deleteSubscriber: CurrentUser,
   addSubscriberUser: Subscriber,
   removeSubscriberUser: Subscriber,
+  updateSubscriber: Subscriber,
   addEntityToSubscriber: Subscriber,
   removeEntityFromSubscriber: Subscriber,
   createSubscriberToken: Scalars['String'],
@@ -266,6 +267,12 @@ export type MutationAddSubscriberUserArgs = {
 
 export type MutationRemoveSubscriberUserArgs = {
   userId: Scalars['ID'],
+  subscriberId: Scalars['ID']
+};
+
+
+export type MutationUpdateSubscriberArgs = {
+  input: SubscriberSettingsInput,
   subscriberId: Scalars['ID']
 };
 
@@ -441,7 +448,7 @@ export type SubscriberAccess = {
   accessPermissions: Array<Permission>,
 };
 
-export type SubscriberEntity = Acme | Zone;
+export type SubscriberEntity = Acme | Zone | SubscriberSettings;
 
 export type SubscriberEventPayload = {
    __typename?: 'SubscriberEventPayload',
@@ -465,7 +472,17 @@ export type SubscriberSettings = {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  TLSOutputMode: SubscriberTlsOutputMode,
 };
+
+export type SubscriberSettingsInput = {
+  TLSOutputMode: SubscriberTlsOutputMode,
+};
+
+export enum SubscriberTlsOutputMode {
+  Dual = 'DUAL',
+  Single = 'SINGLE'
+}
 
 export type Subscription = {
    __typename?: 'Subscription',
@@ -576,6 +593,9 @@ export type GetSubscribedEntitiesQuery = (
   ) | (
     { __typename?: 'Zone' }
     & ZoneFragment
+  ) | (
+    { __typename?: 'SubscriberSettings' }
+    & Pick<SubscriberSettings, 'TLSOutputMode'>
   )> }
 );
 
@@ -595,6 +615,9 @@ export type SubscribeSubscription = (
     ) | (
       { __typename?: 'Zone' }
       & ZoneFragment
+    ) | (
+      { __typename?: 'SubscriberSettings' }
+      & Pick<SubscriberSettings, 'TLSOutputMode'>
     ) }
   ) }
 );

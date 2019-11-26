@@ -9,8 +9,12 @@ import {
   UpdateDateColumn,
   Entity,
   JoinColumn,
+  AfterUpdate,
 } from 'typeorm';
 import { Subscriber } from './SubscriberModel';
+import { SubscriberTLSOutputMode } from './SubscriberTLSOutputMode';
+import { subscriberPubSub } from './SubscriptionPubSub';
+import { SubscriberEventPayloadType } from './SubscriberEventPayload';
 
 @ObjectType()
 @Entity()
@@ -33,4 +37,17 @@ export class SubscriberSettings extends BaseEntity {
 
   @Column()
   subscriberId: string;
+
+  @Field(() => SubscriberTLSOutputMode)
+  @Column({
+    type: 'enum',
+    enum: SubscriberTLSOutputMode,
+    default: SubscriberTLSOutputMode.SINGLE,
+  })
+  TLSOutputMode: SubscriberTLSOutputMode;
+
+  @AfterUpdate()
+  async pushSubscriberSettings(): Promise<void> {
+    await subscriberPubSub.publish(SubscriberEventPayloadType.UPDATE, this);
+  }
 }

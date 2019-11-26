@@ -134,6 +134,7 @@ type Mutation {
   deleteSubscriber(subscriberId: ID!): CurrentUser!
   addSubscriberUser(input: UserPermissionInput!, subscriberId: ID!): Subscriber!
   removeSubscriberUser(userId: ID!, subscriberId: ID!): Subscriber!
+  updateSubscriber(input: SubscriberSettingsInput!, subscriberId: ID!): Subscriber!
   addEntityToSubscriber(newEntities: [EntityInput!]!, subscriberId: ID!): Subscriber!
   removeEntityFromSubscriber(entityIds: [ID!]!, subscriberId: ID!): Subscriber!
   createSubscriberToken(subscriberId: ID!): String!
@@ -247,7 +248,7 @@ type SubscriberAccess {
   accessPermissions: [Permission!]!
 }
 
-union SubscriberEntity = ACME | Zone
+union SubscriberEntity = ACME | Zone | SubscriberSettings
 
 type SubscriberEventPayload {
   eventType: SubscriberPayloadType!
@@ -269,6 +270,16 @@ type SubscriberSettings {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  TLSOutputMode: SubscriberTLSOutputMode!
+}
+
+input SubscriberSettingsInput {
+  TLSOutputMode: SubscriberTLSOutputMode!
+}
+
+enum SubscriberTLSOutputMode {
+  DUAL
+  SINGLE
 }
 
 type Subscription {
