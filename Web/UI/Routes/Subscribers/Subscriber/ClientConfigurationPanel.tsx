@@ -92,7 +92,6 @@ volumes:
 
   return (
     <PaperSection>
-      <Typography variant='h4'>Client Configuration</Typography>
       {subscriberToken ? (
         <>
           <Typography variant='h4'>Subscriber Configuration</Typography>
