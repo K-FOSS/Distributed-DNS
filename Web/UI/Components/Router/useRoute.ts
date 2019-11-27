@@ -9,7 +9,12 @@ export function useRoute(): Route | undefined {
   const findRoute = useCallback(
     (routes: Route[]): Route | undefined => {
       for (const route of routes) {
-        if (route.to === pathname || route.to === pathname.replace(/\/$/, ''))
+        const routePath = new RegExp(route.to);
+
+        if (
+          route.to === pathname ||
+          routePath.test(pathname.replace(/\/$/, ''))
+        )
           return route;
         else if (route.children && pathname.includes(route.to))
           return findRoute(route.children);

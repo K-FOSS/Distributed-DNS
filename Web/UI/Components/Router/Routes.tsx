@@ -13,7 +13,19 @@ export interface Route {
 export const Routes: Route[] = [
   { label: 'Home', to: '/' },
   { label: 'Setup', to: '/Setup', hideUI: true, hidden: true },
-  { label: 'Zones', to: '/Zones', roles: [UserRole.User] },
+  {
+    label: 'Zones',
+    to: '/Zones',
+    roles: [UserRole.User],
+    children: [
+      {
+        label: 'Zone',
+        to: '/Zones/.*',
+        roles: [UserRole.User],
+        hidden: true,
+      },
+    ],
+  },
   { label: 'ACMEs', to: '/ACMEs', roles: [UserRole.User] },
   { label: 'Subscribers', to: '/Subscribers', roles: [UserRole.User] },
   { label: 'Login', to: '/Login', roles: [UserRole.Guest] },

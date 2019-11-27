@@ -15,7 +15,7 @@ export function generateList(
       roles ? roles.every((role) => userRoles.includes(role)) : true && !hidden,
     )
     .map(({ children, to, label }) =>
-      children ? (
+      children && children.some((child) => !child.hidden) ? (
         <ParentListItem key={to} label={{ primary: label }}>
           <LabelListItem
             key={to}
