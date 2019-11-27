@@ -1,7 +1,6 @@
 // Web/UI/Components/Zone/ResourceRecord/EditComponent/ValueComponent.tsx
 import React, { useMemo } from 'react';
-import { useImport } from 'UI/Components/Providers/ImportProvider';
-import { Loader } from 'UI/Components/Styles/Loader';
+import { useTextField } from 'UI/Components/Styles/Form/useTextField';
 
 interface ValueComponentProps {
   value: string;
@@ -12,14 +11,7 @@ export function ValueEditComponent({
   value,
   onChange,
 }: ValueComponentProps): React.ReactElement {
-  const TextField = useImport({
-    imported: import(
-      'UI/Components/Styles/Inputs/TextField/BaseTextField/index',
-    ),
-    path: 'Components/Styles/Inputs/TextField/BaseTextField/index.tsx',
-    // TODO: TextField Skeleton Loader
-    Loader,
-  });
+  const TextField = useTextField();
 
   const valueObj = useMemo(
     (): any => (value ? JSON.parse(value) : { value: '' }),

@@ -1,26 +1,42 @@
 // API/src/Modules/Subscribers/SubscriberModel.ts
-import { Field, ID, ObjectType, ForbiddenError } from 'type-graphql';
-import { sign, verify } from 'jsonwebtoken';
-import {
-  BaseEntity,
-  Entity,
-  PrimaryGeneratedColumn,
-  ManyToMany,
-  JoinTable,
-  Column,
-  BeforeUpdate,
-  OneToMany,
-  AfterUpdate,
-} from 'typeorm';
-import { Zone } from '../Zones/ZoneModel';
 import { config } from 'API/Config';
 import { ApolloError } from 'apollo-server-koa';
-import { SubscriberAccess } from './SubscriberAccessModel';
+import { sign, verify } from 'jsonwebtoken';
+import {
+  createUnionType,
+  Field,
+  ID,
+  ObjectType,
+  UnauthorizedError,
+} from 'type-graphql';
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  FindOneOptions,
+} from 'typeorm';
+import { ACME } from '../ACMEs/ACMEModel';
 import { User } from '../Users/UserModel';
+import { Zone } from '../Zones/ZoneModel';
+import { SubscriberAccess } from './SubscriberAccessModel';
+import { SubscriberSettings } from './SubscriberSettingsModel';
+import { Permission } from '../Permission/Permission';
+import { UserRole } from '../Users/UserRole';
 
 interface SubscriberTokenPayload {
   subscriberId: string;
 }
+
+export const SubscriberEntities = createUnionType({
+  name: 'SubscriberEntity',
+  types: () => [ACME, Zone, SubscriberSettings],
+});
 
 @ObjectType()
 @Entity()
@@ -30,23 +46,40 @@ export class Subscriber extends BaseEntity {
   readonly id: string;
 
   @Field()
+  @CreateDateColumn()
+  readonly createdAt: Date;
+
+  @Field()
+  @UpdateDateColumn()
+  readonly updatedAt: Date;
+
+  @Field()
   @Column('varchar', { default: 'Subs' })
   name: string;
-
-  @Field(() => Zone)
-  @ManyToMany(() => Zone, { cascade: ['insert', 'update'], lazy: true })
-  @JoinTable()
-  subscribedZones: Zone[];
 
   @Field(() => [SubscriberAccess])
   @OneToMany(
     () => SubscriberAccess,
     (subscriberAccess) => subscriberAccess.subscriber,
-    {
-      cascade: ['insert', 'update'],
-    },
   )
   accessPermissions: SubscriberAccess[];
+
+  @ManyToMany(() => Zone, { cascade: ['insert'], lazy: true })
+  @JoinTable()
+  subscribedZoneEntities: typeof SubscriberEntities[];
+
+  @ManyToMany(() => ACME, { cascade: ['insert'], lazy: true })
+  @JoinTable()
+  subscribedTLSEntities: typeof SubscriberEntities[];
+
+  @Field(() => SubscriberSettings)
+  async subscriberSettings(): Promise<SubscriberSettings> {
+    return SubscriberSettings.findOneOrFail({
+      where: {
+        subscriberId: this.id,
+      },
+    });
+  }
 
   subscriberToken(): string {
     const payload: SubscriberTokenPayload = { subscriberId: this.id };
@@ -73,34 +106,50 @@ export class Subscriber extends BaseEntity {
     return subscriber;
   }
 
-  static async getSubscribers(user: User | string): Promise<Subscriber[]> {
+  async checkUserAuthorization(
+    user: User,
+    requiredPermission: Permission,
+  ): Promise<Subscriber> {
+    const authorization = await SubscriberAccess.findOne({
+      subscriberId: this.id,
+      userId: user.id,
+    });
+
+    if (
+      (authorization &&
+        authorization.accessPermissions.includes(requiredPermission)) ||
+      user.roles.includes(UserRole.ADMIN)
+    )
+      return this;
+
+    throw new UnauthorizedError();
+  }
+
+  static async getSubscribers(
+    user: User | string,
+    requiredPermission = Permission.READ,
+  ): Promise<Subscriber[]> {
     return this.createQueryBuilder('subscriber')
       .leftJoinAndSelect('subscriber.accessPermissions', 'access')
       .where('access.userId = :userId', {
         userId: typeof user === 'string' ? user : user.id,
       })
+      .andWhere(`access.accessPermissions @> '{"${requiredPermission}"}'`)
       .getMany();
   }
 
   static async getSubscriber(
+    user: User,
     subscriberId: string,
-    user: User | string,
+    requiredPermission = Permission.READ,
+    options?: FindOneOptions<Subscriber>,
   ): Promise<Subscriber> {
-    const subscriber = await this.createQueryBuilder('subscriber')
-      .where('subscriber.id = :subscriberId', { subscriberId })
-      .leftJoinAndSelect('subscriber.accessPermissions', 'access')
-      .andWhere('access.userId = :userId', {
-        userId: typeof user === 'string' ? user : user.id,
-      })
-      .getOne();
-    if (!subscriber) throw new ForbiddenError();
+    const subscriber = await Subscriber.findOneOrFail({
+      where: { id: subscriberId },
+      ...options,
+    });
 
-    return subscriber;
-  }
-
-  @BeforeUpdate()
-  @AfterUpdate()
-  async beforeUpdate(item: Subscriber, b: string): Promise<void> {
-    console.log(item, b);
+    if (user.roles.includes(UserRole.ADMIN)) return subscriber;
+    return subscriber.checkUserAuthorization(user, requiredPermission);
   }
 }

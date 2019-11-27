@@ -1,0 +1,17 @@
+query Subscribers {
+  currentUser {
+    id
+
+    username
+
+    subscribers {
+      id
+
+      name
+
+      userAccess
+
+      userPermissions
+    }
+  }
+}

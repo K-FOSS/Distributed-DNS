@@ -1,18 +1,19 @@
 // API/src/Modules/ResourceRecords/ResourceRecordModel.ts
 import { Max } from 'class-validator';
-import { Field, ID, ObjectType, Int } from 'type-graphql';
+import { Field, ID, Int, ObjectType } from 'type-graphql';
 import {
-  AfterInsert,
   AfterRemove,
   AfterUpdate,
   BaseEntity,
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  JoinColumn,
+  AfterInsert,
 } from 'typeorm';
+import { SubscriberEventPayloadType } from '../Subscribers/SubscriberEventPayload';
 import { subscriberPubSub } from '../Subscribers/SubscriptionPubSub';
 import { Zone } from '../Zones/ZoneModel';
 import { ResourceRecordType } from './ResourceRecordTypes';
@@ -44,17 +45,25 @@ export class ResourceRecord extends BaseEntity {
   @Column('text')
   data: string;
 
-  @ManyToOne(() => Zone, (zone) => zone.resourceRecords)
+  @ManyToOne(
+    () => Zone,
+    (zone) => zone.resourceRecords,
+    {
+      cascade: ['remove'],
+      onDelete: 'CASCADE',
+    },
+  )
   @JoinColumn()
   zone: Zone;
+
   @Column()
   zoneId: string;
 
   @AfterUpdate()
-  @AfterInsert()
   @AfterRemove()
+  @AfterInsert()
   async updateZone(): Promise<void> {
     const zone = await Zone.findOne(this.zoneId);
-    if (zone) subscriberPubSub.publish(this.zoneId, zone);
+    if (zone) subscriberPubSub.publish(SubscriberEventPayloadType.UPDATE, zone);
   }
 }

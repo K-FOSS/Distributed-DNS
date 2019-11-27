@@ -1,28 +1,26 @@
 // API/src/Modules/ACMEs/ACMEResolver.ts
+import { AuthContext } from 'API/Context';
 import {
-  Resolver,
-  Mutation,
+  Arg,
   Authorized,
   Ctx,
-  Arg,
   FieldResolver,
-  Root,
-  Subscription,
-  Query,
-  ID,
   ForbiddenError,
+  ID,
+  Mutation,
+  Query,
+  Resolver,
+  Root,
 } from 'type-graphql';
-import { ACME } from './ACMEModel';
 import { CurrentUser } from '../Auth/CurrentUser';
-import { AuthContext } from 'API/Context';
+import { Certificate } from '../Certificates/CertificateModel';
+import { getPermission, Permission } from '../Permission/Permission';
 import { ACMEAccess } from './ACMEAccessModel';
-import { Permission, getPermission } from '../Permission/Permission';
 import { ACMEAccount } from './ACMEAccountModel';
 import { ACMEDomainInput } from './ACMEDomainInput';
 import { ACMEDomain } from './ACMEDomainModel';
-import { Certificate } from '../Certificates/CertificateModel';
-import { acmePubSub } from './ACMEPubSub';
 import { ACMEInput, ACMEUpdateInput } from './ACMEInput';
+import { ACME } from './ACMEModel';
 
 @Resolver(() => ACME)
 export class ACMEResolver {
@@ -161,17 +159,6 @@ export class ACMEResolver {
     );
 
     return certificate.acme;
-  }
-
-  @Subscription({
-    // @ts-ignore
-    subscribe: async (stuff, args) => acmePubSub.subscribe(args.ACMEToken),
-  })
-  certificateEvents(
-    @Arg('ACMEToken') ACMEToken: string,
-    @Root() cert: Certificate,
-  ): Certificate {
-    return cert;
   }
 
   @FieldResolver(() => [ACMEDomain])

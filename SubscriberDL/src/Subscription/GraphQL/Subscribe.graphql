@@ -1,0 +1,22 @@
+subscription Subscribe($subscriberToken: String!) {
+  subscribe(subscriberToken: $subscriberToken) {
+    eventType
+
+    id
+
+    eventType
+
+    entity {
+      ... on Zone {
+        ...Zone
+      }
+      ... on ACME {
+        ...ACME
+      }
+
+      ... on SubscriberSettings {
+        TLSOutputMode
+      }
+    }
+  }
+}

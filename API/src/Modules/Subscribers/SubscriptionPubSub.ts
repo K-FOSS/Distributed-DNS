@@ -1,14 +1,21 @@
 // API/src/Modules/Subscribers/SubscriptionPubSub.ts
 import { EventEmitter } from 'events';
-import { Subscriber } from './SubscriberModel';
+import { Subscriber, SubscriberEntities } from './SubscriberModel';
 import pEvent from 'p-event';
 import { Zone } from '../Zones/ZoneModel';
+import {
+  SubscriberEventPayloadType,
+  SubscriberEventPayload,
+} from './SubscriberEventPayload';
+import { EntityType } from './EntityType';
+import { ACME } from '../ACMEs/ACMEModel';
+import { EntityInput } from './EntityInput';
+import { SubscriberSettings } from './SubscriberSettingsModel';
 
 interface EventSubscriber {
   Id: string;
   eventEmitter: EventEmitter;
 }
-
 const eventSubscribers: EventSubscriber[] = [];
 
 const timeout = (ms: number): Promise<void> =>
@@ -16,24 +23,55 @@ const timeout = (ms: number): Promise<void> =>
 
 export class SubscriberPubSub {
   public ee: EventEmitter = new EventEmitter();
-  public async publish(zoneId: string, payload: Zone) {
-    this.ee.emit(zoneId, payload);
+
+  public async publish(
+    eventType: SubscriberEventPayloadType,
+    entity: typeof SubscriberEntities,
+  ) {
+    const eventPayload = new SubscriberEventPayload();
+    eventPayload.id = entity.id;
+    eventPayload.entity = entity;
+    eventPayload.eventType = eventType;
+
+    this.ee.emit(eventPayload.id, eventPayload);
   }
 
-  public async addZoneToSubscriber(
+  public async updateSubscriber(
     subscriberId: string,
-    zoneId: string,
+    newEntities: EntityInput[],
   ): Promise<void> {
-    const zone = await Zone.findOneOrFail({
-      where: { id: zoneId },
-      relations: ['resourceRecords'],
+    const subscriber = await Subscriber.findOne({
+      where: {
+        id: subscriberId,
+      },
     });
+    if (!subscriber) throw new Error('INVALID SUBSCRIBER');
 
-    this.ee.emit(`${subscriberId}-newZone`);
+    this.ee.emit(subscriber.id);
 
-    await timeout(10000);
+    await timeout(1500);
 
-    this.ee.emit(zone.id, zone);
+    // const newEntities: Promise<typeof SubscriberEntities[]> = []
+
+    for (const { entityId, entityType } of newEntities) {
+      let newEntity: typeof SubscriberEntities;
+
+      if (entityType === EntityType.TLS)
+        newEntity = await ACME.findOneOrFail({
+          where: {
+            id: entityId,
+          },
+        });
+      else if (entityType === EntityType.ZONE)
+        newEntity = await Zone.findOneOrFail({
+          where: {
+            id: entityId,
+          },
+        });
+      else throw new Error('INVALID SUBSCRIBER TYPE');
+
+      this.publish(SubscriberEventPayloadType.CREATE, newEntity);
+    }
   }
 
   public async subscribe(
@@ -43,26 +81,40 @@ export class SubscriberPubSub {
     let subscription = await Subscriber.getSubscriberFromToken(subscriberToken);
     eventSubscribers.push({ Id: subscription.id, eventEmitter });
 
-    async function* zoneEvents() {
+    async function* subscriberEvents() {
       subscription = await Subscriber.getSubscriberFromToken(subscriberToken);
-      const zoneIds: string[] = [];
+      const entityIds: string[] = [];
 
-      for (const { id } of await subscription.subscribedZones) zoneIds.push(id);
+      for (const { id } of (
+        await Promise.all([
+          subscription.subscribedZoneEntities,
+          subscription.subscribedTLSEntities,
+          SubscriberSettings.findOne({
+            where: {
+              subscriberId: subscription.id,
+            },
+          }),
+        ])
+      ).flat())
+        entityIds.push(id);
 
-      yield* pEvent.iterator(eventEmitter, zoneIds, {
-        resolutionEvents: [`${subscription.id}-newZone`],
+      yield* pEvent.iterator(eventEmitter, entityIds, {
+        resolutionEvents: [subscription.id],
       });
     }
 
-    async function* subscribeToZoneGen() {
+    async function* subscribeToEventsGen() {
       while (true) {
-        yield* zoneEvents();
+        yield* subscriberEvents();
       }
     }
 
-    return subscribeToZoneGen();
+    return subscribeToEventsGen();
   }
-  public async unsubscribe(subId: number) {}
+
+  public async unsubscribe(subId: number) {
+    console.log(`Unsubsriber ${subId}`);
+  }
 }
 
 export const subscriberPubSub = new SubscriberPubSub();

@@ -1,0 +1,15 @@
+query getSubscribedEntities($subscriberToken: String!) {
+  getSubscribedEntities(subscriberToken: $subscriberToken) {
+    ... on Zone {
+      ...Zone
+    }
+
+    ... on ACME {
+      ...ACME
+    }
+
+    ... on SubscriberSettings {
+      TLSOutputMode
+    }
+  }
+}

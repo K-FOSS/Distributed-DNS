@@ -1,0 +1,15 @@
+query ZonesPage {
+  currentUser {
+    id
+
+    username
+
+    zones {
+      id
+
+      domainName
+
+      userPermissions
+    }
+  }
+}

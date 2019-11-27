@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { User } from '../Users/UserModel';
 import { Subscriber } from './SubscriberModel';
+import { Permission } from '../Permission/Permission';
 
 @ObjectType()
 @Entity()
@@ -18,14 +19,27 @@ export class SubscriberAccess extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   readonly id: string;
 
-  @ManyToOne(() => Subscriber, (subscriber) => subscriber.accessPermissions)
+  @ManyToOne(
+    () => Subscriber,
+    (subscriber) => subscriber.accessPermissions,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
   @JoinColumn()
   subscriber: Subscriber;
+
   @Column()
   subscriberId: string;
 
-  @ManyToOne(() => User)
+  @Field(() => User)
+  @ManyToOne(() => User, { lazy: true })
   user: Promise<User> | User;
+
   @Column()
   userId: string;
+
+  @Field(() => [Permission])
+  @Column({ enum: Permission, type: 'enum', array: true })
+  accessPermissions: Permission[];
 }

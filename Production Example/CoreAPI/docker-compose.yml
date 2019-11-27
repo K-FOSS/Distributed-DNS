@@ -47,8 +47,7 @@ services:
       - DATABASE_Data:/var/lib/postgresql/data
 
   API:
-    build: '../../API'
-    image: docker.pkg.github.com/kristianfjones/distributed-dns/distributed-dns-api:latest
+    image: docker.pkg.github.com/kristianfjones/distributed-dns/distributed-dns-api:api
     depends_on:
       - Database
     environment:
@@ -64,8 +63,7 @@ services:
           - api
 
   Web-UI:
-    build: '../../Web'
-    image: docker.pkg.github.com/kristianfjones/distributed-dns/distributed-dns-web:latest
+    image: docker.pkg.github.com/kristianfjones/distributed-dns/distributed-dns-web:web
     depends_on:
       - API
     environment:

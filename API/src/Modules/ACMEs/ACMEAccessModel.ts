@@ -23,13 +23,18 @@ export class ACMEAccess extends BaseEntity {
   @UpdateDateColumn()
   readonly updatedAt: Date;
 
-  @ManyToOne(() => ACME, (acme) => acme.permissions)
+  @ManyToOne(
+    () => ACME,
+    (acme) => acme.permissions,
+  )
   acme: ACME;
+
   @Column()
   acmeId: string;
 
   @ManyToOne(() => User)
   user: Promise<User> | User;
+
   @Column()
   userId: string;
 

@@ -1,6 +1,0 @@
-subscription CertificateEvents($ACMEToken: String!) {
-  certificateEvents(ACMEToken: $ACMEToken) {
-    privateKey
-    certificate
-  }
-}

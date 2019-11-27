@@ -88,10 +88,6 @@ export type CreateSrvResourceRecordInput = {
   target: Scalars['String'],
 };
 
-export type CreateUtilityInput = {
-  name: Scalars['String'],
-};
-
 export type CreateValueResourceRecordInput = {
   type: ValueRecordType,
   ttl?: Maybe<Scalars['Int']>,
@@ -110,6 +106,16 @@ export type CurrentUser = {
   ACMEs: Array<Acme>,
 };
 
+
+export type EntityInput = {
+  entityType: EntityType,
+  entityId: Scalars['ID'],
+};
+
+export enum EntityType {
+  Tls = 'TLS',
+  Zone = 'ZONE'
+}
 
 export type LoginInput = {
   username: Scalars['String'],
@@ -136,12 +142,17 @@ export type Mutation = {
   updateMXResourceRecord: Zone,
   updateSRVResourceRecord: Zone,
   createSubscriber: CurrentUser,
+  deleteSubscriber: CurrentUser,
+  addSubscriberUser: Subscriber,
+  removeSubscriberUser: Subscriber,
   updateSubscriber: Subscriber,
+  addEntityToSubscriber: Subscriber,
+  removeEntityFromSubscriber: Subscriber,
   createSubscriberToken: Scalars['String'],
-  createUtility: Utility,
   addZoneUser: Zone,
   removeZoneUser: Zone,
   createZone: Zone,
+  deleteZone: CurrentUser,
 };
 
 
@@ -243,8 +254,37 @@ export type MutationCreateSubscriberArgs = {
 };
 
 
+export type MutationDeleteSubscriberArgs = {
+  subscriberId: Scalars['ID']
+};
+
+
+export type MutationAddSubscriberUserArgs = {
+  input: UserPermissionInput,
+  subscriberId: Scalars['ID']
+};
+
+
+export type MutationRemoveSubscriberUserArgs = {
+  userId: Scalars['ID'],
+  subscriberId: Scalars['ID']
+};
+
+
 export type MutationUpdateSubscriberArgs = {
-  input: UpdateSubscriberInput,
+  input: SubscriberSettingsInput,
+  subscriberId: Scalars['ID']
+};
+
+
+export type MutationAddEntityToSubscriberArgs = {
+  newEntities: Array<EntityInput>,
+  subscriberId: Scalars['ID']
+};
+
+
+export type MutationRemoveEntityFromSubscriberArgs = {
+  entityIds: Array<Scalars['ID']>,
   subscriberId: Scalars['ID']
 };
 
@@ -254,13 +294,8 @@ export type MutationCreateSubscriberTokenArgs = {
 };
 
 
-export type MutationCreateUtilityArgs = {
-  input: CreateUtilityInput
-};
-
-
 export type MutationAddZoneUserArgs = {
-  input: ZoneUserInput,
+  input: UserPermissionInput,
   zoneId: Scalars['ID']
 };
 
@@ -273,6 +308,11 @@ export type MutationRemoveZoneUserArgs = {
 
 export type MutationCreateZoneArgs = {
   input: ZoneInput
+};
+
+
+export type MutationDeleteZoneArgs = {
+  zoneId: Scalars['ID']
 };
 
 export type MxResourceRecordInput = {
@@ -294,11 +334,9 @@ export type Query = {
   currentUser?: Maybe<CurrentUser>,
   hasSetup: Scalars['Boolean'],
   subscriber: Subscriber,
-  getSubscribedZones: Array<Zone>,
+  getSubscribedEntities: Array<SubscriberEntity>,
   users: Array<User>,
   user: User,
-  utilities: Array<Utility>,
-  helloWorld: Scalars['String'],
   zones: Array<Zone>,
   zone: Zone,
 };
@@ -314,7 +352,7 @@ export type QuerySubscriberArgs = {
 };
 
 
-export type QueryGetSubscribedZonesArgs = {
+export type QueryGetSubscribedEntitiesArgs = {
   subscriberToken: Scalars['String']
 };
 
@@ -393,40 +431,67 @@ export type SrvResourceRecordInput = {
 export type Subscriber = {
    __typename?: 'Subscriber',
   id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
   name: Scalars['String'],
-  subscribedZones: Array<Zone>,
   accessPermissions: Array<SubscriberAccess>,
+  subscriberSettings: SubscriberSettings,
+  userAccess: Permission,
+  userPermissions: Array<Permission>,
+  subscribedEntities: Array<SubscriberEntity>,
 };
 
 export type SubscriberAccess = {
    __typename?: 'SubscriberAccess',
   id: Scalars['ID'],
+  user: User,
+  accessPermissions: Array<Permission>,
+};
+
+export type SubscriberEntity = Acme | Zone | SubscriberSettings;
+
+export type SubscriberEventPayload = {
+   __typename?: 'SubscriberEventPayload',
+  eventType: SubscriberPayloadType,
+  id: Scalars['ID'],
+  entity: SubscriberEntity,
 };
 
 export type SubscriberInput = {
   name: Scalars['String'],
 };
 
+export enum SubscriberPayloadType {
+  Create = 'CREATE',
+  Update = 'UPDATE',
+  Delete = 'DELETE'
+}
+
+export type SubscriberSettings = {
+   __typename?: 'SubscriberSettings',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  TLSOutputMode: SubscriberTlsOutputMode,
+};
+
+export type SubscriberSettingsInput = {
+  TLSOutputMode: SubscriberTlsOutputMode,
+};
+
+export enum SubscriberTlsOutputMode {
+  Dual = 'DUAL',
+  Single = 'SINGLE'
+}
+
 export type Subscription = {
    __typename?: 'Subscription',
-  certificateEvents: Certificate,
-  subscribeToZones: Zone,
+  subscribe: SubscriberEventPayload,
 };
 
 
-export type SubscriptionCertificateEventsArgs = {
-  ACMEToken: Scalars['String']
-};
-
-
-export type SubscriptionSubscribeToZonesArgs = {
+export type SubscriptionSubscribeArgs = {
   subscriberToken: Scalars['String']
-};
-
-export type UpdateSubscriberInput = {
-  name?: Maybe<Scalars['String']>,
-  addZoneIds: Array<Scalars['ID']>,
-  removeZoneIds: Array<Scalars['ID']>,
 };
 
 export type User = {
@@ -441,17 +506,16 @@ export type UserInput = {
   password: Scalars['String'],
 };
 
+export type UserPermissionInput = {
+  userId: Scalars['ID'],
+  accessPermission: Permission,
+};
+
 export enum UserRole {
   Guest = 'GUEST',
   User = 'USER',
   Admin = 'ADMIN'
 }
-
-export type Utility = {
-   __typename?: 'Utility',
-  id: Scalars['ID'],
-  name: Scalars['String'],
-};
 
 export enum ValueRecordType {
   A = 'A',
@@ -471,7 +535,7 @@ export type ValueResourceRecordInput = {
 export type Zone = {
    __typename?: 'Zone',
   id: Scalars['ID'],
-  updatedDate?: Maybe<Scalars['DateTime']>,
+  updatedDate: Scalars['DateTime'],
   domainName: Scalars['String'],
   resourceRecords: Array<ResourceRecord>,
   accessPermissions: Array<ZonePermissions>,
@@ -505,15 +569,6 @@ export type ZoneSettings = {
    __typename?: 'ZoneSettings',
   id: Scalars['ID'],
   contact: Scalars['String'],
-};
-
-export type ZoneSettingsInput = {
-  stuff: Scalars['String'],
-};
-
-export type ZoneUserInput = {
-  userId: Scalars['ID'],
-  accessPermission: Permission,
 };
 
 export type HasSetupQueryVariables = {};

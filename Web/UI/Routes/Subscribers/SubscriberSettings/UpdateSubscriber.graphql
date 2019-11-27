@@ -1,0 +1,14 @@
+mutation UpdateSubscriber(
+  $subscriberId: ID!
+  $input: SubscriberSettingsInput!
+) {
+  updateSubscriber(subscriberId: $subscriberId, input: $input) {
+    id
+
+    subscriberSettings {
+      id
+
+      TLSOutputMode
+    }
+  }
+}

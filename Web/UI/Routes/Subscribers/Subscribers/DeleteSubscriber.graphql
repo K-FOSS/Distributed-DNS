@@ -1,0 +1,17 @@
+mutation DeleteSubscriber($subscriberId: ID!) {
+  deleteSubscriber(subscriberId: $subscriberId) {
+    id
+
+    username
+
+    subscribers {
+      id
+
+      name
+
+      userAccess
+
+      userPermissions
+    }
+  }
+}

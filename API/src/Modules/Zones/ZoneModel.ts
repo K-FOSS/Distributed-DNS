@@ -12,6 +12,8 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  AfterRemove,
+  BeforeRemove,
 } from 'typeorm';
 import { Permission } from '../Permission/Permission';
 import { ResourceRecord } from '../ResourceRecords/ResourceRecordModel';
@@ -21,6 +23,7 @@ import { User } from '../Users/UserModel';
 import { UserRole } from '../Users/UserRole';
 import { ZonePermissions } from './ZonePermissionModel';
 import { ZoneSettings } from './ZoneSettingsModel';
+import { SubscriberEventPayloadType } from '../Subscribers/SubscriberEventPayload';
 
 @ObjectType()
 @Entity()
@@ -33,21 +36,22 @@ export class Zone extends BaseEntity {
   readonly createdAt: Date;
 
   @OneToOne(() => ZoneSettings, {
-    cascade: ['insert', 'update'],
+    onDelete: 'CASCADE',
   })
   @JoinColumn()
   zoneSettings: ZoneSettings;
+
   @Column()
   zoneSettingsId: string;
 
-  @Field(() => Date, { nullable: true })
-  async updatedDate(): Promise<Date | undefined> {
+  @Field(() => Date)
+  async updatedDate(): Promise<Date> {
     const resourceRecord = await ResourceRecord.getRepository().findOne(
       undefined,
       { order: { updatedAt: 'DESC' } },
     );
 
-    return resourceRecord ? resourceRecord.updatedAt : undefined;
+    return resourceRecord?.updatedAt || new Date();
   }
 
   @Field()
@@ -59,7 +63,7 @@ export class Zone extends BaseEntity {
     () => ResourceRecord,
     (resourceRecord) => resourceRecord.zone,
     {
-      cascade: ['insert', 'update'],
+      onDelete: 'CASCADE',
     },
   )
   @JoinColumn()
@@ -70,7 +74,7 @@ export class Zone extends BaseEntity {
     () => ZonePermissions,
     (zonePermission) => zonePermission.zone,
     {
-      cascade: ['insert', 'update'],
+      onDelete: 'CASCADE',
     },
   )
   accessPermissions: ZonePermissions[];
@@ -124,8 +128,18 @@ export class Zone extends BaseEntity {
     return zone.checkUserAuthorization(user, requiredPermission);
   }
 
+  @BeforeRemove()
+  async beforeRemove(): Promise<void> {
+    console.log('Removing');
+  }
+
   @AfterUpdate()
   updateZone(): void {
-    subscriberPubSub.publish(this.id, this);
+    subscriberPubSub.publish(SubscriberEventPayloadType.UPDATE, this);
+  }
+
+  @AfterRemove()
+  zoneDeleted(): void {
+    console.log('Zone Deleted', this);
   }
 }

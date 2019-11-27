@@ -2,11 +2,10 @@
 import Typography from '@material-ui/core/Typography';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useImport } from 'UI/Components/Providers/ImportProvider';
 import { BaseButton } from 'UI/Components/Styles/Button/BaseButton';
+import { useTextField } from 'UI/Components/Styles/Form/useTextField';
 import { BaseList } from 'UI/Components/Styles/List/BaseList';
 import { LabelListItem } from 'UI/Components/Styles/List/ListItems/LabelListItem';
-import { Loader } from 'UI/Components/Styles/Loader';
 import { PaperSection } from 'UI/Components/Styles/Section/PaperSection';
 import { Zone } from 'UI/GraphQL/graphqlTypes.gen';
 import { AcmeQuery } from './ACME.gen';
@@ -36,14 +35,7 @@ export function ACMEDomainsPanel({
     domains: undefined,
   });
   const acmeId = useMemo(() => acmeData?.ACME.id || undefined, [acmeData]);
-  const TextField = useImport({
-    imported: import(
-      'UI/Components/Styles/Inputs/TextField/BaseTextField/index',
-    ),
-    path: 'Components/Styles/Inputs/TextField/BaseTextField/index.tsx',
-    // TODO: TextField Skeleton Loader
-    Loader,
-  });
+  const TextField = useTextField();
 
   const handleValueChange: ValueChangeHandler = useCallback(
     (field, value) =>

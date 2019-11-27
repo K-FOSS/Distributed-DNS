@@ -23,8 +23,6 @@ export default function ZonePage(): React.ReactElement {
     [data],
   );
 
-  
-
   return (
     <>
       <Header title={{ primary: 'Zone' }}>

@@ -1,7 +1,6 @@
 // Web/UI/Components/Zone/ResourceRecord/Select/index.tsx
 import React from 'react';
-import { useImport } from 'UI/Components/Providers/ImportProvider';
-import { Loader } from 'UI/Components/Styles/Loader';
+import { useTextField } from 'UI/Components/Styles/Form/useTextField';
 import { ResourceRecordType } from 'UI/GraphQL/graphqlTypes.gen';
 
 interface ResourceRecordSelectProps {
@@ -13,14 +12,7 @@ export function ResourceRecordSelect({
   value,
   onChange,
 }: ResourceRecordSelectProps): React.ReactElement {
-  const TextField = useImport({
-    imported: import(
-      'UI/Components/Styles/Inputs/TextField/BaseTextField/index',
-    ),
-    path: 'Components/Styles/Inputs/TextField/BaseTextField/index.tsx',
-    // TODO: TextField Skeleton Loader
-    Loader,
-  });
+  const TextField = useTextField();
 
   return (
     <TextField

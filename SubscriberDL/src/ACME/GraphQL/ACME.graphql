@@ -1,0 +1,15 @@
+fragment ACME on ACME {
+  id
+
+  name
+
+  certificates {
+    id
+
+    createdAt
+
+    certificate
+
+    privateKey
+  }
+}

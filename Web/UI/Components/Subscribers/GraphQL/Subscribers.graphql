@@ -1,9 +1,0 @@
-query Subscribers {
-  currentUser {
-    id
-    subscribers {
-      id
-      name
-    }
-  }
-}

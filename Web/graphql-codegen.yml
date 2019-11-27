@@ -1,6 +1,9 @@
 overwrite: true
 schema: 'http://api/graphql'
 generates:
+  UI/GraphQL/introspection-result.json:
+    plugins:
+      - fragment-matcher
   UI/GraphQL/graphqlTypes.gen.ts:
     documents: 'UI/**/*.graphql'
     plugins:

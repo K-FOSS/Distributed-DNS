@@ -65,26 +65,26 @@ export enum SRVProtocol {
   TLS = '_tls',
   LDAP = '_ldap',
   HTTP = '_http',
-  OCSP = '_oscp'
+  OCSP = '_oscp',
 }
 
 registerEnumType(SRVProtocol, {
-  name: 'SRVProtocol'
-})
+  name: 'SRVProtocol',
+});
 
 @InputType()
 export class CreateSRVResourceRecordInput implements Partial<ResourceRecord> {
   @Field()
-  host: string
+  host: string;
 
   @Field(() => Int, { nullable: true })
   ttl?: number;
 
   @Field()
-  service: string
+  service: string;
 
   @Field(() => SRVProtocol)
-  protocol: SRVProtocol
+  protocol: SRVProtocol;
 
   @Field(() => Int)
   priority: number;
@@ -96,5 +96,5 @@ export class CreateSRVResourceRecordInput implements Partial<ResourceRecord> {
   port: number;
 
   @Field()
-  target: string
+  target: string;
 }

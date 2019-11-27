@@ -75,10 +75,6 @@ input CreateSRVResourceRecordInput {
   target: String!
 }
 
-input CreateUtilityInput {
-  name: String!
-}
-
 input CreateValueResourceRecordInput {
   type: ValueRecordType!
   ttl: Int
@@ -100,6 +96,16 @@ type CurrentUser {
 The javascript `Date` as string. Type represents date and time as the ISO Date string.
 """
 scalar DateTime
+
+input EntityInput {
+  entityType: EntityType!
+  entityId: ID!
+}
+
+enum EntityType {
+  TLS
+  ZONE
+}
 
 input LoginInput {
   username: String!
@@ -125,12 +131,17 @@ type Mutation {
   updateMXResourceRecord(input: MXResourceRecordInput!, resourceRecordId: ID!): Zone!
   updateSRVResourceRecord(input: SRVResourceRecordInput!, resourceRecordId: ID!): Zone!
   createSubscriber(input: SubscriberInput!): CurrentUser!
-  updateSubscriber(input: UpdateSubscriberInput!, subscriberId: ID!): Subscriber!
+  deleteSubscriber(subscriberId: ID!): CurrentUser!
+  addSubscriberUser(input: UserPermissionInput!, subscriberId: ID!): Subscriber!
+  removeSubscriberUser(userId: ID!, subscriberId: ID!): Subscriber!
+  updateSubscriber(input: SubscriberSettingsInput!, subscriberId: ID!): Subscriber!
+  addEntityToSubscriber(newEntities: [EntityInput!]!, subscriberId: ID!): Subscriber!
+  removeEntityFromSubscriber(entityIds: [ID!]!, subscriberId: ID!): Subscriber!
   createSubscriberToken(subscriberId: ID!): String!
-  createUtility(input: CreateUtilityInput!): Utility!
-  addZoneUser(input: ZoneUserInput!, zoneId: ID!): Zone!
+  addZoneUser(input: UserPermissionInput!, zoneId: ID!): Zone!
   removeZoneUser(zoneUserId: ID!, zoneId: ID!): Zone!
   createZone(input: ZoneInput!): Zone!
+  deleteZone(zoneId: ID!): CurrentUser!
 }
 
 input MXResourceRecordInput {
@@ -151,11 +162,9 @@ type Query {
   currentUser: CurrentUser
   hasSetup: Boolean!
   subscriber(subscriberId: ID!): Subscriber!
-  getSubscribedZones(subscriberToken: String!): [Zone!]!
+  getSubscribedEntities(subscriberToken: String!): [SubscriberEntity!]!
   users: [User!]!
   user(userId: String!): User!
-  utilities: [Utility!]!
-  helloWorld: String!
   zones: [Zone!]!
   zone(zoneId: String!): Zone!
 }
@@ -223,28 +232,58 @@ input SRVResourceRecordInput {
 
 type Subscriber {
   id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
   name: String!
-  subscribedZones: [Zone!]!
   accessPermissions: [SubscriberAccess!]!
+  subscriberSettings: SubscriberSettings!
+  userAccess: Permission!
+  userPermissions: [Permission!]!
+  subscribedEntities: [SubscriberEntity!]!
 }
 
 type SubscriberAccess {
   id: ID!
+  user: User!
+  accessPermissions: [Permission!]!
+}
+
+union SubscriberEntity = ACME | Zone | SubscriberSettings
+
+type SubscriberEventPayload {
+  eventType: SubscriberPayloadType!
+  id: ID!
+  entity: SubscriberEntity!
 }
 
 input SubscriberInput {
   name: String!
 }
 
-type Subscription {
-  certificateEvents(ACMEToken: String!): Certificate!
-  subscribeToZones(subscriberToken: String!): Zone!
+enum SubscriberPayloadType {
+  CREATE
+  UPDATE
+  DELETE
 }
 
-input UpdateSubscriberInput {
-  name: String
-  addZoneIds: [ID!]!
-  removeZoneIds: [ID!]!
+type SubscriberSettings {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  TLSOutputMode: SubscriberTLSOutputMode!
+}
+
+input SubscriberSettingsInput {
+  TLSOutputMode: SubscriberTLSOutputMode!
+}
+
+enum SubscriberTLSOutputMode {
+  DUAL
+  SINGLE
+}
+
+type Subscription {
+  subscribe(subscriberToken: String!): SubscriberEventPayload!
 }
 
 type User {
@@ -258,15 +297,15 @@ input UserInput {
   password: String!
 }
 
+input UserPermissionInput {
+  userId: ID!
+  accessPermission: Permission!
+}
+
 enum UserRole {
   GUEST
   USER
   ADMIN
-}
-
-type Utility {
-  id: ID!
-  name: String!
 }
 
 enum ValueRecordType {
@@ -286,7 +325,7 @@ input ValueResourceRecordInput {
 
 type Zone {
   id: ID!
-  updatedDate: DateTime
+  updatedDate: DateTime!
   domainName: String!
   resourceRecords(filter: ResourceRecordFilter): [ResourceRecord!]!
   accessPermissions: [ZonePermissions!]!
@@ -314,13 +353,4 @@ type ZonePermissions {
 type ZoneSettings {
   id: ID!
   contact: String!
-}
-
-input ZoneSettingsInput {
-  stuff: String!
-}
-
-input ZoneUserInput {
-  userId: ID!
-  accessPermission: Permission!
 }

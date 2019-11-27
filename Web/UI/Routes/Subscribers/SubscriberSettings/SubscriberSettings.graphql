@@ -1,0 +1,27 @@
+query SubscriberSettings($subscriberId: ID!) {
+  subscriber(subscriberId: $subscriberId) {
+    id
+
+    name
+
+    updatedAt
+
+    subscriberSettings {
+      id
+
+      TLSOutputMode
+    }
+
+    accessPermissions {
+      id
+
+      user {
+        id
+
+        username
+      }
+
+      accessPermissions
+    }
+  }
+}

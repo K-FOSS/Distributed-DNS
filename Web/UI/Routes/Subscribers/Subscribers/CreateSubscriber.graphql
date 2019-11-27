@@ -1,0 +1,17 @@
+mutation CreateSubscriber($input: SubscriberInput!) {
+  createSubscriber(input: $input) {
+    id
+
+    username
+
+    subscribers {
+      id
+
+      name
+
+      userAccess
+
+      userPermissions
+    }
+  }
+}

@@ -1,21 +1,20 @@
 // Web/UI/Components/Users/AutoSuggest/AutoSuggest.tsx
+import Chip from '@material-ui/core/Chip';
+import MenuItem from '@material-ui/core/MenuItem';
+import Paper from '@material-ui/core/Paper';
 import React, {
-  useMemo,
-  useState,
+  ChangeEvent,
   Dispatch,
   SetStateAction,
   useCallback,
-  ChangeEvent,
+  useMemo,
   useRef,
+  useState,
 } from 'react';
-import Paper from '@material-ui/core/Paper';
-import { useUsersQuery } from './Users.gen';
-import { useImport } from 'UI/Components/Providers/ImportProvider';
-import { Loader } from 'UI/Components/Styles/Loader';
-import { useStyles } from './Styles';
-import Chip from '@material-ui/core/Chip';
-import MenuItem from '@material-ui/core/MenuItem';
+import { useTextField } from 'UI/Components/Styles/Form/useTextField';
 import { User } from 'UI/GraphQL/graphqlTypes.gen';
+import { useStyles } from './Styles';
+import { useUsersQuery } from './Users.gen';
 
 export type UserData = Pick<User, 'username' | 'id'>;
 
@@ -47,13 +46,7 @@ export function UsersAutoSuggest({
     hideSuggest: true,
   });
 
-  const TextField = useImport({
-    imported: import(
-      'UI/Components/Styles/Inputs/TextField/BaseTextField/index',
-    ),
-    path: 'Components/Styles/Inputs/TextField/BaseTextField/index.tsx',
-    Loader,
-  });
+  const TextField = useTextField();
 
   const handleStateChange: HandleStateChange = useCallback(
     (field, value) =>

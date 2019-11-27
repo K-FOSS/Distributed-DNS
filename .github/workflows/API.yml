@@ -53,7 +53,7 @@ jobs:
         uses: KristianFJones/Publish-Docker-Github-Action@master
         with:
           dockerfile: API/Dockerfile
-          name: docker.pkg.github.com/kristianfjones/distributed-dns/distributed-dns-api:latest
+          name: docker.pkg.github.com/kristianfjones/distributed-dns/distributed-dns-api:api
           username: ${{ secrets.DOCKER_GITHUB_USERNAME }}
           password: ${{ secrets.DOCKER_GITHUB_PASSWORD }}
           registry: docker.pkg.github.com

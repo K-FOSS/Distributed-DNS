@@ -20,8 +20,9 @@ import { ResourceRecordType } from '../ResourceRecords/ResourceRecordTypes';
 import { ResourceRecordFilter } from './ResourceRecordFilter';
 import { ZoneSettings } from './ZoneSettingsModel';
 import { Permission, getPermission } from '../Permission/Permission';
-import { ZoneUserInput } from './ZoneSettingsInput';
 import { ApolloError } from 'apollo-server-koa';
+import { CurrentUser } from '../Auth/CurrentUser';
+import { UserPermissionInput } from '../Permission/UserInput';
 
 @Resolver(() => Zone)
 export class ZoneResolver {
@@ -65,7 +66,7 @@ export class ZoneResolver {
   @Mutation(() => Zone)
   async addZoneUser(
     @Arg('zoneId', () => ID) zoneId: string,
-    @Arg('input') { userId, accessPermission }: ZoneUserInput,
+    @Arg('input') { userId, accessPermission }: UserPermissionInput,
     @Ctx() { currentUser }: AuthContext,
   ): Promise<Zone> {
     const zone = await Zone.getUserZone(currentUser, zoneId, Permission.ADMIN, {
@@ -132,31 +133,56 @@ export class ZoneResolver {
     @Arg('input')
     { zoneUserIds, ns, contact, ...zoneInput }: ZoneInput,
   ): Promise<Zone> {
-    const zone = Zone.create(zoneInput);
     const zoneSettings = ZoneSettings.create({ contact });
-    const zonePermissions = zoneUserIds.map((userId) =>
-      ZonePermissions.create({
-        userId: userId,
-        accessPermissions: [
-          Permission.READ,
-          Permission.WRITE,
-          Permission.ADMIN,
-        ],
-      }),
+    await zoneSettings.save();
+
+    const zone = Zone.create({ ...zoneInput, zoneSettingsId: zoneSettings.id });
+    await zone.save();
+
+    await Promise.all(
+      zoneUserIds.map((userId) =>
+        ZonePermissions.create({
+          userId: userId,
+          accessPermissions: [
+            Permission.READ,
+            Permission.WRITE,
+            Permission.ADMIN,
+          ],
+          zoneId: zone.id,
+        }).save(),
+      ),
     );
-    zone.zoneSettings = zoneSettings;
-    zone.accessPermissions = zonePermissions;
 
     const nsRecord = ResourceRecord.create({
       type: ResourceRecordType.NS,
       host: '@',
       data: JSON.stringify({ value: ns }),
+      zoneId: zone.id,
     });
-    zone.resourceRecords = [nsRecord];
-
-    await zone.save();
+    await nsRecord.save();
 
     return zone;
+  }
+
+  @Authorized()
+  @Mutation(() => CurrentUser)
+  async deleteZone(
+    @Arg('zoneId', () => ID) zoneId: string,
+    @Ctx() { currentUser }: AuthContext,
+  ): Promise<CurrentUser> {
+    const zone = await Zone.getUserZone(currentUser, zoneId, Permission.ADMIN);
+
+    const [zoneSettings] = await Promise.all([
+      ZoneSettings.findOneOrFail({
+        where: { id: zone.zoneSettingsId },
+      }),
+    ]);
+
+    await Promise.all([zoneSettings.remove()]);
+
+    await zone.remove();
+
+    return currentUser;
   }
 
   @FieldResolver(() => [ResourceRecord])

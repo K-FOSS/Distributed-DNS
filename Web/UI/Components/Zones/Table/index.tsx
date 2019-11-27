@@ -22,6 +22,8 @@ export function ZonesTable(): React.ReactElement {
     [history],
   );
 
+  console.log(data);
+
   return (
     <>
       <MaterialTable

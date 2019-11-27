@@ -2,8 +2,7 @@
 import MaterialTable from 'material-table';
 import { useSnackbar } from 'notistack';
 import React, { useCallback, useMemo } from 'react';
-import { useImport } from 'UI/Components/Providers/ImportProvider';
-import { Loader } from 'UI/Components/Styles/Loader';
+import { useTextField } from 'UI/Components/Styles/Form/useTextField';
 import {
   Permission,
   ResourceRecord,
@@ -52,14 +51,7 @@ export function ZoneTable({ zoneData }: ZoneTableProps): React.ReactElement {
     [zoneData],
   );
 
-  const TextField = useImport({
-    imported: import(
-      'UI/Components/Styles/Inputs/TextField/BaseTextField/index',
-    ),
-    path: 'Components/Styles/Inputs/TextField/BaseTextField/index.tsx',
-    // TODO: TextField Skeleton Loader
-    Loader,
-  });
+  const TextField = useTextField();
 
   const handleAddResourceRecord = useCallback(
     async ({ data, ttl, ...input }: ResourceRecordData) => {

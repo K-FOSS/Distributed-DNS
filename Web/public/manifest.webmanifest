@@ -1,0 +1,20 @@
+{
+  "short_name": "Distributed DNS",
+  "name": "Distributed DNS",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/favicon-512x512.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#fff",
+  "theme_color": "#2196f3"
+}

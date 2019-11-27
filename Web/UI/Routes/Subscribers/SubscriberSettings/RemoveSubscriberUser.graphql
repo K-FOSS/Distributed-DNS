@@ -1,0 +1,25 @@
+mutation RemoveSubscriberUser($subscriberId: ID!, $userId: ID!) {
+  removeSubscriberUser(subscriberId: $subscriberId, userId: $userId) {
+    id
+
+    name
+
+    updatedAt
+
+    subscriberSettings {
+      id
+    }
+
+    accessPermissions {
+      id
+
+      user {
+        id
+
+        username
+      }
+
+      accessPermissions
+    }
+  }
+}
