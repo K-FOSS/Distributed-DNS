@@ -32,7 +32,7 @@ export function ClientConfigurationPanel(): React.ReactElement {
 
     if (response.data?.createSubscriberToken)
       setSubscriberToken(response.data.createSubscriberToken);
-  }, []);
+  }, [createSubscriberToken, subscriberId]);
 
   const handleCopyTokenClick = useCallback(
     async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
