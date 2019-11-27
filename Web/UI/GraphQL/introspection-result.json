@@ -10,6 +10,9 @@
           },
           {
             "name": "Zone"
+          },
+          {
+            "name": "SubscriberSettings"
           }
         ]
       }

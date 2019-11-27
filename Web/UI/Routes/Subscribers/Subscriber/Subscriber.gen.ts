@@ -48,6 +48,6 @@ export type SubscriberQuery = (
     ) | (
       { __typename?: 'Zone' }
       & Pick<Types.Zone, 'id' | 'domainName'>
-    )> }
+    ) | { __typename?: 'SubscriberSettings' }> }
   ) }
 );

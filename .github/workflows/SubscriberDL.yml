@@ -1,4 +1,4 @@
-name: DNSDL
+name: SubscriberDL
 on:
   push:
 jobs:

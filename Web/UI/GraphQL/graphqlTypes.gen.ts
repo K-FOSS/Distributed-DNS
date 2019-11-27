@@ -448,7 +448,7 @@ export type SubscriberAccess = {
   accessPermissions: Array<Permission>,
 };
 
-export type SubscriberEntity = Acme | Zone;
+export type SubscriberEntity = Acme | Zone | SubscriberSettings;
 
 export type SubscriberEventPayload = {
    __typename?: 'SubscriberEventPayload',
@@ -921,8 +921,18 @@ export type AddEntityToSubscriberMutation = (
     ) | (
       { __typename?: 'Zone' }
       & Pick<Zone, 'id' | 'domainName'>
-    )> }
+    ) | { __typename?: 'SubscriberSettings' }> }
   ) }
+);
+
+export type CreateSubscriberTokenMutationVariables = {
+  subscriberId: Scalars['ID']
+};
+
+
+export type CreateSubscriberTokenMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'createSubscriberToken'>
 );
 
 export type NewEntityQueryVariables = {};
@@ -960,7 +970,7 @@ export type RemoveEntityFromSubscriberMutation = (
     ) | (
       { __typename?: 'Zone' }
       & Pick<Zone, 'id' | 'domainName'>
-    )> }
+    ) | { __typename?: 'SubscriberSettings' }> }
   ) }
 );
 
@@ -980,7 +990,7 @@ export type SubscriberQuery = (
     ) | (
       { __typename?: 'Zone' }
       & Pick<Zone, 'id' | 'domainName'>
-    )> }
+    ) | { __typename?: 'SubscriberSettings' }> }
   ) }
 );
 

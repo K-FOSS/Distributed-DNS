@@ -49,6 +49,6 @@ export type RemoveEntityFromSubscriberMutation = (
     ) | (
       { __typename?: 'Zone' }
       & Pick<Types.Zone, 'id' | 'domainName'>
-    )> }
+    ) | { __typename?: 'SubscriberSettings' }> }
   ) }
 );

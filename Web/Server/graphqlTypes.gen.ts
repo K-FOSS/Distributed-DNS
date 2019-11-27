@@ -448,7 +448,7 @@ export type SubscriberAccess = {
   accessPermissions: Array<Permission>,
 };
 
-export type SubscriberEntity = Acme | Zone;
+export type SubscriberEntity = Acme | Zone | SubscriberSettings;
 
 export type SubscriberEventPayload = {
    __typename?: 'SubscriberEventPayload',

@@ -25,6 +25,7 @@ import { useNewEntityQuery } from './NewEntity.gen';
 import { useAddEntityToSubscriberMutation } from './AddEntityToSubscriber.gen';
 import { useRemoveEntityFromSubscriberMutation } from './RemoveEntityFromSubscriber.gen';
 import { useSnackbar } from 'notistack';
+import { ClientConfigurationPanel } from './ClientConfigurationPanel';
 
 interface SubscriberPageParams {
   subscriberId: string;
@@ -215,9 +216,7 @@ export default function SubscriberPage(): React.ReactElement {
             )}
           </PaperSection>
           {userSubscriberPermissions.includes(Permission.Write) && (
-            <PaperSection>
-              <Typography variant='h4'>Client Configuration</Typography>
-            </PaperSection>
+            <ClientConfigurationPanel />
           )}
         </PageSectionRoot>
       </div>
