@@ -5,6 +5,7 @@ RUN npm install
 COPY ./Server/ ./Server/
 COPY ./UI/ ./UI/
 COPY ./bin/ ./bin/
+COPY ./public/ ./public/
 COPY ./types/ ./types/
 COPY ./Icons/ ./Icons/
 RUN NODE_ENV=production npm run build
