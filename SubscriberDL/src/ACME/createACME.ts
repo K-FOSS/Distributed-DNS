@@ -1,49 +1,58 @@
 // SubscriberDL/src/ACME/updateACME.ts
-import { outputFile, pathExists, remove } from 'fs-extra'
-import { loadState, saveState, statePath } from '../State'
-import { AcmeFragment } from './GraphQL/ACME.gen'
-import { config } from '../Config'
-import { SubscriberTlsOutputMode } from '../graphqlTypes.gen'
+import { outputFile, pathExists, remove } from "fs-extra";
+import { loadState, saveState, statePath } from "../State";
+import { AcmeFragment } from "./GraphQL/ACME.gen";
+import { config } from "../Config";
+import { SubscriberTlsOutputMode } from "../graphqlTypes.gen";
+import { restartWebContainer } from "../Docker";
 
+/**
+ * Create or Update a ACME Certificate/Key pair on this Subscriber
+ * @param ACME ACME
+ */
 export async function createUpdateACME(
-  ACME: AcmeFragment,
+  ACME: AcmeFragment
 ): Promise<void | void[]> {
-  const currentState = await loadState()
+  const currentState = await loadState();
 
-  let acmeState = currentState.ACMEs.find(({ id }) => id === ACME.id)
+  // Get the local state of the ACME Subscriber Entity
+  let acmeState = currentState.ACMEs.find(({ id }) => id === ACME.id);
+
   if (acmeState) {
-    if (acmeState.updatedDate === ACME.certificates[0].createdAt) return
-
-    console.log('Updating existing Certificate')
+    // If certificates date is unchanged nothing is needed.
+    if (acmeState.updatedDate === ACME.certificates[0].createdAt) return;
 
     currentState.ACMEs[currentState.ACMEs.indexOf(acmeState)] = {
       ...currentState.ACMEs[currentState.ACMEs.indexOf(acmeState)],
-      updatedDate: ACME.certificates[0].createdAt,
-    }
+      updatedDate: ACME.certificates[0].createdAt
+    };
   } else {
+    // Create new ACME State if it is undefined
     acmeState = {
       id: ACME.id,
       updatedDate: ACME.certificates[0].createdAt,
-      name: ACME.name,
-    }
-    currentState.ACMEs.push(acmeState)
+      name: ACME.name
+    };
+    currentState.ACMEs.push(acmeState);
   }
 
-  await saveState(currentState)
+  await saveState(currentState);
 
-  const { certificate, privateKey } = ACME.certificates[0]
+  const { certificate, privateKey } = ACME.certificates[0];
 
-  const certsFile = `${config.dataPath}/TLS/${ACME.name}.pem`
-  const keyFile = `${config.dataPath}/TLS/${ACME.name}.key`
+  const certsFile = `${config.dataPath}/TLS/${ACME.name}.pem`;
+  const keyFile = `${config.dataPath}/TLS/${ACME.name}.key`;
 
   if (currentState.Settings.TLSOutputMode === SubscriberTlsOutputMode.Dual) {
-    return Promise.all([
+    await Promise.all([
       outputFile(keyFile, privateKey),
-      outputFile(certsFile, certificate),
-    ])
+      outputFile(certsFile, certificate)
+    ]);
+  } else {
+    if (await pathExists(keyFile)) remove(keyFile);
+
+    await outputFile(certsFile, certificate + privateKey);
   }
 
-  if (await pathExists(keyFile)) remove(keyFile)
-
-  return outputFile(certsFile, certificate + privateKey)
+  await restartWebContainer();
 }

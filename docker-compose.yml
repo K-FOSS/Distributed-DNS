@@ -1,78 +1,68 @@
 version: '3.7'
+
 services:
   Web:
-    image: abiosoft/caddy
+    image: hectormolinero/caddy2
+    restart: unless-stopped
     ports:
       - 80:80
     volumes:
-      - './Caddyfile:/etc/Caddyfile'
-      - './ACMEDL/data:/SSL'
-  api:
-    build:
-      context: './API'
-      dockerfile: 'Dockerfile.dev'
-    image: 'applicationtemplate'
-    environment:
-      DB_HOST: database
-      DB_PASSWORD: pgpass
-      NODE_ENV: development
-    volumes:
-      - './API:/development'
-      - './API.graphql:/API.graphql'
-  web-gen:
-    build:
-      context: './Scripts/GraphQLCodegen'
-      dockerfile: 'Dockerfile'
-    image: 'applicationtemplate-gen'
-    volumes:
-      - './Web:/data'
+      - ./Caddyfile.json:/etc/Caddy/Caddyfile.json
 
-  SubscriberDL-GQLGen:
-    build:
-      context: './Scripts/GraphQLCodegen'
-      dockerfile: 'Dockerfile'
-    image: 'applicationtemplate-gen'
+  PermissionMaker:
+    image: alpine:3.11
+    command: chown -R 1000:1000 /workspace/
     volumes:
-      - './SubscriberDL:/data'
+      - apiModules:/workspace/apiModules
+      - uiModules:/workspace/uiModules
+      - subscriberDLModules:/workspace/subscriberDLModules
 
-  database:
+  Database:
     image: postgres:11-alpine
-    ports:
-      - 4763:5432
     volumes:
       - databaseData:/var/lib/postgresql/data
+    ports:
+      - 4763:5432
     environment:
       POSTGRES_PASSWORD: pgpass
       POSTGRES_DB: application
 
-  NS1:
-    image: resystit/bind9:latest
-    restart: unless-stopped
-    container_name: 'NS'
-    ports:
-      - 53:53/tcp
-      - 53:53/udp
-      - 55:53/udp
+  API:
+    build:
+      context: ./API/
+      dockerfile: Dockerfile.dev
+    image: kristianfoss/development/app-template-api
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    environment:
+      DB_HOST: database
+      DB_PASSWORD: pgpass
     volumes:
-      - ./SubscriberDL/data/Zones:/zones
-      - ./SubscriberDL/data/BIND:/etc/bind/
-    labels:
-      - com.distributed-dns.bind=true
+      - ./API:/workspace/API:delegated
+      - apiModules:/workspace/API/node_modules
 
   SubscriberDL:
-    build: './SubscriberDL'
-    image: 'subscriber-dl'
-    environment:
-      SUBSCRIBER_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWJzY3JpYmVySWQiOiJmY2NkMzVlZS1jODQyLTRkZWItODg1Mi1iODI2Mjk2N2NjNTYiLCJpYXQiOjE1NzQ3MTg2MTB9.IJSEASiuJOFteJ2F1rXNc6Fu5lETQQ7LGw-6MbqwpUI
-      API_URL: 'http://api'
+    build:
+      context: ./SubscriberDL/
+      dockerfile: Dockerfile.dev
+    image: kristianfoss/development/distributed-dns-subscriberdl
+    command: /bin/sh -c "while sleep 1000; do :; done"
     volumes:
-      - zoneFiles:/data/Zones
-      - bindConfig:/data/BIND
-      - state:/data/State
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ./SubscriberDL:/workspace/SubscriberDL:delegated
+      - subscriberDLModules:/workspace/SubscriberDL/node_modules
+
+  # UI:
+  #   build:
+  #     context: ./Web/
+  #     dockerfile: Dockerfile.dev
+  #   image: kristianfoss/development/app-template-ui
+  #   command: /bin/sh -c "while sleep 1000; do :; done"
+  #   volumes:
+  #     - .:/workspace:cached
+  #     - uiModules:/workspace/Web/node_modules
 
 volumes:
   databaseData:
-  zoneFiles:
-  bindConfig:
-  state:
+  apiModules:
+  uiModules:
+  apiSchema:
+  subscriberDLModules:

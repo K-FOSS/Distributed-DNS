@@ -42,7 +42,7 @@ export async function createOrder(
   const [privateKey, csr] = await forge.createCsr({
     commonName: domainNames[0],
     altNames: domainNames,
-    keySize: 4096,
+    keySize: 2048,
   });
   await client.finalizeOrder(Order, csr);
 
