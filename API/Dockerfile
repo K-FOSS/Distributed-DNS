@@ -1,17 +1,17 @@
-FROM docker.pkg.github.com/kristianfjones/docker-images/node-alpine:latest
+FROM mhart/alpine-node
 WORKDIR /app
 COPY package.json package-lock.json tsconfig.json tsconfig.build.json ./
 RUN npm ci
 COPY src ./src/
 RUN NODE_ENV=production npm run build
 
-FROM docker.pkg.github.com/kristianfjones/docker-images/node-alpine:latest
+FROM mhart/alpine-node
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package.json package-lock.json ./
 RUN npm ci --prod
 
-FROM astefanutti/scratch-node
+FROM mhart/alpine-node
 ENV NODE_ENV=production
 COPY --from=1 /app/node_modules/ /app/node_modules/
 WORKDIR /app
