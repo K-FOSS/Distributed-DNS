@@ -54,17 +54,18 @@ export class SubscribersResolver {
     @Arg('subscriberToken') subscriberToken: string,
   ): Promise<typeof SubscriberEntities[]> {
     const subscriber = await Subscriber.getSubscriberFromToken(subscriberToken);
-    return (
-      await Promise.all([
-        subscriber.subscribedZoneEntities,
-        subscriber.subscribedTLSEntities,
-        SubscriberSettings.findOneOrFail({
-          where: {
-            subscriberId: subscriber.id,
-          },
-        }),
-      ])
-    ).flat();
+
+    const subscriberEntities = await Promise.all([
+      subscriber.subscribedZoneEntities,
+      subscriber.subscribedTLSEntities,
+      SubscriberSettings.findOneOrFail({
+        where: {
+          subscriberId: subscriber.id,
+        },
+      }),
+    ]);
+
+    return subscriberEntities.flat();
   }
 
   @Authorized()
@@ -133,16 +134,17 @@ export class SubscribersResolver {
 
     let newUserAccessPermission: Permission[];
 
-    if (accessPermission === Permission.ADMIN)
+    if (accessPermission === Permission.ADMIN) {
       newUserAccessPermission = [
         Permission.READ,
         Permission.WRITE,
         Permission.ADMIN,
       ];
-    else if (accessPermission === Permission.WRITE)
+    } else if (accessPermission === Permission.WRITE) {
       newUserAccessPermission = [Permission.READ, Permission.WRITE];
-    else if (accessPermission === Permission.READ)
+    } else if (accessPermission === Permission.READ) {
       newUserAccessPermission = [Permission.READ];
+    }
 
     const userAccess = SubscriberAccess.create({
       userId: userId,

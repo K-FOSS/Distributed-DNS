@@ -35,8 +35,8 @@ export const initApollo = (): ApolloClient<NormalizedCacheObject> => {
   const wsLink = new WebSocketLink({
     uri,
     options: {
-      lazy: true,
       reconnect: true,
+      reconnectionAttempts: 500,
       connectionParams: {
         authToken: config.subscriberToken,
       },
