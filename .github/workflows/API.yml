@@ -48,7 +48,6 @@ jobs:
     needs: [Test, Prettier, Lint]
     steps:
       - uses: actions/checkout@master
-      - uses: textbook/git-checkout-submodule-action@master
       - name: Publish to Registry
         uses: KristianFJones/Publish-Docker-Github-Action@master
         with:
