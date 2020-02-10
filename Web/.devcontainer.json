@@ -1,16 +1,18 @@
 {
   "name": "Distributed DNS API Container",
   "dockerComposeFile": ["../docker-compose.yml"],
-  "service": "API",
+  "service": "UI",
   "shutdownAction": "none",
   "settings": {
     // This dev container does include /bin/bash if you prefer to use it instead of ash.
     "terminal.integrated.shell.linux": "/bin/sh"
   },
   "remoteEnv": {
-    "SHELL": "/bin/sh"
+    "SHELL": "/bin/sh",
+    "API_HOST": "api:8080",
+    "PUBLIC_URL": "http://localhost:8080"
   },
   "extensions": ["esbenp.prettier-vscode"],
   "remoteUser": "node",
-  "workspaceFolder": "/workspace/API"
+  "workspaceFolder": "/workspace/Web"
 }

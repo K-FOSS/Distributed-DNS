@@ -56,13 +56,13 @@ export class SubscribersResolver {
     const subscriber = await Subscriber.getSubscriberFromToken(subscriberToken);
 
     const subscriberEntities = await Promise.all([
-      subscriber.subscribedZoneEntities,
-      subscriber.subscribedTLSEntities,
       SubscriberSettings.findOneOrFail({
         where: {
           subscriberId: subscriber.id,
         },
       }),
+      subscriber.subscribedZoneEntities,
+      subscriber.subscribedTLSEntities,
     ]);
 
     return subscriberEntities.flat();

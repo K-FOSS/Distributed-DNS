@@ -21,6 +21,7 @@ export const build = async (watch = false): Promise<void> => {
     contentHash: true,
     sourceMaps: false,
     cache: false,
+    hmrPort: 5859,
   });
 
   await bundler.bundle();

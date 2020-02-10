@@ -6,7 +6,6 @@ export type Scalars = {
   Boolean: boolean,
   Int: number,
   Float: number,
-  /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
   DateTime: any,
 };
 
@@ -19,6 +18,11 @@ export type Acme = {
   contactEmail: Scalars['String'],
   ACMEToken: Scalars['String'],
   acmeUserPermission: Permission,
+};
+
+
+export type AcmeCertificatesArgs = {
+  count?: Maybe<Scalars['Int']>
 };
 
 export type AcmeAccount = {
@@ -388,7 +392,6 @@ export type ResourceRecord = {
   ttl?: Maybe<Scalars['Int']>,
   type: ResourceRecordType,
   host: Scalars['String'],
-  /** JSON Stringified data */
   data: Scalars['String'],
 };
 
@@ -552,7 +555,6 @@ export type ZoneResourceRecordsArgs = {
 
 export type ZoneInput = {
   domainName: Scalars['String'],
-  /** The user requesting the zone */
   zoneUserIds: Array<Scalars['String']>,
   ns: Scalars['String'],
   contact: Scalars['String'],
@@ -589,10 +591,21 @@ export type GetSubscribedEntitiesQuery = (
   { __typename?: 'Query' }
   & { getSubscribedEntities: Array<(
     { __typename?: 'ACME' }
-    & AcmeFragment
+    & Pick<Acme, 'id' | 'name'>
+    & { certificates: Array<(
+      { __typename?: 'Certificate' }
+      & Pick<Certificate, 'id' | 'createdAt' | 'certificate' | 'privateKey'>
+    )> }
   ) | (
     { __typename?: 'Zone' }
-    & ZoneFragment
+    & Pick<Zone, 'id' | 'domainName' | 'updatedDate'>
+    & { zoneSettings: (
+      { __typename?: 'ZoneSettings' }
+      & Pick<ZoneSettings, 'contact'>
+    ), resourceRecords: Array<(
+      { __typename?: 'ResourceRecord' }
+      & Pick<ResourceRecord, 'id' | 'host' | 'type' | 'ttl' | 'data'>
+    )> }
   ) | (
     { __typename?: 'SubscriberSettings' }
     & Pick<SubscriberSettings, 'TLSOutputMode'>
@@ -611,10 +624,21 @@ export type SubscribeSubscription = (
     & Pick<SubscriberEventPayload, 'eventType' | 'id'>
     & { entity: (
       { __typename?: 'ACME' }
-      & AcmeFragment
+      & Pick<Acme, 'id' | 'name'>
+      & { certificates: Array<(
+        { __typename?: 'Certificate' }
+        & Pick<Certificate, 'id' | 'createdAt' | 'certificate' | 'privateKey'>
+      )> }
     ) | (
       { __typename?: 'Zone' }
-      & ZoneFragment
+      & Pick<Zone, 'id' | 'domainName' | 'updatedDate'>
+      & { zoneSettings: (
+        { __typename?: 'ZoneSettings' }
+        & Pick<ZoneSettings, 'contact'>
+      ), resourceRecords: Array<(
+        { __typename?: 'ResourceRecord' }
+        & Pick<ResourceRecord, 'id' | 'host' | 'type' | 'ttl' | 'data'>
+      )> }
     ) | (
       { __typename?: 'SubscriberSettings' }
       & Pick<SubscriberSettings, 'TLSOutputMode'>

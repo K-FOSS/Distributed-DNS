@@ -50,6 +50,16 @@ services:
       - ./SubscriberDL:/workspace/SubscriberDL:delegated
       - subscriberDLModules:/workspace/SubscriberDL/node_modules
 
+  UI:
+    build:
+      context: ./Web/
+      dockerfile: Dockerfile.dev
+    image: kristianfoss/development/distributed-dns-web
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    volumes:
+      - ./Web:/workspace/Web:delegated
+      - uiModules:/workspace/Web/node_modules
+
   # UI:
   #   build:
   #     context: ./Web/

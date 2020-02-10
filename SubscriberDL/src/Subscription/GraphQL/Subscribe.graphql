@@ -7,15 +7,48 @@ subscription Subscribe($subscriberToken: String!) {
     eventType
 
     entity {
-      ... on Zone {
-        ...Zone
-      }
-      ... on ACME {
-        ...ACME
-      }
-
       ... on SubscriberSettings {
         TLSOutputMode
+      }
+
+      ... on Zone {
+        id
+
+        domainName
+
+        updatedDate
+
+        zoneSettings {
+          contact
+        }
+
+        resourceRecords {
+          id
+
+          host
+
+          type
+
+          ttl
+
+          data
+        }
+      }
+
+      ... on ACME {
+        id
+
+        name
+
+        certificates(count: 1) {
+          id
+
+          createdAt
+
+          certificate
+
+          privateKey
+        }
       }
     }
   }

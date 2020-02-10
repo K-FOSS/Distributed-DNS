@@ -1,10 +1,9 @@
 import * as Types from '../graphqlTypes.gen';
 
-import { ResourceRecordFragment } from './ResourceRecords/ResourceRecord.gen';
+import { ResourceRecordFragmentDoc, ResourceRecordFragment } from './ResourceRecords/ResourceRecord.gen';
 
 
 import gql from 'graphql-tag';
-import { ResourceRecord } from './ResourceRecords/ResourceRecord.gen';
 export const Zone = gql`
     fragment Zone on Zone {
   id

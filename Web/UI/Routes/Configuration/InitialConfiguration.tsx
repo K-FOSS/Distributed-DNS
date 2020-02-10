@@ -26,11 +26,14 @@ export default function InitialConfigurationRoute(): React.ReactElement {
   const errors = useApolloErrors(ApolloErrors);
 
   const handleSubmit = useCallback(
-    async (formData: FormData) => {
+    async function handleConfiguration(formData: FormData) {
       const response = await initialConfiguration({
         variables: { userInput: formData },
       });
-      console.log(response);
+
+      if (response.data?.initialConfiguration) {
+        location.href = '/';
+      }
     },
     [initialConfiguration],
   );

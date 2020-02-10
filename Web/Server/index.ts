@@ -10,6 +10,8 @@ import { hasSetup } from './Configuration';
 
 const setupTEST = (path: string): boolean => /Setup$/.test(path);
 
+const port = process.env.NODE_ENV === 'production' ? 81 : 8081;
+
 const loadServer = async (): Promise<typeof import('./server')> => {
   const manifest = await readJSON(`dist/server/parcel-manifest.json`);
   return require(`${__dirname}${manifest['Server.tsx']}`);
@@ -35,6 +37,7 @@ async function startWeb(): Promise<void> {
 
   router.get('*', async (ctx) => {
     let { uiServer } = await loadServer();
+
     if (process.env.NODE_ENV !== 'production') {
       const chokidar = await import('chokidar');
       chokidar
@@ -57,7 +60,7 @@ async function startWeb(): Promise<void> {
 
   server.use(router.routes()).use(router.allowedMethods());
 
-  server.listen(81, () => console.log(`Server listening on port 80`));
+  server.listen(port, () => console.log(`Server listening on port ${port}`));
 }
 
 startWeb();
