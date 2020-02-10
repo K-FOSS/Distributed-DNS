@@ -9,7 +9,6 @@
   },
   "remoteEnv": {
     "SHELL": "/bin/sh",
-    "API_HOST": "api:8080",
     "PUBLIC_URL": "http://localhost:8080"
   },
   "extensions": ["esbenp.prettier-vscode"],

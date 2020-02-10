@@ -659,6 +659,6 @@ export type ZoneFragment = (
     & Pick<ZoneSettings, 'contact'>
   ), resourceRecords: Array<(
     { __typename?: 'ResourceRecord' }
-    & ResourceRecordFragment
+    & Pick<ResourceRecord, 'id' | 'host' | 'type' | 'ttl' | 'data'>
   )> }
 );

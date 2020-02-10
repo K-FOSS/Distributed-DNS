@@ -8,7 +8,8 @@
     "terminal.integrated.shell.linux": "/bin/sh"
   },
   "remoteEnv": {
-    "SHELL": "/bin/sh"
+    "SHELL": "/bin/sh",
+    "PORT": "8080"
   },
   "extensions": ["esbenp.prettier-vscode"],
   "remoteUser": "node",

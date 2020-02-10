@@ -10,6 +10,14 @@ fragment Zone on Zone {
   }
 
   resourceRecords {
-    ...ResourceRecord
+    id
+
+    host
+
+    type
+
+    ttl
+
+    data
   }
 }

@@ -4,8 +4,7 @@ import ParcelBundler from 'parcel-bundler';
 import { generateIcons } from './Icons';
 
 export const build = async (watch = false): Promise<void> => {
-  await remove('dist');
-  await mkdir('dist');
+  await remove('dist/*');
 
   if (await pathExists('public')) await copy('public', 'dist/public');
 

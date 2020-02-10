@@ -1,7 +1,5 @@
 import * as Types from '../graphqlTypes.gen';
 
-import { ResourceRecordFragmentDoc, ResourceRecordFragment } from './ResourceRecords/ResourceRecord.gen';
-
 
 import gql from 'graphql-tag';
 export const Zone = gql`
@@ -13,10 +11,14 @@ export const Zone = gql`
     contact
   }
   resourceRecords {
-    ...ResourceRecord
+    id
+    host
+    type
+    ttl
+    data
   }
 }
-    ${ResourceRecord}`;
+    `;
 export type ZoneFragment = (
   { __typename?: 'Zone' }
   & Pick<Types.Zone, 'id' | 'domainName' | 'updatedDate'>
@@ -25,6 +27,6 @@ export type ZoneFragment = (
     & Pick<Types.ZoneSettings, 'contact'>
   ), resourceRecords: Array<(
     { __typename?: 'ResourceRecord' }
-    & ResourceRecordFragment
+    & Pick<Types.ResourceRecord, 'id' | 'host' | 'type' | 'ttl' | 'data'>
   )> }
 );

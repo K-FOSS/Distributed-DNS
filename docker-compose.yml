@@ -1,21 +1,21 @@
 version: '3.7'
 
 services:
-  Web:
-    image: hectormolinero/caddy2
-    restart: unless-stopped
-    ports:
-      - 80:80
-    volumes:
-      - ./Caddyfile.json:/etc/Caddy/Caddyfile.json
+  # Web:
+  #   image: hectormolinero/caddy2
+  #   restart: unless-stopped
+  #   ports:
+  #     - 80:80
+  #   volumes:
+  #     - ./Caddyfile.json:/etc/Caddy/Caddyfile.json
 
-  PermissionMaker:
-    image: alpine:3.11
-    command: chown -R 1000:1000 /workspace/
-    volumes:
-      - apiModules:/workspace/apiModules
-      - uiModules:/workspace/uiModules
-      - subscriberDLModules:/workspace/subscriberDLModules
+  # PermissionMaker:
+  #   image: alpine:3.11
+  #   command: chown -R 1000:1000 /workspace/
+  #   volumes:
+  #     - apiModules:/workspace/apiModules
+  #     - uiModules:/workspace/uiModules
+  #     - subscriberDLModules:/workspace/subscriberDLModules
 
   Database:
     image: postgres:11-alpine
@@ -54,11 +54,16 @@ services:
     build:
       context: ./Web/
       dockerfile: Dockerfile.dev
-    image: kristianfoss/development/distributed-dns-web
+    image: kristianfoss/development/distributed-dns-ui
     command: /bin/sh -c "while sleep 1000; do :; done"
+    ports:
+      - 5859:5859
     volumes:
       - ./Web:/workspace/Web:delegated
       - uiModules:/workspace/Web/node_modules
+      - uiDist:/workspace/Web/dist
+    environment:
+      API_HOST: api:8080
 
   # UI:
   #   build:
@@ -74,5 +79,6 @@ volumes:
   databaseData:
   apiModules:
   uiModules:
+  uiDist:
   apiSchema:
   subscriberDLModules:
