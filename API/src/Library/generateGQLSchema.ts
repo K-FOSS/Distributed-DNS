@@ -11,6 +11,5 @@ export function generateGQLSchema(): Promise<GraphQLSchema> {
       resolve(`${__dirname}/../Modules/**/*Resolver.js`),
     ],
     authChecker,
-    emitSchemaFile: '../API.graphql',
   });
 }

@@ -3,7 +3,7 @@ fragment ACME on ACME {
 
   name
 
-  certificates {
+  certificates(count: 1) {
     id
 
     createdAt

@@ -11,6 +11,7 @@ import {
   Query,
   Resolver,
   Root,
+  Int,
 } from 'type-graphql';
 import { CurrentUser } from '../Auth/CurrentUser';
 import { Certificate } from '../Certificates/CertificateModel';
@@ -167,10 +168,15 @@ export class ACMEResolver {
   }
 
   @FieldResolver(() => [Certificate])
-  async certificates(@Root() acme: ACME): Promise<Certificate[]> {
+  async certificates(
+    @Root() acme: ACME,
+    @Arg('count', () => Int, { defaultValue: undefined, nullable: true })
+    take: number,
+  ): Promise<Certificate[]> {
     return Certificate.find({
       where: { acmeId: acme.id },
       order: { createdAt: 'DESC' },
+      take,
     });
   }
 

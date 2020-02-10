@@ -5,11 +5,43 @@ query getSubscribedEntities($subscriberToken: String!) {
     }
 
     ... on Zone {
-      ...Zone
+      id
+
+      domainName
+
+      updatedDate
+
+      zoneSettings {
+        contact
+      }
+
+      resourceRecords {
+        id
+
+        host
+
+        type
+
+        ttl
+
+        data
+      }
     }
 
     ... on ACME {
-      ...ACME
+      id
+
+      name
+
+      certificates(count: 1) {
+        id
+
+        createdAt
+
+        certificate
+
+        privateKey
+      }
     }
   }
 }

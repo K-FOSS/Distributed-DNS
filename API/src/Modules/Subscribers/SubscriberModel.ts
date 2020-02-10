@@ -119,8 +119,9 @@ export class Subscriber extends BaseEntity {
       (authorization &&
         authorization.accessPermissions.includes(requiredPermission)) ||
       user.roles.includes(UserRole.ADMIN)
-    )
+    ) {
       return this;
+    }
 
     throw new UnauthorizedError();
   }
@@ -149,7 +150,10 @@ export class Subscriber extends BaseEntity {
       ...options,
     });
 
-    if (user.roles.includes(UserRole.ADMIN)) return subscriber;
+    if (user.roles.includes(UserRole.ADMIN)) {
+      return subscriber;
+    }
+
     return subscriber.checkUserAuthorization(user, requiredPermission);
   }
 }

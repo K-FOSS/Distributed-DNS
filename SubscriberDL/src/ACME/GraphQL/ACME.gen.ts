@@ -6,7 +6,7 @@ export const Acme = gql`
     fragment ACME on ACME {
   id
   name
-  certificates {
+  certificates(count: 1) {
     id
     createdAt
     certificate

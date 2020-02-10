@@ -1,17 +1,17 @@
 // SubscriberDL/src/ACME/updateACME.ts
-import { outputFile, pathExists, remove } from "fs-extra";
-import { loadState, saveState, statePath } from "../State";
-import { AcmeFragment } from "./GraphQL/ACME.gen";
-import { config } from "../Config";
-import { SubscriberTlsOutputMode } from "../graphqlTypes.gen";
-import { restartWebContainer } from "../Docker";
+import { outputFile, pathExists, remove } from 'fs-extra';
+import { loadState, saveState, statePath } from '../State';
+import { AcmeFragment } from './GraphQL/ACME.gen';
+import { config } from '../Config';
+import { SubscriberTlsOutputMode } from '../graphqlTypes.gen';
+import { restartWebContainer } from '../Docker';
 
 /**
  * Create or Update a ACME Certificate/Key pair on this Subscriber
  * @param ACME ACME
  */
 export async function createUpdateACME(
-  ACME: AcmeFragment
+  ACME: AcmeFragment,
 ): Promise<void | void[]> {
   const currentState = await loadState();
 
@@ -24,14 +24,14 @@ export async function createUpdateACME(
 
     currentState.ACMEs[currentState.ACMEs.indexOf(acmeState)] = {
       ...currentState.ACMEs[currentState.ACMEs.indexOf(acmeState)],
-      updatedDate: ACME.certificates[0].createdAt
+      updatedDate: ACME.certificates[0].createdAt,
     };
   } else {
     // Create new ACME State if it is undefined
     acmeState = {
       id: ACME.id,
       updatedDate: ACME.certificates[0].createdAt,
-      name: ACME.name
+      name: ACME.name,
     };
     currentState.ACMEs.push(acmeState);
   }
@@ -46,7 +46,7 @@ export async function createUpdateACME(
   if (currentState.Settings.TLSOutputMode === SubscriberTlsOutputMode.Dual) {
     await Promise.all([
       outputFile(keyFile, privateKey),
-      outputFile(certsFile, certificate)
+      outputFile(certsFile, certificate),
     ]);
   } else {
     if (await pathExists(keyFile)) remove(keyFile);

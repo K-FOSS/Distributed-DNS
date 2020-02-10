@@ -1,11 +1,10 @@
 // Web/bin/lib/build.ts
-import { copy, mkdir, remove, pathExists } from 'fs-extra';
+import { copy, remove, pathExists } from 'fs-extra';
 import ParcelBundler from 'parcel-bundler';
 import { generateIcons } from './Icons';
 
 export const build = async (watch = false): Promise<void> => {
-  await remove('dist');
-  await mkdir('dist');
+  await Promise.all([remove('dist/public'), remove('dist/server')]);
 
   if (await pathExists('public')) await copy('public', 'dist/public');
 
@@ -21,6 +20,7 @@ export const build = async (watch = false): Promise<void> => {
     contentHash: true,
     sourceMaps: false,
     cache: false,
+    hmrPort: 5859,
   });
 
   await bundler.bundle();
