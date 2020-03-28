@@ -16,7 +16,7 @@ ENV NODE_ENV=production
 COPY package.json package-lock.json ./
 RUN npm install --prod
 
-FROM alpine:3.10
+FROM alpine:3.11
 ENV NODE_ENV=production
 COPY --from=1 /usr/bin/node /usr/bin/
 COPY --from=1 /usr/lib/libgcc* /usr/lib/libstdc* /usr/lib/
