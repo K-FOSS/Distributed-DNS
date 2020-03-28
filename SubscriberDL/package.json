@@ -21,7 +21,7 @@
     "@graphql-codegen/typescript-graphql-files-modules": "1.12.2",
     "@graphql-codegen/typescript-operations": "1.12.2",
     "@graphql-codegen/typescript-react-apollo": "1.12.2",
-    "@graphql-codegen/visitor-plugin-common": "1.12.2",
+    "@graphql-codegen/visitor-plugin-common": "1.13.1",
     "@types/dockerode": "2.5.20",
     "@types/fs-extra": "8.0.1",
     "@types/node": "13.7.0",
