@@ -124,9 +124,9 @@
     "universal-cookie-koa": "^4.0.1"
   },
   "devDependencies": {
-    "@babel/core": "7.7.4",
-    "@babel/plugin-proposal-optional-chaining": "7.7.4",
-    "@babel/preset-env": "7.7.4",
+    "@babel/core": "7.9.0",
+    "@babel/plugin-proposal-optional-chaining": "7.9.0",
+    "@babel/preset-env": "7.9.0",
     "@graphql-codegen/cli": "1.8.3",
     "@graphql-codegen/fragment-matcher": "1.8.3",
     "@graphql-codegen/near-operation-file-preset": "1.8.3",
