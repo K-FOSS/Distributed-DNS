@@ -145,7 +145,7 @@
     "@types/node-forge": "0.9.0",
     "@types/parcel-bundler": "1.12.1",
     "@types/react": "16.9.27",
-    "@types/react-dom": "16.9.4",
+    "@types/react-dom": "16.9.5",
     "@types/react-router": "5.1.4",
     "@types/react-router-dom": "5.1.2",
     "@types/react-syntax-highlighter": "11.0.2",
