@@ -40,7 +40,7 @@
     "@types/acme-client": "3.0.0",
     "@types/bcryptjs": "2.4.2",
     "@types/fs-extra": "8.0.1",
-    "@types/jest": "24.0.18",
+    "@types/jest": "24.9.1",
     "@types/jsonwebtoken": "8.3.4",
     "@types/koa__router": "8.0.0",
     "@types/module-alias": "2.0.0",
