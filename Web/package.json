@@ -149,7 +149,7 @@
     "@types/react-router": "5.1.4",
     "@types/react-router-dom": "5.1.2",
     "@types/react-syntax-highlighter": "11.0.2",
-    "@types/sharp": "0.23.0",
+    "@types/sharp": "0.24.0",
     "@types/workbox-sw": "4.3.0",
     "@typescript-eslint/eslint-plugin": "2.8.0",
     "@typescript-eslint/parser": "2.8.0",
@@ -171,7 +171,7 @@
     "parcel-plugin-bundle-manifest": "0.2.0",
     "parcel-plugin-compress": "1.1.0",
     "prettier": "1.19.1",
-    "sharp": "0.23.3",
+    "sharp": "0.25.2",
     "to-ico": "1.1.5",
     "ts-node": "8.5.2",
     "typescript": "3.7.2"
