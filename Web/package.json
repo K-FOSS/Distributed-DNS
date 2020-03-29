@@ -142,7 +142,7 @@
     "@types/koa__router": "8.0.2",
     "@types/module-alias": "2.0.0",
     "@types/node": "12.12.32",
-    "@types/node-forge": "0.9.0",
+    "@types/node-forge": "0.9.3",
     "@types/parcel-bundler": "1.12.1",
     "@types/react": "16.9.27",
     "@types/react-dom": "16.9.4",
