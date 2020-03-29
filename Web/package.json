@@ -137,7 +137,7 @@
     "@graphql-codegen/typescript-operations": "1.8.3",
     "@graphql-codegen/typescript-react-apollo": "1.8.3",
     "@types/fs-extra": "8.1.0",
-    "@types/koa": "2.0.52",
+    "@types/koa": "2.11.3",
     "@types/koa-static": "4.0.1",
     "@types/koa__router": "8.0.2",
     "@types/module-alias": "2.0.0",
