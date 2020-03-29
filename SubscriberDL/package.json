@@ -22,7 +22,7 @@
     "@graphql-codegen/typescript-operations": "1.12.2",
     "@graphql-codegen/typescript-react-apollo": "1.12.2",
     "@graphql-codegen/visitor-plugin-common": "1.13.1",
-    "@types/dockerode": "2.5.20",
+    "@types/dockerode": "2.5.26",
     "@types/fs-extra": "8.1.0",
     "@types/node": "13.7.0",
     "nodemon": "2.0.1",
