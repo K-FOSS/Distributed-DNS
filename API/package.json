@@ -81,7 +81,7 @@
     "reflect-metadata": "^0.1.13",
     "type-graphql": "^0.17.5",
     "typeorm": "^0.2.20",
-    "yaml": "^1.7.2"
+    "yaml": "^1.9.2"
   },
   "prettier": {
     "singleQuote": true,
