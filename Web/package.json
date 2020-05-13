@@ -120,7 +120,7 @@
     "react-router-dom": "^5.1.2",
     "react-ssr-prepass": "^1.0.8",
     "react-syntax-highlighter": "^11.0.2",
-    "refractor": "^2.10.0",
+    "refractor": "^3.0.0",
     "universal-cookie-koa": "^4.0.1"
   },
   "devDependencies": {
