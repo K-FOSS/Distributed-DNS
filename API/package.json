@@ -79,7 +79,7 @@
     "p-event": "^4.1.0",
     "pg": "^7.12.1",
     "reflect-metadata": "^0.1.13",
-    "type-graphql": "^0.17.5",
+    "type-graphql": "^0.17.6",
     "typeorm": "^0.2.20",
     "yaml": "^1.9.2"
   },
