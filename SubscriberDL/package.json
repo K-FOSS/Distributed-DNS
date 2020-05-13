@@ -35,7 +35,7 @@
     "apollo-link": "^1.2.13",
     "apollo-link-http": "^1.5.16",
     "apollo-link-ws": "^1.0.19",
-    "dockerode": "^3.0.2",
+    "dockerode": "^3.2.0",
     "dotenv": "^8.2.0",
     "fs-extra": "^8.1.0",
     "graphql": "^14.6.0",
