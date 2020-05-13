@@ -135,7 +135,7 @@
     "@graphql-codegen/typescript-document-nodes": "1.8.3",
     "@graphql-codegen/typescript-graphql-files-modules": "1.8.3",
     "@graphql-codegen/typescript-operations": "1.8.3",
-    "@graphql-codegen/typescript-react-apollo": "1.8.3",
+    "@graphql-codegen/typescript-react-apollo": "1.13.5",
     "@types/fs-extra": "8.1.0",
     "@types/koa": "2.0.52",
     "@types/koa-static": "4.0.1",
