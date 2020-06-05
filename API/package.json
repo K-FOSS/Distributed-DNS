@@ -69,7 +69,7 @@
     "@koa/router": "^8.0.8",
     "@types/graphql": "^14.5.0",
     "acme-client": "^3.2.0",
-    "apollo-server-koa": "^2.9.8",
+    "apollo-server-koa": "^2.14.2",
     "bcryptjs": "^2.4.3",
     "class-validator": "^0.12.2",
     "fs-extra": "^8.1.0",
