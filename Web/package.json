@@ -129,7 +129,7 @@
     "@babel/preset-env": "7.9.0",
     "@graphql-codegen/cli": "1.8.3",
     "@graphql-codegen/fragment-matcher": "1.13.5",
-    "@graphql-codegen/near-operation-file-preset": "1.8.3",
+    "@graphql-codegen/near-operation-file-preset": "1.15.1",
     "@graphql-codegen/schema-ast": "1.8.3",
     "@graphql-codegen/typescript": "1.8.3",
     "@graphql-codegen/typescript-document-nodes": "1.8.3",
