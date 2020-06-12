@@ -18,7 +18,7 @@
     "@graphql-codegen/schema-ast": "1.12.2",
     "@graphql-codegen/typescript": "1.12.2",
     "@graphql-codegen/typescript-document-nodes": "1.12.2",
-    "@graphql-codegen/typescript-graphql-files-modules": "1.12.2",
+    "@graphql-codegen/typescript-graphql-files-modules": "1.15.3",
     "@graphql-codegen/typescript-operations": "1.13.5",
     "@graphql-codegen/typescript-react-apollo": "1.12.2",
     "@graphql-codegen/visitor-plugin-common": "1.13.1",
