@@ -171,7 +171,7 @@
     "parcel-plugin-bundle-manifest": "0.2.0",
     "parcel-plugin-compress": "1.1.0",
     "prettier": "1.19.1",
-    "sharp": "0.23.3",
+    "sharp": "0.30.5",
     "to-ico": "1.1.5",
     "ts-node": "8.5.2",
     "typescript": "3.7.2"
